@@ -1,0 +1,438 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */; };
+		17832D021FB49C1500E19938 /* CoreImage_HDRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */; };
+		17832D041FB49C1500E19938 /* CoreImage_HDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17832CF61FB49C1500E19938 /* CoreImage_HDR.h */; settings = {ATTRIBUTES = (Public, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		17832CFE1FB49C1500E19938 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 17832CEA1FB49C1500E19938 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 17832CF21FB49C1500E19938;
+			remoteInfo = "CoreImage-HDR";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreImage_HDR.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		17832CF61FB49C1500E19938 /* CoreImage_HDR.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CoreImage_HDR.h; sourceTree = "<group>"; };
+		17832CF71FB49C1500E19938 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		17832CFC1FB49C1500E19938 /* CoreImage-HDRTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "CoreImage-HDRTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreImage_HDRTests.swift; sourceTree = "<group>"; };
+		17832D031FB49C1500E19938 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		17832CEF1FB49C1500E19938 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		17832CF91FB49C1500E19938 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		17832CE91FB49C1500E19938 = {
+			isa = PBXGroup;
+			children = (
+				17832CF51FB49C1500E19938 /* CoreImage-HDR */,
+				17832D001FB49C1500E19938 /* CoreImage-HDRTests */,
+				17832CF41FB49C1500E19938 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		17832CF41FB49C1500E19938 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */,
+				17832CFC1FB49C1500E19938 /* CoreImage-HDRTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		17832CF51FB49C1500E19938 /* CoreImage-HDR */ = {
+			isa = PBXGroup;
+			children = (
+				17832CF61FB49C1500E19938 /* CoreImage_HDR.h */,
+				17832CF71FB49C1500E19938 /* Info.plist */,
+			);
+			path = "CoreImage-HDR";
+			sourceTree = "<group>";
+		};
+		17832D001FB49C1500E19938 /* CoreImage-HDRTests */ = {
+			isa = PBXGroup;
+			children = (
+				17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */,
+				17832D031FB49C1500E19938 /* Info.plist */,
+			);
+			path = "CoreImage-HDRTests";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		17832CF01FB49C1500E19938 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				17832D041FB49C1500E19938 /* CoreImage_HDR.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		17832CF21FB49C1500E19938 /* CoreImage-HDR */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 17832D071FB49C1500E19938 /* Build configuration list for PBXNativeTarget "CoreImage-HDR" */;
+			buildPhases = (
+				17832CEE1FB49C1500E19938 /* Sources */,
+				17832CEF1FB49C1500E19938 /* Frameworks */,
+				17832CF01FB49C1500E19938 /* Headers */,
+				17832CF11FB49C1500E19938 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "CoreImage-HDR";
+			productName = "CoreImage-HDR";
+			productReference = 17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		17832CFB1FB49C1500E19938 /* CoreImage-HDRTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 17832D0A1FB49C1500E19938 /* Build configuration list for PBXNativeTarget "CoreImage-HDRTests" */;
+			buildPhases = (
+				17832CF81FB49C1500E19938 /* Sources */,
+				17832CF91FB49C1500E19938 /* Frameworks */,
+				17832CFA1FB49C1500E19938 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				17832CFF1FB49C1500E19938 /* PBXTargetDependency */,
+			);
+			name = "CoreImage-HDRTests";
+			productName = "CoreImage-HDRTests";
+			productReference = 17832CFC1FB49C1500E19938 /* CoreImage-HDRTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		17832CEA1FB49C1500E19938 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0910;
+				LastUpgradeCheck = 0910;
+				ORGANIZATIONNAME = "Philipp Waxweiler";
+				TargetAttributes = {
+					17832CF21FB49C1500E19938 = {
+						CreatedOnToolsVersion = 9.1;
+						ProvisioningStyle = Automatic;
+					};
+					17832CFB1FB49C1500E19938 = {
+						CreatedOnToolsVersion = 9.1;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 17832CED1FB49C1500E19938 /* Build configuration list for PBXProject "CoreImage-HDR" */;
+			compatibilityVersion = "Xcode 8.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 17832CE91FB49C1500E19938;
+			productRefGroup = 17832CF41FB49C1500E19938 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				17832CF21FB49C1500E19938 /* CoreImage-HDR */,
+				17832CFB1FB49C1500E19938 /* CoreImage-HDRTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		17832CF11FB49C1500E19938 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		17832CFA1FB49C1500E19938 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		17832CEE1FB49C1500E19938 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		17832CF81FB49C1500E19938 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				17832D021FB49C1500E19938 /* CoreImage_HDRTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		17832CFF1FB49C1500E19938 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 17832CF21FB49C1500E19938 /* CoreImage-HDR */;
+			targetProxy = 17832CFE1FB49C1500E19938 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		17832D051FB49C1500E19938 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		17832D061FB49C1500E19938 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		17832D081FB49C1500E19938 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 529Y8Q5FKY;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = "CoreImage-HDR/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "PhilippWaxweiler.CoreImage-HDR";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+			};
+			name = Debug;
+		};
+		17832D091FB49C1500E19938 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 529Y8Q5FKY;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = "CoreImage-HDR/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "PhilippWaxweiler.CoreImage-HDR";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+			};
+			name = Release;
+		};
+		17832D0B1FB49C1500E19938 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 529Y8Q5FKY;
+				INFOPLIST_FILE = "CoreImage-HDRTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "PhilippWaxweiler.CoreImage-HDRTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+			};
+			name = Debug;
+		};
+		17832D0C1FB49C1500E19938 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 529Y8Q5FKY;
+				INFOPLIST_FILE = "CoreImage-HDRTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "PhilippWaxweiler.CoreImage-HDRTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		17832CED1FB49C1500E19938 /* Build configuration list for PBXProject "CoreImage-HDR" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17832D051FB49C1500E19938 /* Debug */,
+				17832D061FB49C1500E19938 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		17832D071FB49C1500E19938 /* Build configuration list for PBXNativeTarget "CoreImage-HDR" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17832D081FB49C1500E19938 /* Debug */,
+				17832D091FB49C1500E19938 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		17832D0A1FB49C1500E19938 /* Build configuration list for PBXNativeTarget "CoreImage-HDRTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17832D0B1FB49C1500E19938 /* Debug */,
+				17832D0C1FB49C1500E19938 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 17832CEA1FB49C1500E19938 /* Project object */;
+}
