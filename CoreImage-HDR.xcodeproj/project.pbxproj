@@ -10,6 +10,16 @@
 		17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */; };
 		17832D021FB49C1500E19938 /* CoreImage_HDRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */; };
 		17832D041FB49C1500E19938 /* CoreImage_HDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17832CF61FB49C1500E19938 /* CoreImage_HDR.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D0D1FB49C4500E19938 /* HDRProcessor.swift */; };
+		17832D191FB51A0D00E19938 /* normalizeWeights.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17832D101FB51A0C00E19938 /* normalizeWeights.metal */; };
+		17832D1B1FB51A0D00E19938 /* denoiseHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17832D121FB51A0C00E19938 /* denoiseHDR.metal */; };
+		17832D1C1FB51A0D00E19938 /* HDR_maximum.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17832D131FB51A0C00E19938 /* HDR_maximum.metal */; };
+		17832D1D1FB51A0D00E19938 /* calcHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17832D141FB51A0D00E19938 /* calcHDR.metal */; };
+		17832D1E1FB51A0D00E19938 /* finalizeHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17832D151FB51A0D00E19938 /* finalizeHDR.metal */; };
+		17832D1F1FB51A0D00E19938 /* getWeightFunction.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17832D161FB51A0D00E19938 /* getWeightFunction.metal */; };
+		17832D201FB51A0D00E19938 /* defines.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17832D171FB51A0D00E19938 /* defines.metal */; };
+		17832D211FB51A0D00E19938 /* HistogramHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17832D181FB51A0D00E19938 /* HistogramHDR.metal */; };
+		17832D231FB51E3300E19938 /* TestPics.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17832D221FB51E3300E19938 /* TestPics.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,6 +39,16 @@
 		17832CFC1FB49C1500E19938 /* CoreImage-HDRTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "CoreImage-HDRTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreImage_HDRTests.swift; sourceTree = "<group>"; };
 		17832D031FB49C1500E19938 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		17832D0D1FB49C4500E19938 /* HDRProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRProcessor.swift; sourceTree = "<group>"; };
+		17832D101FB51A0C00E19938 /* normalizeWeights.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = normalizeWeights.metal; sourceTree = "<group>"; };
+		17832D121FB51A0C00E19938 /* denoiseHDR.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = denoiseHDR.metal; sourceTree = "<group>"; };
+		17832D131FB51A0C00E19938 /* HDR_maximum.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = HDR_maximum.metal; sourceTree = "<group>"; };
+		17832D141FB51A0D00E19938 /* calcHDR.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = calcHDR.metal; sourceTree = "<group>"; };
+		17832D151FB51A0D00E19938 /* finalizeHDR.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = finalizeHDR.metal; sourceTree = "<group>"; };
+		17832D161FB51A0D00E19938 /* getWeightFunction.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = getWeightFunction.metal; sourceTree = "<group>"; };
+		17832D171FB51A0D00E19938 /* defines.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = defines.metal; sourceTree = "<group>"; };
+		17832D181FB51A0D00E19938 /* HistogramHDR.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = HistogramHDR.metal; sourceTree = "<group>"; };
+		17832D221FB51E3300E19938 /* TestPics.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = TestPics.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,8 +91,10 @@
 		17832CF51FB49C1500E19938 /* CoreImage-HDR */ = {
 			isa = PBXGroup;
 			children = (
+				17832D0F1FB49D4000E19938 /* Shader */,
 				17832CF61FB49C1500E19938 /* CoreImage_HDR.h */,
 				17832CF71FB49C1500E19938 /* Info.plist */,
+				17832D0D1FB49C4500E19938 /* HDRProcessor.swift */,
 			);
 			path = "CoreImage-HDR";
 			sourceTree = "<group>";
@@ -82,8 +104,24 @@
 			children = (
 				17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */,
 				17832D031FB49C1500E19938 /* Info.plist */,
+				17832D221FB51E3300E19938 /* TestPics.xcassets */,
 			);
 			path = "CoreImage-HDRTests";
+			sourceTree = "<group>";
+		};
+		17832D0F1FB49D4000E19938 /* Shader */ = {
+			isa = PBXGroup;
+			children = (
+				17832D141FB51A0D00E19938 /* calcHDR.metal */,
+				17832D171FB51A0D00E19938 /* defines.metal */,
+				17832D121FB51A0C00E19938 /* denoiseHDR.metal */,
+				17832D151FB51A0D00E19938 /* finalizeHDR.metal */,
+				17832D161FB51A0D00E19938 /* getWeightFunction.metal */,
+				17832D131FB51A0C00E19938 /* HDR_maximum.metal */,
+				17832D181FB51A0D00E19938 /* HistogramHDR.metal */,
+				17832D101FB51A0C00E19938 /* normalizeWeights.metal */,
+			);
+			path = Shader;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -148,6 +186,7 @@
 				TargetAttributes = {
 					17832CF21FB49C1500E19938 = {
 						CreatedOnToolsVersion = 9.1;
+						LastSwiftMigration = 0910;
 						ProvisioningStyle = Automatic;
 					};
 					17832CFB1FB49C1500E19938 = {
@@ -186,6 +225,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17832D231FB51E3300E19938 /* TestPics.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -196,6 +236,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */,
+				17832D1D1FB51A0D00E19938 /* calcHDR.metal in Sources */,
+				17832D1C1FB51A0D00E19938 /* HDR_maximum.metal in Sources */,
+				17832D1E1FB51A0D00E19938 /* finalizeHDR.metal in Sources */,
+				17832D201FB51A0D00E19938 /* defines.metal in Sources */,
+				17832D191FB51A0D00E19938 /* normalizeWeights.metal in Sources */,
+				17832D1B1FB51A0D00E19938 /* denoiseHDR.metal in Sources */,
+				17832D1F1FB51A0D00E19938 /* getWeightFunction.metal in Sources */,
+				17832D211FB51A0D00E19938 /* HistogramHDR.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -333,6 +382,7 @@
 		17832D081FB49C1500E19938 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -348,6 +398,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "PhilippWaxweiler.CoreImage-HDR";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
@@ -355,6 +406,7 @@
 		17832D091FB49C1500E19938 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -377,6 +429,7 @@
 		17832D0B1FB49C1500E19938 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 529Y8Q5FKY;
@@ -391,6 +444,7 @@
 		17832D0C1FB49C1500E19938 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 529Y8Q5FKY;

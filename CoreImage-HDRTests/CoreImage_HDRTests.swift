@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import CoreImage
 @testable import CoreImage_HDR
 
 class CoreImage_HDRTests: XCTestCase {
@@ -22,8 +23,8 @@ class CoreImage_HDRTests: XCTestCase {
     }
     
     func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        var pix:[CIImage] = [#imageLiteral(resourceName: "dunkel"), #imageLiteral(resourceName: "mittel"), #imageLiteral(resourceName: "hell")].map{CIImage(data: $0.tiffRepresentation!)!}
+        XCTAssert(true)
     }
     
     func testPerformanceExample() {

@@ -12,6 +12,13 @@ import CoreImage
 final class HDRProcessor: CIImageProcessorKernel {
     static let device = MTLCreateSystemDefaultDevice()
     override class func process(with inputs: [CIImageProcessorInput]?, arguments: [String : Any]?, output: CIImageProcessorOutput) throws {
-        
+        guard
+            let device = device,
+            let commandBuffer = output.metalCommandBuffer,
+            let input = inputs?.first,
+            let sourceTexture = input.metalTexture,
+            let destinationTexture = output.metalTexture else  {
+                return
+        }
     }
 }
