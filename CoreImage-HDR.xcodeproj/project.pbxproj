@@ -19,7 +19,6 @@
 		17832D1F1FB51A0D00E19938 /* getWeightFunction.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17832D161FB51A0D00E19938 /* getWeightFunction.metal */; };
 		17832D201FB51A0D00E19938 /* defines.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17832D171FB51A0D00E19938 /* defines.metal */; };
 		17832D211FB51A0D00E19938 /* HistogramHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17832D181FB51A0D00E19938 /* HistogramHDR.metal */; };
-		17832D231FB51E3300E19938 /* TestPics.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17832D221FB51E3300E19938 /* TestPics.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,7 +47,6 @@
 		17832D161FB51A0D00E19938 /* getWeightFunction.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = getWeightFunction.metal; sourceTree = "<group>"; };
 		17832D171FB51A0D00E19938 /* defines.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = defines.metal; sourceTree = "<group>"; };
 		17832D181FB51A0D00E19938 /* HistogramHDR.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = HistogramHDR.metal; sourceTree = "<group>"; };
-		17832D221FB51E3300E19938 /* TestPics.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = TestPics.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,7 +102,6 @@
 			children = (
 				17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */,
 				17832D031FB49C1500E19938 /* Info.plist */,
-				17832D221FB51E3300E19938 /* TestPics.xcassets */,
 			);
 			path = "CoreImage-HDRTests";
 			sourceTree = "<group>";
@@ -225,7 +222,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				17832D231FB51E3300E19938 /* TestPics.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -395,6 +391,7 @@
 				INFOPLIST_FILE = "CoreImage-HDR/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_BUNDLE_IDENTIFIER = "PhilippWaxweiler.CoreImage-HDR";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -419,6 +416,7 @@
 				INFOPLIST_FILE = "CoreImage-HDR/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_BUNDLE_IDENTIFIER = "PhilippWaxweiler.CoreImage-HDR";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;

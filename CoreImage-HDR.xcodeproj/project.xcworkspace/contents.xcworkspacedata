@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Workspace
    version = "1.0">
+   <Group
+      location = "group:../TestImages.xcassets"
+      name = "TestImages.xcassets">
+      <Group
+         location = "group:claudioVorlage.imageset"
+         name = "claudioVorlage.imageset">
+         <FileRef
+            location = "group:claudioVorlage.jpg">
+         </FileRef>
+         <FileRef
+            location = "group:Contents.json">
+         </FileRef>
+      </Group>
+      <FileRef
+         location = "group:Contents.json">
+      </FileRef>
+   </Group>
    <FileRef
-      location = "self:CoreImage-HDR.xcodeproj">
+      location = "self:">
    </FileRef>
 </Workspace>

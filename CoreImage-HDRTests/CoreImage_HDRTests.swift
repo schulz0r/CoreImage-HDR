@@ -8,13 +8,31 @@
 
 import XCTest
 import CoreImage
+import AppKit
 @testable import CoreImage_HDR
 
 class CoreImage_HDRTests: XCTestCase {
     
+    var Testimages:[CIImage] = []
+    
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        let imageNames = ["dark", "medium", "bright"]
+        
+        /* Why does the Bundle Assets never contain images? Probably a XCode bug.
+        Add an Asset catalogue to this test bundle and try to load any image. */
+        //let AppBundle = Bundle(for: CoreImage_HDRTests.self)  // or: HDRProcessor.self, if assets belong to the other target
+        //let imagePath = AppBundle.path(forResource: "myImage", ofType: "jpg")
+        
+        // WORKAROUND: load images from disk
+        Testimages = imageNames.map{
+            let url = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents/Codes/Testpics/" + $0 + ".jpg")
+            guard let image = CIImage(contentsOf: url) else {
+                fatalError("Could not load TestImages needed for testing!")
+            }
+            return image
+        }
+        
     }
     
     override func tearDown() {
@@ -22,8 +40,8 @@ class CoreImage_HDRTests: XCTestCase {
         super.tearDown()
     }
     
-    func testExample() {
-        var pix:[CIImage] = [#imageLiteral(resourceName: "dunkel"), #imageLiteral(resourceName: "mittel"), #imageLiteral(resourceName: "hell")].map{CIImage(data: $0.tiffRepresentation!)!}
+    func testHDR() {
+        
         XCTAssert(true)
     }
     
