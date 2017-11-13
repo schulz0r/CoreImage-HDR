@@ -68,6 +68,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		175005351FBA608D005F6856 /* Framework */ = {
+			isa = PBXGroup;
+			children = (
+				17832CF61FB49C1500E19938 /* CoreImage_HDR.h */,
+				17832CF71FB49C1500E19938 /* Info.plist */,
+			);
+			name = Framework;
+			sourceTree = "<group>";
+		};
 		17832CE91FB49C1500E19938 = {
 			isa = PBXGroup;
 			children = (
@@ -89,9 +98,8 @@
 		17832CF51FB49C1500E19938 /* CoreImage-HDR */ = {
 			isa = PBXGroup;
 			children = (
+				175005351FBA608D005F6856 /* Framework */,
 				17832D0F1FB49D4000E19938 /* Shader */,
-				17832CF61FB49C1500E19938 /* CoreImage_HDR.h */,
-				17832CF71FB49C1500E19938 /* Info.plist */,
 				17832D0D1FB49C4500E19938 /* HDRProcessor.swift */,
 			);
 			path = "CoreImage-HDR";

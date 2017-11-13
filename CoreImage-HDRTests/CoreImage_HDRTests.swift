@@ -41,7 +41,7 @@ class CoreImage_HDRTests: XCTestCase {
     }
     
     func testHDR() {
-        
+        let HDR = try? HDRProcessor.apply(withExtent: Testimages[0].extent, inputs: Testimages, arguments: nil)
         XCTAssert(true)
     }
     
