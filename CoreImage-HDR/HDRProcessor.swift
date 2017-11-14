@@ -15,10 +15,13 @@ final class HDRProcessor: CIImageProcessorKernel {
         guard
             let device = device,
             let commandBuffer = output.metalCommandBuffer,
-            let input = inputs?.first,
-            let sourceTexture = input.metalTexture,
-            let destinationTexture = output.metalTexture else  {
+            let inputImages = inputs?.map({$0.metalTexture}),
+            let destinationTexture = output.metalTexture,
+            let exposureTimes = arguments?["ExposureTimes"] as? [Float]
+        else  {
                 return
         }
+        
+        
     }
 }

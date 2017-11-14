@@ -14,6 +14,7 @@ import AppKit
 class CoreImage_HDRTests: XCTestCase {
     
     var Testimages:[CIImage] = []
+    var ExposureTimes:[Float] = []
     
     override func setUp() {
         super.setUp()
@@ -25,14 +26,22 @@ class CoreImage_HDRTests: XCTestCase {
         //let imagePath = AppBundle.path(forResource: "myImage", ofType: "jpg")
         
         // WORKAROUND: load images from disk
-        Testimages = imageNames.map{
-            let url = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents/Codes/Testpics/" + $0 + ".jpg")
-            guard let image = CIImage(contentsOf: url) else {
+        let URLs = imageNames.map{FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents/Codes/Testpics/" + $0 + ".jpg")}
+        
+        Testimages = URLs.map{
+            guard let image = CIImage(contentsOf: $0) else {
                 fatalError("Could not load TestImages needed for testing!")
             }
             return image
         }
         
+        // load exposure times
+        ExposureTimes = Testimages.map{
+            guard let metaData = $0.properties["{Exif}"] as? Dictionary<String, Any> else {
+                fatalError("Cannot read Exif Dictionary")
+            }
+            return metaData["ExposureTime"] as! Float
+        }
     }
     
     override func tearDown() {
@@ -41,8 +50,10 @@ class CoreImage_HDRTests: XCTestCase {
     }
     
     func testHDR() {
-        let HDR = try? HDRProcessor.apply(withExtent: Testimages[0].extent, inputs: Testimages, arguments: nil)
-        XCTAssert(true)
+        let HDR = try? HDRProcessor.apply(withExtent: Testimages[0].extent,
+                                          inputs: Testimages,
+                                          arguments: ["ExposureTimes" : self.ExposureTimes])
+        XCTAssertNotNil(HDR)
     }
     
     func testPerformanceExample() {

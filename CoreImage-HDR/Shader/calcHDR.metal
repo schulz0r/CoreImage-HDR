@@ -5,12 +5,12 @@
 //  Created by Philipp Waxweiler on 23.11.16.
 //  Copyright © 2016 Philipp Waxweiler. All rights reserved.
 //
-
+/*
 #include <metal_stdlib>
 using namespace metal;
-//#include "calculateHDR.metal"
-//#include "defines.metal"
-
+#include "calculateHDR.metal"
+#include "defines.metal"
+*/
 
 /*----------------------------
  HDR estimation
@@ -31,6 +31,5 @@ calculate_xRGB(texture2d_array<float, access::read> input [[texture(0)]],
     result = HDR_value(input, int2(gid), cameraShifts, arraySize, t, I, WeightFunction, INFINITY);
     output.write( (result), gid, 0);
 }
-
 
 */
