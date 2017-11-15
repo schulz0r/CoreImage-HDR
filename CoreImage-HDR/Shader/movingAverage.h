@@ -11,7 +11,7 @@ using namespace metal;
 
 inline float tauFunc(uint x);
 
-inline void denoiseLDR(thread float3 * linearDenoisedPixel, thread uchar4 * pixelArray, constant float * t, constant float3 * I, uint arraySize){
+inline void movingAverage(thread float3 * linearDenoisedPixel, thread uchar4 * pixelArray, constant float * t, constant float3 * I, uint arraySize){
     
     //float tau[MAX_ARRAY_SIZE];
     float3 zaehler, nenner;

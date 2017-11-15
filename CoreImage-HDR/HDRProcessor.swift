@@ -22,6 +22,10 @@ final class HDRProcessor: CIImageProcessorKernel {
                 return
         }
         
+        guard inputImages.count <= 5 else {
+            fatalError("Only up to 5 images are allowed. If you want more, you can easily edit the HDRProcessor code.")
+        }
         
+            
     }
 }
