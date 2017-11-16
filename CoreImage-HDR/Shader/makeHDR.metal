@@ -38,6 +38,6 @@ kernel void makeHDR(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> inputAr
     movingAverage<MAX_IMAGE_COUNT>(linearData, exposureTimes, NumberOfinputImages);
     
     // calculate HDR Value
-    const half3 HDRValue = HDRValue(linearData, NumberOfinputImages, t, CalibrationData.weights, half maximum);
+    const half3 HDRValue = HDRValue(linearData, NumberOfinputImages, exposureTimes, CalibrationData.weights, half maximum);
     output.write( HDRValue, gid);
 }
