@@ -9,6 +9,7 @@
 #include <metal_stdlib>
 using namespace metal;
 #include "movingAverage.h"
+#include "calculateHDR.h"
 
 #define MAX_IMAGE_COUNT 5
 
@@ -25,7 +26,7 @@ kernel void makeHDR(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> inputAr
                     constant CameraCalibration & CalibrationData,
                     uint2 gid [[thread_position_in_grid]]){
     
-    metal::array<half3, MAX_IMAGE_COUNT> linearData;
+    thread half3 * linearData[MAX_IMAGE_COUNT];
     
     // linearize pixel
     for(int i = 0; i < NumberOfinputImages; i++) {
@@ -34,10 +35,9 @@ kernel void makeHDR(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> inputAr
     }
     
     // calculate moving average to reduce noise
-    movingAverage(linearData, thread uchar4 * pixelArray, exposureTimes, CameraData.response, NumberOfinputImages);
+    movingAverage<MAX_IMAGE_COUNT>(linearData, exposureTimes, NumberOfinputImages);
     
     // calculate HDR Value
-    /*
-    float4 result = HDR_value(input, int2(gid), cameraShifts, arraySize, t, I, WeightFunction, INFINITY);
-    output.write( (result), gid, 0);*/
+    const half3 HDRValue = HDRValue(linearData, NumberOfinputImages, t, CalibrationData.weights, half maximum);
+    output.write( HDRValue, gid);
 }

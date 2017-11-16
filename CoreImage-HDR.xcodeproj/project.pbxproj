@@ -18,7 +18,7 @@
 		17832D1F1FB51A0D00E19938 /* getWeightFunction.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17832D161FB51A0D00E19938 /* getWeightFunction.metal */; };
 		17832D201FB51A0D00E19938 /* defines.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17832D171FB51A0D00E19938 /* defines.metal */; };
 		17832D211FB51A0D00E19938 /* HistogramHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17832D181FB51A0D00E19938 /* HistogramHDR.metal */; };
-		17ACF5381FBBC57300BFBF41 /* calculateHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17ACF5371FBBC57300BFBF41 /* calculateHDR.metal */; };
+		17ACF5381FBBC57300BFBF41 /* calculateHDR.h in Sources */ = {isa = PBXBuildFile; fileRef = 17ACF5371FBBC57300BFBF41 /* calculateHDR.h */; };
 		17ACF53A1FBBC7C200BFBF41 /* makeHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */; };
 /* End PBXBuildFile section */
 
@@ -47,7 +47,7 @@
 		17832D161FB51A0D00E19938 /* getWeightFunction.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = getWeightFunction.metal; sourceTree = "<group>"; };
 		17832D171FB51A0D00E19938 /* defines.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = defines.metal; sourceTree = "<group>"; };
 		17832D181FB51A0D00E19938 /* HistogramHDR.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = HistogramHDR.metal; sourceTree = "<group>"; };
-		17ACF5371FBBC57300BFBF41 /* calculateHDR.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = calculateHDR.metal; sourceTree = "<group>"; };
+		17ACF5371FBBC57300BFBF41 /* calculateHDR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calculateHDR.h; sourceTree = "<group>"; };
 		17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = makeHDR.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -120,6 +120,8 @@
 			isa = PBXGroup;
 			children = (
 				17ACF53B1FBBC7C900BFBF41 /* Waste */,
+				17832D121FB51A0C00E19938 /* movingAverage.h */,
+				17ACF5371FBBC57300BFBF41 /* calculateHDR.h */,
 				17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */,
 			);
 			path = Shader;
@@ -129,13 +131,11 @@
 			isa = PBXGroup;
 			children = (
 				17832D171FB51A0D00E19938 /* defines.metal */,
-				17832D121FB51A0C00E19938 /* movingAverage.h */,
 				17832D151FB51A0D00E19938 /* finalizeHDR.metal */,
 				17832D161FB51A0D00E19938 /* getWeightFunction.metal */,
 				17832D131FB51A0C00E19938 /* HDR_maximum.metal */,
 				17832D181FB51A0D00E19938 /* HistogramHDR.metal */,
 				17832D101FB51A0C00E19938 /* normalizeWeights.metal */,
-				17ACF5371FBBC57300BFBF41 /* calculateHDR.metal */,
 			);
 			name = Waste;
 			sourceTree = "<group>";
@@ -255,7 +255,7 @@
 				17832D1C1FB51A0D00E19938 /* HDR_maximum.metal in Sources */,
 				17832D1E1FB51A0D00E19938 /* finalizeHDR.metal in Sources */,
 				17832D201FB51A0D00E19938 /* defines.metal in Sources */,
-				17ACF5381FBBC57300BFBF41 /* calculateHDR.metal in Sources */,
+				17ACF5381FBBC57300BFBF41 /* calculateHDR.h in Sources */,
 				17832D191FB51A0D00E19938 /* normalizeWeights.metal in Sources */,
 				17832D1B1FB51A0D00E19938 /* movingAverage.h in Sources */,
 				17ACF53A1FBBC7C200BFBF41 /* makeHDR.metal in Sources */,
