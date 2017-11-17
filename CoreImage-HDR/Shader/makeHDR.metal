@@ -26,18 +26,19 @@ kernel void makeHDR(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> inputAr
                     constant CameraCalibration & CalibrationData,
                     uint2 gid [[thread_position_in_grid]]){
     
-    thread half3 * linearData[MAX_IMAGE_COUNT];
+    thread half3 linearData[MAX_IMAGE_COUNT];
     
     // linearize pixel
     for(int i = 0; i < NumberOfinputImages; i++) {
         const half3 pixel = inputArray[i].read(uint2(int2(gid) + cameraShifts[i])).rgb;
-        linearData[i] = half3(CalibrationData.response[int(pixel.x * 255)].x, CalibrationData.response[int(pixel.y * 255)].y, CalibrationData.response[int(pixel.z * 255)].z);
+        const uint3 indices = uint3(pixel * 255);
+        linearData[i] = half3(CalibrationData.response[indices.x].x, CalibrationData.response[indices.y].y, CalibrationData.response[indices.z].z);
     }
     
     // calculate moving average to reduce noise
-    movingAverage<MAX_IMAGE_COUNT>(linearData, exposureTimes, NumberOfinputImages);
+    movingAverage(linearData, exposureTimes, NumberOfinputImages);
     
     // calculate HDR Value
-    const half3 HDRValue = HDRValue(linearData, NumberOfinputImages, exposureTimes, CalibrationData.weights, half maximum);
-    output.write( HDRValue, gid);
+    const half3 enhancedPixel = HDRValue(linearData, NumberOfinputImages, exposureTimes, CalibrationData.weights);
+    HDRImage.write(half4(enhancedPixel, 1), gid);
 }

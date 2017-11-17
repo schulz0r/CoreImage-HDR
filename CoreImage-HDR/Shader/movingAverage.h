@@ -11,8 +11,7 @@ using namespace metal;
 
 half weightFunction(uint x);
 
-template<uint T>
-void movingAverage(metal::array<half3, T> linearPixel, constant float * t, const uint arraySize) {
+void movingAverage(thread half3 * linearPixel, constant float * t, const uint arraySize) {
     half3 zaehler, nenner, weight;
     for(uint a = 0; a < arraySize - 1; a++){  // -1 for last pixel not being corrected
         zaehler = 0;
@@ -20,10 +19,10 @@ void movingAverage(metal::array<half3, T> linearPixel, constant float * t, const
         
         // from image a onwards, calculate the weighted sum of the image and its successive ones
         for(uint j = a; j < arraySize; j++) {
-            const int3 indices = int3(linearPixel * 255);
-            weight.rgb = j == a? t[j] : half3( weightFunction(indices[j].r), weightFunction(indices[j].g), weightFunction(indices[j].b) ) * t[j];
-            zaehler.rgb += linearPixel[j] * weight / t[j];
-            nenner.rgb += weight.rgb;
+            const int3 indices = int3(linearPixel[j] * 255);
+            weight.rgb = j == a? half3(1) : half3( weightFunction(indices.r), weightFunction(indices.g), weightFunction(indices.b) );
+            zaehler.rgb += linearPixel[j] * weight;
+            nenner.rgb += weight.rgb * t[j];
         }
         linearPixel[a] = t[a] * (zaehler / nenner);
     }
