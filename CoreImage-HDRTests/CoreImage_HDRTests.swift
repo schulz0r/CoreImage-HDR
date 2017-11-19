@@ -9,7 +9,18 @@
 import XCTest
 import CoreImage
 import AppKit
+import ImageIO
 @testable import CoreImage_HDR
+
+fileprivate extension CIImage {
+    func write(url: URL) {
+        do {
+            try NSBitmapImageRep(ciImage: self).representation(using: NSBitmapImageRep.FileType.png, properties: [:])?.write(to: url)
+        } catch let Error {
+            print(Error.localizedDescription)
+        }
+    }
+}
 
 class CoreImage_HDRTests: XCTestCase {
     
@@ -50,9 +61,14 @@ class CoreImage_HDRTests: XCTestCase {
     }
     
     func testHDR() {
-        let HDR = try? HDRProcessor.apply(withExtent: Testimages[0].extent,
+        guard let HDR = try? HDRProcessor.apply(withExtent: Testimages[0].extent,
                                           inputs: Testimages,
-                                          arguments: ["ExposureTimes" : self.ExposureTimes])
+                                          arguments: ["ExposureTimes" : self.ExposureTimes,
+                                                      "CameraResponse" : Array<Float>(stride(from: 0, to: 2, by: 1.0/255.0))]
+            ) else {
+                fatalError()
+        }
+        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/noob.png"))
         XCTAssertNotNil(HDR)
     }
     
@@ -62,5 +78,6 @@ class CoreImage_HDRTests: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
+    
     
 }

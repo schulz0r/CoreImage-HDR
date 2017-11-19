@@ -20,7 +20,7 @@ struct CameraCalibration {
 
 kernel void makeHDR(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> inputArray [[texture(0)]],
                     texture2d<half, access::write> HDRImage [[texture(MAX_IMAGE_COUNT)]],
-                    constant int & NumberOfinputImages [[buffer(0)]],
+                    constant uint & NumberOfinputImages [[buffer(0)]],
                     constant int2 * cameraShifts [[buffer(1)]],
                     constant float * exposureTimes [[buffer(2)]],
                     constant CameraCalibration & CalibrationData,
