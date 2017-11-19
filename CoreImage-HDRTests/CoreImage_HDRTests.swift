@@ -61,15 +61,18 @@ class CoreImage_HDRTests: XCTestCase {
     }
     
     func testHDR() {
-        guard let HDR = try? HDRProcessor.apply(withExtent: Testimages[0].extent,
-                                          inputs: Testimages,
-                                          arguments: ["ExposureTimes" : self.ExposureTimes,
-                                                      "CameraResponse" : Array<Float>(stride(from: 0, to: 2, by: 1.0/255.0))]
-            ) else {
-                fatalError()
+        do{
+            let HDR = try HDRProcessor.apply(withExtent: Testimages[0].extent,
+                                              inputs: Testimages,
+                                              arguments: ["ExposureTimes" : self.ExposureTimes,
+                                                          "CameraResponse" : Array<Float>(stride(from: 0, to: 2, by: 1.0/255.0))]
+            )
+            HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/noob.png"))
+        } catch let Errors {
+            XCTFail(Errors.localizedDescription)
         }
-        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/noob.png"))
-        XCTAssertNotNil(HDR)
+        
+        XCTAssertTrue(true)
     }
     
     func testPerformanceExample() {
