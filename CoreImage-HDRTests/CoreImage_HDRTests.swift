@@ -14,8 +14,13 @@ import ImageIO
 
 fileprivate extension CIImage {
     func write(url: URL) {
+        
+        guard let pngFile = NSBitmapImageRep(ciImage: self).representation(using: NSBitmapImageRep.FileType.png, properties: [:]) else {
+            fatalError("Could not convert to png.")
+        }
+        
         do {
-            try NSBitmapImageRep(ciImage: self).representation(using: NSBitmapImageRep.FileType.png, properties: [:])?.write(to: url)
+            try pngFile.write(to: url)
         } catch let Error {
             print(Error.localizedDescription)
         }
@@ -61,16 +66,18 @@ class CoreImage_HDRTests: XCTestCase {
     }
     
     func testHDR() {
+        var HDR:CIImage = CIImage()
         do{
-            let HDR = try HDRProcessor.apply(withExtent: Testimages[0].extent,
-                                              inputs: Testimages,
-                                              arguments: ["ExposureTimes" : self.ExposureTimes,
-                                                          "CameraResponse" : Array<Float>(stride(from: 0, to: 2, by: 1.0/255.0))]
+            HDR = try HDRProcessor.apply(withExtent: Testimages[0].extent,
+                                         inputs: Testimages,
+                                         arguments: ["ExposureTimes" : self.ExposureTimes,
+                                                     "CameraResponse" : Array<Float>(stride(from: 0, to: 2, by: 2.0/256.0))]
             )
-            HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/noob.png"))
         } catch let Errors {
             XCTFail(Errors.localizedDescription)
         }
+        
+        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/noobs.png"))
         
         XCTAssertTrue(true)
     }
