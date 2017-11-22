@@ -92,8 +92,7 @@
 			children = (
 				17AEAA621FC57E2400CE17DF /* extensions.swift */,
 				175005351FBA608D005F6856 /* Framework */,
-				17832D0F1FB49D4000E19938 /* Shader */,
-				17832D0D1FB49C4500E19938 /* HDRProcessor.swift */,
+				17AEAA641FC5D13300CE17DF /* HDR */,
 			);
 			path = "CoreImage-HDR";
 			sourceTree = "<group>";
@@ -123,6 +122,15 @@
 			children = (
 			);
 			name = Waste;
+			sourceTree = "<group>";
+		};
+		17AEAA641FC5D13300CE17DF /* HDR */ = {
+			isa = PBXGroup;
+			children = (
+				17832D0F1FB49D4000E19938 /* Shader */,
+				17832D0D1FB49C4500E19938 /* HDRProcessor.swift */,
+			);
+			path = HDR;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
