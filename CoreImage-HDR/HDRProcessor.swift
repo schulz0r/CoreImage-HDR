@@ -26,7 +26,7 @@ final class HDRProcessor: CIImageProcessorKernel {
                 return
         }
         
-        let MaxImageCount = 3
+        let MaxImageCount = 5
         guard inputImages.count <= MaxImageCount else {
             fatalError("Only up to \(MaxImageCount) images are allowed. It is an arbitrary number and can be changed in the HDR kernel any time.")
         }
