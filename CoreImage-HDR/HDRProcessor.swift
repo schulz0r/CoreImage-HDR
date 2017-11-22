@@ -11,8 +11,10 @@ import CoreImage
 import MetalKit
 
 final class HDRProcessor: CIImageProcessorKernel {
+    
     static let device = MTLCreateSystemDefaultDevice()
-    override class func process(with inputs: [CIImageProcessorInput]?, arguments: [String : Any]?, output: CIImageProcessorOutput) throws {
+    
+    override final class func process(with inputs: [CIImageProcessorInput]?, arguments: [String : Any]?, output: CIImageProcessorOutput) throws {
         guard
             let device = device,
             let commandBuffer = output.metalCommandBuffer,
@@ -24,13 +26,15 @@ final class HDRProcessor: CIImageProcessorKernel {
                 return
         }
         
-        let MaxImageCount = 5
+        let MaxImageCount = 3
         guard inputImages.count <= MaxImageCount else {
-            fatalError("Only up to 5 images are allowed. It is an arbitrary number and can be changed in the HDR kernel any time.")
+            fatalError("Only up to \(MaxImageCount) images are allowed. It is an arbitrary number and can be changed in the HDR kernel any time.")
         }
         
+        let imageDimensions = MTLSizeMake(inputImages[0]!.width, inputImages[0]!.height, 1)
+        
         var numberOfInputImages = uint(inputImages.count)
-        var cameraShifts = arguments?["ExposureTimes"] ?? [int2](repeating: int2(0,0), count: inputImages.count)
+        var cameraShifts = arguments?["CameraShifts"] ?? [int2](repeating: int2(0,0), count: inputImages.count)
         var weightFunction = zip([0] + cameraResponse, cameraResponse).map{ $0.1 - $0.0}
         
         let MTLNumberOfImages = device.makeBuffer(bytes: &numberOfInputImages, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)
@@ -38,7 +42,6 @@ final class HDRProcessor: CIImageProcessorKernel {
         let MTLExposureTimes = device.makeBuffer(bytes: exposureTimes, length: MemoryLayout<Float>.size * inputImages.count, options: .cpuCacheModeWriteCombined)
         let MTLWeightFunc = device.makeBuffer(bytesNoCopy: &weightFunction, length: weightFunction.count * MemoryLayout<Float>.size, options: .cpuCacheModeWriteCombined, deallocator: nil)
         let MTLResponseFunc = device.makeBuffer(bytesNoCopy: &cameraResponse, length: cameraResponse.count * MemoryLayout<Float>.size, options: .cpuCacheModeWriteCombined, deallocator: nil)
-        
         
         guard
             let encoder = commandBuffer.makeComputeCommandEncoder()
@@ -48,7 +51,7 @@ final class HDRProcessor: CIImageProcessorKernel {
         
         do{
             let library = try device.makeDefaultLibrary(bundle: Bundle(for: HDRProcessor.self))
-            let HDRFunc = library.makeFunction(name: "makeHDR")!
+            guard let HDRFunc = library.makeFunction(name: "makeHDRImage") else { fatalError() }
             let HDRState = try device.makeComputePipelineState(function: HDRFunc)
             encoder.setComputePipelineState(HDRState)
         } catch let Errors {
@@ -56,14 +59,12 @@ final class HDRProcessor: CIImageProcessorKernel {
         }
         
         encoder.setTextures(inputImages, range: Range<Int>(0..<inputImages.count))
-        encoder.setTexture(HDRTexture, index: MaxImageCount)
+        encoder.setTexture(HDRTexture, index: 1)
         encoder.setBuffer(MTLNumberOfImages, offset: 0, index: 0)
         encoder.setBuffer(MTLCameraShifts, offset: 0, index: 1)
         encoder.setBuffer(MTLExposureTimes, offset: 0, index: 2)
         encoder.setBuffers([MTLResponseFunc, MTLWeightFunc], offsets: [0,0], range: Range<Int>(3...4))
+        encoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: MTLSizeMake(1, 1, 1))
         encoder.endEncoding()
-        
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
     }
 }

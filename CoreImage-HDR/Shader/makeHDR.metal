@@ -11,14 +11,14 @@ using namespace metal;
 #include "movingAverage.h"
 #include "calculateHDR.h"
 
-#define MAX_IMAGE_COUNT 5
+#define MAX_IMAGE_COUNT 3
 
 struct CameraCalibration {
     constant float3 * response;
     constant float3 * weights;
 };
-
-kernel void makeHDR(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> inputArray [[texture(0)]],
+/*
+kernel void makeHDR(const metal::array<texture2d<half, access::read>, MAX_IMAGE_COUNT> inputArray [[texture(0)]],
                     texture2d<half, access::write> HDRImage [[texture(MAX_IMAGE_COUNT)]],
                     constant uint & NumberOfinputImages [[buffer(0)]],
                     constant int2 * cameraShifts [[buffer(1)]],
@@ -41,4 +41,11 @@ kernel void makeHDR(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> inputAr
     // calculate HDR Value
     const half3 enhancedPixel = HDRValue(linearData, NumberOfinputImages, exposureTimes, CalibrationData.weights);
     HDRImage.write(half4(enhancedPixel, 1), gid);
+}
+*/
+kernel void makeHDRImage(texture2d<half, access::read> inputArray [[texture(0)]],
+                    texture2d<half, access::write> HDRImage [[texture(1)]],
+                    uint2 gid [[thread_position_in_grid]]){
+    
+    HDRImage.write(inputArray.read(gid), gid);
 }
