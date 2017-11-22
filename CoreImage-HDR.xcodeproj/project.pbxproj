@@ -20,6 +20,7 @@
 		17832D211FB51A0D00E19938 /* HistogramHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17832D181FB51A0D00E19938 /* HistogramHDR.metal */; };
 		17ACF5381FBBC57300BFBF41 /* calculateHDR.h in Sources */ = {isa = PBXBuildFile; fileRef = 17ACF5371FBBC57300BFBF41 /* calculateHDR.h */; };
 		17ACF53A1FBBC7C200BFBF41 /* makeHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */; };
+		17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AEAA621FC57E2400CE17DF /* extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		17832D181FB51A0D00E19938 /* HistogramHDR.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = HistogramHDR.metal; sourceTree = "<group>"; };
 		17ACF5371FBBC57300BFBF41 /* calculateHDR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calculateHDR.h; sourceTree = "<group>"; };
 		17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = makeHDR.metal; sourceTree = "<group>"; };
+		17AEAA621FC57E2400CE17DF /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +105,7 @@
 				175005351FBA608D005F6856 /* Framework */,
 				17832D0F1FB49D4000E19938 /* Shader */,
 				17832D0D1FB49C4500E19938 /* HDRProcessor.swift */,
+				17AEAA621FC57E2400CE17DF /* extensions.swift */,
 			);
 			path = "CoreImage-HDR";
 			sourceTree = "<group>";
@@ -254,6 +257,7 @@
 				17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */,
 				17832D1C1FB51A0D00E19938 /* HDR_maximum.metal in Sources */,
 				17832D1E1FB51A0D00E19938 /* finalizeHDR.metal in Sources */,
+				17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */,
 				17832D201FB51A0D00E19938 /* defines.metal in Sources */,
 				17ACF5381FBBC57300BFBF41 /* calculateHDR.h in Sources */,
 				17832D191FB51A0D00E19938 /* normalizeWeights.metal in Sources */,

@@ -10,6 +10,7 @@ import XCTest
 import CoreImage
 import AppKit
 import ImageIO
+import MetalKit
 @testable import CoreImage_HDR
 
 fileprivate extension CIImage {
@@ -71,7 +72,7 @@ class CoreImage_HDRTests: XCTestCase {
             HDR = try HDRProcessor.apply(withExtent: Testimages[0].extent,
                                          inputs: Testimages,
                                          arguments: ["ExposureTimes" : self.ExposureTimes,
-                                                     "CameraResponse" : Array<Float>(stride(from: 0, to: 2, by: 2.0/256.0))]
+                                                     "CameraResponse" : zip([float3](repeating: float3(1), count: 256), Array<Float>(stride(from: 0, to: 2, by: 2.0/256.0))).map{$0.0 * $0.1} ]
             )
         } catch let Errors {
             XCTFail(Errors.localizedDescription)
