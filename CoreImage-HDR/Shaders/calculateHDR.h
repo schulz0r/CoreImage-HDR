@@ -6,10 +6,11 @@
 //  Copyright © 2016 Philipp Waxweiler. All rights reserved.
 //
 #pragma once
+
 #include <metal_stdlib>
 using namespace metal;
 
-half3 HDRValue(array_ref<half3> linearPixelArray, constant float * t, constant float3 * W) {
+inline half3 HDRValue(array_ref<half3> linearPixelArray, constant float * t, constant float3 * W) {
     half3 zaehler = 0.0, nenner = 0.0, result = 0.0, weight;
     
     if(all(linearPixelArray[0].rgb != 255)){ // if darkest pixel is saturated...

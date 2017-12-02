@@ -7,12 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		171D8F4D1FC7B41900B608CF /* ResponseEstimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171D8F4C1FC7B41900B608CF /* ResponseEstimation.swift */; };
+		177753041FD1C81200C427E8 /* responseSumShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 177753031FD1C81200C427E8 /* responseSumShader.metal */; };
+		1777530F1FD3430E00C427E8 /* SortAndCount.h in Headers */ = {isa = PBXBuildFile; fileRef = 177753051FD1C88B00C427E8 /* SortAndCount.h */; };
+		177753101FD3431300C427E8 /* calculateHDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17ACF5371FBBC57300BFBF41 /* calculateHDR.h */; };
 		17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */; };
 		17832D021FB49C1500E19938 /* CoreImage_HDRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */; };
 		17832D041FB49C1500E19938 /* CoreImage_HDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17832CF61FB49C1500E19938 /* CoreImage_HDR.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D0D1FB49C4500E19938 /* HDRProcessor.swift */; };
-		17832D1B1FB51A0D00E19938 /* movingAverage.h in Sources */ = {isa = PBXBuildFile; fileRef = 17832D121FB51A0C00E19938 /* movingAverage.h */; };
-		17ACF5381FBBC57300BFBF41 /* calculateHDR.h in Sources */ = {isa = PBXBuildFile; fileRef = 17ACF5371FBBC57300BFBF41 /* calculateHDR.h */; };
 		17ACF53A1FBBC7C200BFBF41 /* makeHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */; };
 		17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AEAA621FC57E2400CE17DF /* extensions.swift */; };
 /* End PBXBuildFile section */
@@ -28,6 +30,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		171D8F4C1FC7B41900B608CF /* ResponseEstimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseEstimation.swift; sourceTree = "<group>"; };
+		177753031FD1C81200C427E8 /* responseSumShader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = responseSumShader.metal; sourceTree = "<group>"; };
+		177753051FD1C88B00C427E8 /* SortAndCount.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
 		17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreImage_HDR.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		17832CF61FB49C1500E19938 /* CoreImage_HDR.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CoreImage_HDR.h; sourceTree = "<group>"; };
 		17832CF71FB49C1500E19938 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -69,6 +74,26 @@
 			name = Framework;
 			sourceTree = "<group>";
 		};
+		177753111FD3435500C427E8 /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				177753121FD3440700C427E8 /* Headers */,
+				177753031FD1C81200C427E8 /* responseSumShader.metal */,
+				17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */,
+			);
+			path = Shaders;
+			sourceTree = "<group>";
+		};
+		177753121FD3440700C427E8 /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				17ACF5371FBBC57300BFBF41 /* calculateHDR.h */,
+				17832D121FB51A0C00E19938 /* movingAverage.h */,
+				177753051FD1C88B00C427E8 /* SortAndCount.h */,
+			);
+			name = Headers;
+			sourceTree = "<group>";
+		};
 		17832CE91FB49C1500E19938 = {
 			isa = PBXGroup;
 			children = (
@@ -90,9 +115,11 @@
 		17832CF51FB49C1500E19938 /* CoreImage-HDR */ = {
 			isa = PBXGroup;
 			children = (
+				177753111FD3435500C427E8 /* Shaders */,
 				17AEAA621FC57E2400CE17DF /* extensions.swift */,
 				175005351FBA608D005F6856 /* Framework */,
-				17AEAA641FC5D13300CE17DF /* HDR */,
+				171D8F4C1FC7B41900B608CF /* ResponseEstimation.swift */,
+				17832D0D1FB49C4500E19938 /* HDRProcessor.swift */,
 			);
 			path = "CoreImage-HDR";
 			sourceTree = "<group>";
@@ -106,33 +133,6 @@
 			path = "CoreImage-HDRTests";
 			sourceTree = "<group>";
 		};
-		17832D0F1FB49D4000E19938 /* Shader */ = {
-			isa = PBXGroup;
-			children = (
-				17ACF53B1FBBC7C900BFBF41 /* Waste */,
-				17832D121FB51A0C00E19938 /* movingAverage.h */,
-				17ACF5371FBBC57300BFBF41 /* calculateHDR.h */,
-				17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */,
-			);
-			path = Shader;
-			sourceTree = "<group>";
-		};
-		17ACF53B1FBBC7C900BFBF41 /* Waste */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Waste;
-			sourceTree = "<group>";
-		};
-		17AEAA641FC5D13300CE17DF /* HDR */ = {
-			isa = PBXGroup;
-			children = (
-				17832D0F1FB49D4000E19938 /* Shader */,
-				17832D0D1FB49C4500E19938 /* HDRProcessor.swift */,
-			);
-			path = HDR;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -140,6 +140,8 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				177753101FD3431300C427E8 /* calculateHDR.h in Headers */,
+				1777530F1FD3430E00C427E8 /* SortAndCount.h in Headers */,
 				17832D041FB49C1500E19938 /* CoreImage_HDR.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -245,10 +247,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */,
-				17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */,
-				17ACF5381FBBC57300BFBF41 /* calculateHDR.h in Sources */,
-				17832D1B1FB51A0D00E19938 /* movingAverage.h in Sources */,
+				171D8F4D1FC7B41900B608CF /* ResponseEstimation.swift in Sources */,
+				177753041FD1C81200C427E8 /* responseSumShader.metal in Sources */,
 				17ACF53A1FBBC7C200BFBF41 /* makeHDR.metal in Sources */,
+				17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

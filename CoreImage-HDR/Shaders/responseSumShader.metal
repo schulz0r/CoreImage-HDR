@@ -9,7 +9,7 @@
 #include <metal_stdlib>
 using namespace metal;
 #include "SortAndCount.h"
-//#include "calculateHDR.h"
+#include "calculateHDR.h"
 
 #define MAX_IMAGE_COUNT 5
 
@@ -21,19 +21,23 @@ kernel void imageToBins(const metal::array<texture2d<half, access::read>, MAX_IM
                         constant float3 * weights [[buffer(4)]],
                         threadgroup metal::array<SortAndCountElement<half3, half3>, 256> & DataBuffer [[threadgroup(0)]],
                         uint2 gid [[thread_position_in_grid]],
-                        uint tid [[thread_index_in_threadgroup]]) {
+                        uint tid [[thread_index_in_threadgroup]],
+                        uint2 threadgroupSize [[threads_per_threadgroup]],
+                        uint2 threadgroupID [[threadgroup_position_in_grid]]) {
     
-    half3 linearData[MAX_IMAGE_COUNT];
-    const array_ref<half3> PixelArray = make_array_ref(linearData, NumberOfinputImages);
+    const uint numberOfThreadsPerThreadgroup = threadgroupSize.x * threadgroupSize.y;
+    metal::array<half3, MAX_IMAGE_COUNT> linearPixelArray;
     
     // linearize pixel
     for(uint i = 0; i < NumberOfinputImages; i++) {
         const half3 pixel = inputArray[i].read(uint2(int2(gid) + cameraShifts[i])).rgb;
         const ushort3 indices = ushort3(pixel * 255);
-        linearData[i] = half3(response[indices.x].x, response[indices.y].y, response[indices.z].z);
+        linearPixelArray[i] = half3(response[indices.x].x, response[indices.y].y, response[indices.z].z);
     }
     
     // calculate HDR Value
-    DataBuffer[tid].element = HDRValue(PixelArray, exposureTimes, weights);
+    DataBuffer[tid].element = HDRValue(linearPixelArray, exposureTimes, weights);
     DataBuffer[tid].counter = 0;
+    
+    bitonicSortAndCount(tid, numberOfThreadsPerThreadgroup, DataBuffer);
 }
