@@ -11,6 +11,7 @@
 		177753041FD1C81200C427E8 /* responseSumShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 177753031FD1C81200C427E8 /* responseSumShader.metal */; };
 		1777530F1FD3430E00C427E8 /* SortAndCount.h in Headers */ = {isa = PBXBuildFile; fileRef = 177753051FD1C88B00C427E8 /* SortAndCount.h */; };
 		177753101FD3431300C427E8 /* calculateHDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17ACF5371FBBC57300BFBF41 /* calculateHDR.h */; };
+		177753141FD382FC00C427E8 /* getCardinality.metal in Sources */ = {isa = PBXBuildFile; fileRef = 177753131FD382FC00C427E8 /* getCardinality.metal */; };
 		17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */; };
 		17832D021FB49C1500E19938 /* CoreImage_HDRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */; };
 		17832D041FB49C1500E19938 /* CoreImage_HDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17832CF61FB49C1500E19938 /* CoreImage_HDR.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -33,6 +34,7 @@
 		171D8F4C1FC7B41900B608CF /* ResponseEstimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseEstimation.swift; sourceTree = "<group>"; };
 		177753031FD1C81200C427E8 /* responseSumShader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = responseSumShader.metal; sourceTree = "<group>"; };
 		177753051FD1C88B00C427E8 /* SortAndCount.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
+		177753131FD382FC00C427E8 /* getCardinality.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = getCardinality.metal; sourceTree = "<group>"; };
 		17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreImage_HDR.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		17832CF61FB49C1500E19938 /* CoreImage_HDR.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CoreImage_HDR.h; sourceTree = "<group>"; };
 		17832CF71FB49C1500E19938 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -80,6 +82,7 @@
 				177753121FD3440700C427E8 /* Headers */,
 				177753031FD1C81200C427E8 /* responseSumShader.metal */,
 				17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */,
+				177753131FD382FC00C427E8 /* getCardinality.metal */,
 			);
 			path = Shaders;
 			sourceTree = "<group>";
@@ -251,6 +254,7 @@
 				177753041FD1C81200C427E8 /* responseSumShader.metal in Sources */,
 				17ACF53A1FBBC7C200BFBF41 /* makeHDR.metal in Sources */,
 				17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */,
+				177753141FD382FC00C427E8 /* getCardinality.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
