@@ -10,39 +10,22 @@
 using namespace metal;
 
 
-kernel void reduceBins(texture2d<half, access::read> buffer [[texture(0)]],
-                       constant uint2 & imageSize [[buffer(0)]],
-                       device half3 * cameraResponse [[buffer(1)]],
-                       constant half3 * cardinality [[buffer(1)]],
-                       threadgroup half3 * sharedBuffer [[threadgroup(0)]],
-                       uint laneID [[thread_index_in_threadgroup]],
-                       uint2 warpSize [[threads_per_threadgroup]],
-                       uint2 gid [[thread_position_in_grid]]) {
+kernel void reduceBins(device half3 * buffer [[buffer(0)]],
+                       constant uint & bufferSize [[buffer(1)]],
+                       device half3 * cameraResponse [[buffer(2)]],
+                       constant uint * cardinality_red [[buffer(3)]],
+                       constant uint * cardinality_green [[buffer(4)]],
+                       constant uint * cardinality_blue [[buffer(5)]],
+                       uint threadID [[thread_index_in_threadgroup]],
+                       uint warpSize [[threads_per_threadgroup]]) {
     
     half3 localSum = 0;
-    // collect bins until they can be reduced in shared memory
-    for(uint globalPosition = laneID; laneID < imageSize.y; globalPosition += warpSize.y) {
-        localSum += buffer.read(uint2(gid.x, globalPosition)).rgb;
+    
+    // collect all results
+    for(uint globalPosition = threadID; globalPosition < bufferSize; globalPosition += warpSize) {
+        localSum += buffer[globalPosition];
     }
     
-    sharedBuffer[laneID] = localSum;
-    threadgroup_barrier(mem_flags::mem_threadgroup);
-    
-    // reduce in threadgroup memory
-    for(uint s = warpSize.y / 2; s > 0; s <<= 1) {
-        if(laneID < s){
-            sharedBuffer[laneID].rgb += sharedBuffer[laneID + s].rgb;
-        }
-        threadgroup_barrier(mem_flags::mem_threadgroup);
-    }
-    
-    switch(laneID) {
-        case 0:
-            // write to buffer
-            cameraResponse[gid.x] = sharedBuffer[0].rgb / cardinality[gid.x];
-            break;
-        default:
-            break;
-    }
+    cameraResponse[threadID] = localSum / half3(cardinality_red[threadID], cardinality_green[threadID], cardinality_blue[threadID]);
 }
 
