@@ -12,10 +12,11 @@ using namespace metal;
 #include "calculateHDR.h"
 
 #define MAX_IMAGE_COUNT 5
+#define BINS 256
 
 kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>, MAX_IMAGE_COUNT> inputArray [[texture(0)]],
                         texture2d<half, access::read> valuesFromLastIter [[texture(MAX_IMAGE_COUNT)]],
-                        texture2d<half, access::write> outputbuffer [[texture(MAX_IMAGE_COUNT + 1)]],
+                        device half3 * outputbuffer [[buffer(0)]],
                         constant uint & NumberOfinputImages [[buffer(0)]],
                         constant int2 * cameraShifts [[buffer(1)]],
                         constant float * exposureTimes [[buffer(2)]],
@@ -29,6 +30,7 @@ kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>,
     
     const uint numberOfThreadsPerThreadgroup = threadgroupSize.x * threadgroupSize.y;
     const uint threadgroupIndex = threadgroupID.x * threadgroupID.y;
+    half3 buff = 0;
     
     metal::array<uchar3, MAX_IMAGE_COUNT> PixelIndices;
     metal::array<half3, MAX_IMAGE_COUNT> linearizedPixels;
@@ -49,8 +51,9 @@ kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>,
             DataBuffer[tid].element = PixelIndices[imageIndex][colorChannelIndex];
             DataBuffer[tid].counter = µ[colorChannelIndex];
             bitonicSortAndCount(tid, numberOfThreadsPerThreadgroup, DataBuffer);
+            buff = DataBuffer[tid].counter;
         }
         const half3 value = valuesFromLastIter.read(uint2(tid,threadgroupIndex)).rgb;
-        outputbuffer.write(half4(DataBuffer[tid].counter + value, 1), uint2(tid,threadgroupIndex));
+        outputbuffer[threadgroupIndex * BINS + tid] = buff + value;
     }
 }

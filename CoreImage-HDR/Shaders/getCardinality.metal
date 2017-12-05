@@ -14,22 +14,22 @@ using namespace metal;
 
 kernel void getCardinality(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> images [[texture(0)]],
                            constant uint2 & imageDimensions [[buffer(0)]],
-                           constant uint & ReplicationFactor [[buffer(1)]],
-                           device atomic_uint * Cardinality_red [[buffer(2)]],
-                           device atomic_uint * Cardinality_green [[buffer(3)]],
-                           device atomic_uint * Cardinality_blue [[buffer(4)]],
+                           constant uint & imageSlice [[buffer(1)]],
+                           constant uint & ReplicationFactor [[buffer(2)]],
+                           device atomic_uint * Cardinality_red [[buffer(3)]],
+                           device atomic_uint * Cardinality_green [[buffer(4)]],
+                           device atomic_uint * Cardinality_blue [[buffer(5)]],
                            threadgroup volatile atomic_uint * buffer_red [[threadgroup(0)]],
                            threadgroup volatile atomic_uint * buffer_green [[threadgroup(1)]],
                            threadgroup volatile atomic_uint * buffer_blue [[threadgroup(2)]],
-                           uint3 gid [[thread_position_in_grid]],
+                           uint2 gid [[thread_position_in_grid]],
                            uint threadID [[thread_index_in_threadgroup]],
                            uint warpsPerThreadgroup [[simdgroups_per_threadgroup]],
                            uint warpID [[simdgroup_index_in_threadgroup]],
                            uint warpSize [[threads_per_simdgroup]],
-                           uint3 blockSize [[threads_per_threadgroup]],
-                           uint3 threadgroupID [[threadgroup_position_in_grid]]) {
+                           uint2 blockSize [[threads_per_threadgroup]],
+                           uint2 threadgroupID [[threadgroup_position_in_grid]]) {
     
-    const thread uint & imageSlice = gid.z;
     const uint replicationOffset = (BIN_COUNT + 1) * (threadID % ReplicationFactor);
     const uint interleavedReadAccessOffset = (imageDimensions.x / warpsPerThreadgroup) * warpID + warpSize * threadgroupID.x + threadID;
     
