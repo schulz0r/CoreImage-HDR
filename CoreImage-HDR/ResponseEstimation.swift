@@ -26,6 +26,7 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
         
         let MaxImageCount = 5
         let TrainingWeight:Float = 4.0
+        let half3_size = 8
         
         guard inputImages.count <= MaxImageCount else {
             fatalError("Only up to \(MaxImageCount) images are allowed. It is an arbitrary number and can be changed in the HDR kernel any time.")
@@ -34,7 +35,7 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
             fatalError("Each of the \(inputImages.count) input images require an exposure time. Only \(exposureTimes.count) could be found.")
         }
         
-        
+        let binningBlock = MTLSizeMake(16, 16, 1)
         let imageDimensions = MTLSizeMake(inputImages[0].width, inputImages[0].height, 1)
         var cameraResponse = Array<Float>(stride(from: 0.0, to: 2.0, by: 2.0/256.0)).map{float3($0)}
         
@@ -50,7 +51,8 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
         let MTLCardinalities = [device.makeBuffer(length: 256 * MemoryLayout<uint>.size, options: .storageModePrivate),
                                 device.makeBuffer(length: 256 * MemoryLayout<uint>.size, options: .storageModePrivate),
                                 device.makeBuffer(length: 256 * MemoryLayout<uint>.size, options: .storageModePrivate)]
-        
+        var bufferLength = half3_size * (inputImages.first!.height / binningBlock.height) * (inputImages.first!.width / binningBlock.width)
+        guard let buffer = device.makeBuffer(length: bufferLength, options: .storageModePrivate) else {fatalError("Could not allocate Memory in Video RAM.")}
         
         
         
@@ -58,8 +60,10 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
         do{
             let library = try device.makeDefaultLibrary(bundle: Bundle(for: HDRProcessor.self))
             guard
-            let biningFunc = library.makeFunction(name: "writeMeasureToBins"),
-            let cardinalityFunction = library.makeFunction(name: "getCardinality")
+                let biningFunc = library.makeFunction(name: "writeMeasureToBins"),
+                let cardinalityFunction = library.makeFunction(name: "getCardinality"),
+                let binReductionState = library.makeFunction(name: "reduceBins"),
+                let HDRFunc = library.makeFunction(name: "makeHDR")
             else { fatalError() }
             
             // get cardinality of pixels in all images
@@ -85,6 +89,8 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
             cardEncoder.dispatchThreads(MTLSizeMake(inputImages[0].width, inputImages[0].height, inputImages.count), threadsPerThreadgroup: MTLSizeMake(blocksize, 1, 1))
             cardEncoder.endEncoding()
             
+            // repeat training x times
+            
             // collect image in bins
             guard
                 let BinEncoder = commandBuffer.makeComputeCommandEncoder()
@@ -92,30 +98,56 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
                     fatalError("Failed to create command encoder.")
             }
             
-            let binningBlock = MTLSizeMake(16, 16, 1)
-            
-            let descriptor = MTLTextureDescriptor()
-            descriptor.width = 256
-            descriptor.height = (inputImages.first!.height / binningBlock.height) * (inputImages.first!.width / binningBlock.width)
-            descriptor.pixelFormat = inputImages.first!.pixelFormat
-            descriptor.mipmapLevelCount = 0
-            descriptor.resourceOptions = .storageModePrivate
-            let buffer = device.makeTexture(descriptor: descriptor)
-            
             let biningState = try device.makeComputePipelineState(function: biningFunc)
             BinEncoder.setComputePipelineState(biningState)
             BinEncoder.setTextures(inputImages, range: Range<Int>(0..<inputImages.count))
-            BinEncoder.setTexture(buffer, index: MaxImageCount)
-            BinEncoder.setTexture(buffer, index: MaxImageCount + 1)
-            BinEncoder.setBuffer(MTLNumberOfImages, offset: 0, index: 0)
-            BinEncoder.setBuffer(MTLCameraShifts, offset: 0, index: 1)
-            BinEncoder.setBuffer(MTLExposureTimes, offset: 0, index: 2)
-            BinEncoder.setBuffers([MTLResponseFunc, MTLWeightFunc], offsets: [0,0], range: Range<Int>(3...4))
+            BinEncoder.setBuffer(buffer, offset: 0, index: 0)
+            BinEncoder.setBuffer(MTLNumberOfImages, offset: 0, index: 1)
+            BinEncoder.setBuffer(MTLCameraShifts, offset: 0, index: 2)
+            BinEncoder.setBuffer(MTLExposureTimes, offset: 0, index: 3)
+            BinEncoder.setBuffers([MTLResponseFunc, MTLWeightFunc], offsets: [0,0], range: Range<Int>(4...5))
             BinEncoder.setThreadgroupMemoryLength((MemoryLayout<Float>.size/2 + MemoryLayout<simd_uchar1>.size) * binningBlock.width * binningBlock.height, index: 0)    // threadgroup memory for each thread
             BinEncoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: binningBlock)
             BinEncoder.endEncoding()
             
             // reduce bins and calculate response
+            guard
+                let BinReductionEncoder = commandBuffer.makeComputeCommandEncoder()
+                else {
+                    fatalError("Failed to create command encoder.")
+            }
+            
+            let binredState = try device.makeComputePipelineState(function: binReductionState)
+            BinReductionEncoder.setComputePipelineState(binredState)
+            BinReductionEncoder.setBuffer(buffer, offset: 0, index: 0)
+            BinReductionEncoder.setBytes(&bufferLength, length: MemoryLayout<uint>.size, index: 1)
+            BinReductionEncoder.setBuffer(MTLCameraShifts, offset: 0, index: 2)
+            cardEncoder.setBuffers(MTLCardinalities, offsets: [0,0,0], range: Range<Int>(3...5))
+            BinReductionEncoder.dispatchThreadgroups(MTLSizeMake(1,1,1), threadsPerThreadgroup: MTLSizeMake(256, 1, 1))
+            BinReductionEncoder.endEncoding()
+            
+            // flush buffer for next iteration
+            guard let flushBlitEncoder = commandBuffer.makeBlitCommandEncoder() else {fatalError()}
+            flushBlitEncoder.fill(buffer: buffer, range: Range(0...buffer.length), value: 0)
+            flushBlitEncoder.endEncoding()
+            
+            // after training, make HDR
+            guard
+                let makeHDREncoder = commandBuffer.makeComputeCommandEncoder()
+                else {
+                    fatalError("Failed to create command encoder.")
+            }
+            let HDRState = try device.makeComputePipelineState(function: HDRFunc)
+            makeHDREncoder.setComputePipelineState(HDRState)
+            makeHDREncoder.setTextures(inputImages, range: Range<Int>(0..<inputImages.count))
+            makeHDREncoder.setTexture(HDRTexture, index: MaxImageCount)
+            makeHDREncoder.setBuffer(MTLNumberOfImages, offset: 0, index: 0)
+            makeHDREncoder.setBuffer(MTLCameraShifts, offset: 0, index: 1)
+            makeHDREncoder.setBuffer(MTLExposureTimes, offset: 0, index: 2)
+            makeHDREncoder.setBuffers([MTLResponseFunc, MTLWeightFunc], offsets: [0,0], range: Range<Int>(3...4))
+            makeHDREncoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: MTLSizeMake(8, 8, 1))
+            makeHDREncoder.endEncoding()
+            
         } catch let Errors {
             fatalError(Errors.localizedDescription)
         }

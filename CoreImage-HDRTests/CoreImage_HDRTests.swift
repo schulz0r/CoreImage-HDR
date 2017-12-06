@@ -82,6 +82,21 @@ class CoreImage_HDRTests: XCTestCase {
         XCTAssertTrue(true)
     }
     
+    func testCameraResponse() {
+        var HDR:CIImage = CIImage()
+        do{
+            HDR = try HDRCameraResponseProcessor.apply(withExtent: Testimages[0].extent,
+                                         inputs: Testimages,
+                                         arguments: ["ExposureTimes" : self.ExposureTimes])
+        } catch let Errors {
+            XCTFail(Errors.localizedDescription)
+        }
+        
+        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/noobs.png"))
+        
+        XCTAssertTrue(true)
+    }
+    
     func testPerformanceExample() {
         // This is an example of a performance test case.
         self.measure {
