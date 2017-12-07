@@ -14,8 +14,8 @@ using namespace metal;
 
 template<typename T, typename T2>
 struct SortAndCountElement {
-    T element;
-    T2 counter;
+    T element = 0;
+    T2 counter = 0;
 };
 
 template<typename T>
@@ -26,7 +26,7 @@ void swap(threadgroup T & L, threadgroup T & R) {
 }
 
 template<typename T, typename T2>
-void bitonicSortAndCount(const uint tid, const uint threads, threadgroup metal::array<SortAndCountElement<T,T2>, 256> & data) {
+void bitonicSortAndCount(const uint tid, const uint threads, threadgroup SortAndCountElement<T,T2> * data) {
     uint log2k = 1;
     for(uint k = 2; k <= threads << 1; k <<= 1, log2k++) {
         uint b_id = tid >> (log2k - 1);

@@ -106,7 +106,7 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
             BinEncoder.setBuffer(MTLCameraShifts, offset: 0, index: 2)
             BinEncoder.setBuffer(MTLExposureTimes, offset: 0, index: 3)
             BinEncoder.setBuffers([MTLResponseFunc, MTLWeightFunc], offsets: [0,0], range: Range<Int>(4...5))
-            BinEncoder.setThreadgroupMemoryLength((MemoryLayout<Float>.size/2 + MemoryLayout<simd_uchar1>.size) * binningBlock.width * binningBlock.height, index: 0)    // threadgroup memory for each thread
+            BinEncoder.setThreadgroupMemoryLength((MemoryLayout<Float>.size/2 + MemoryLayout<ushort>.size) * binningBlock.width * binningBlock.height, index: 0)    // threadgroup memory for each thread
             BinEncoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: binningBlock)
             BinEncoder.endEncoding()
             
@@ -122,7 +122,7 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
             BinReductionEncoder.setBuffer(buffer, offset: 0, index: 0)
             BinReductionEncoder.setBytes(&bufferLength, length: MemoryLayout<uint>.size, index: 1)
             BinReductionEncoder.setBuffer(MTLCameraShifts, offset: 0, index: 2)
-            cardEncoder.setBuffers(MTLCardinalities, offsets: [0,0,0], range: Range<Int>(3...5))
+            BinReductionEncoder.setBuffers(MTLCardinalities, offsets: [0,0,0], range: Range<Int>(3...5))
             BinReductionEncoder.dispatchThreadgroups(MTLSizeMake(1,1,1), threadsPerThreadgroup: MTLSizeMake(256, 1, 1))
             BinReductionEncoder.endEncoding()
             
