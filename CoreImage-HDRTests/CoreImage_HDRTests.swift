@@ -30,6 +30,8 @@ fileprivate extension CIImage {
 
 class CoreImage_HDRTests: XCTestCase {
     
+    let device = MTLCreateSystemDefaultDevice()!
+    var URLs:[URL] = []
     var Testimages:[CIImage] = []
     var ExposureTimes:[Float] = []
     
@@ -43,7 +45,7 @@ class CoreImage_HDRTests: XCTestCase {
         //let imagePath = AppBundle.path(forResource: "myImage", ofType: "jpg")
         
         // WORKAROUND: load images from disk
-        let URLs = imageNames.map{FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents/Codes/Testpics/" + $0 + ".jpg")}
+        URLs = imageNames.map{FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents/Codes/Testpics/" + $0 + ".jpg")}
         
         Testimages = URLs.map{
             guard let image = CIImage(contentsOf: $0) else {
@@ -92,9 +94,65 @@ class CoreImage_HDRTests: XCTestCase {
             XCTFail(Errors.localizedDescription)
         }
         
-        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/noobs.png"))
+        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/CameraResponse.png"))
         
         XCTAssertTrue(true)
+    }
+    
+    func testHistogramShader() {
+        
+        let MTLCardinalities = [device.makeBuffer(length: 256 * MemoryLayout<uint>.size, options: .storageModeShared),
+                                device.makeBuffer(length: 256 * MemoryLayout<uint>.size, options: .storageModeShared),
+                                device.makeBuffer(length: 256 * MemoryLayout<uint>.size, options: .storageModeShared)]
+        
+        guard
+            let commandQ = device.makeCommandQueue(),
+            let commandBuffer = commandQ.makeCommandBuffer()
+        else {
+            fatalError("Could not make command queue or Buffer.")
+        }
+        do {
+            let library = try device.makeDefaultLibrary(bundle: Bundle(for: HDRCameraResponseProcessor.self))
+            let texture = try MTKTextureLoader(device: device).newTexture(URL: URLs[2], options: nil)
+            
+            guard
+                let cardinalityFunction = library.makeFunction(name: "getCardinality"),
+                let cardEncoder = commandBuffer.makeComputeCommandEncoder()
+            else {
+                fatalError()
+            }
+            
+            let CardinalityState = try device.makeComputePipelineState(function: cardinalityFunction)
+            
+            let blocksize = CardinalityState.threadExecutionWidth * 4
+            var imageSize = uint2(uint(texture.width), uint(texture.height))
+            let remainer = imageSize.x % uint(blocksize)
+            var replicationFactor_R = min(uint(device.maxThreadgroupMemoryLength / (blocksize * MemoryLayout<uint>.size * 257 * 3)), uint(CardinalityState.threadExecutionWidth)) // replicate histograms, but not more than simd group length
+            cardEncoder.setComputePipelineState(CardinalityState)
+            cardEncoder.setTextures([texture], range: Range<Int>(0...0))
+            cardEncoder.setBytes(&imageSize, length: MemoryLayout<uint2>.size, index: 0)
+            cardEncoder.setBytes(&replicationFactor_R, length: MemoryLayout<uint>.size, index: 1)
+            cardEncoder.setBuffers(MTLCardinalities, offsets: [0,0,0], range: Range<Int>(2...4))
+            cardEncoder.setThreadgroupMemoryLength(MemoryLayout<uint>.size * 257 * Int(replicationFactor_R), index: 0)
+            cardEncoder.setThreadgroupMemoryLength(MemoryLayout<uint>.size * 257 * Int(replicationFactor_R), index: 1)
+            cardEncoder.setThreadgroupMemoryLength(MemoryLayout<uint>.size * 257 * Int(replicationFactor_R), index: 2)
+            cardEncoder.dispatchThreads(MTLSizeMake(texture.width + (remainer == 0 ? 0 : blocksize - (texture.width % blocksize)), texture.height, 1), threadsPerThreadgroup: MTLSizeMake(blocksize, 1, 1))
+            cardEncoder.endEncoding()
+            
+            commandBuffer.commit()
+            commandBuffer.waitUntilCompleted() // the shader is running...
+            
+            // now lets check the value of the cardinality histogram
+            var Cardinalities_red = [uint](repeating: 0, count: 256)
+            memcpy(&Cardinalities_red, MTLCardinalities[0]!.contents(), MTLCardinalities[0]!.length)
+            
+            print(Cardinalities_red.description)
+            print(Cardinalities_red.reduce(0, +))
+            
+            XCTAssert(Cardinalities_red.reduce(0, +) == (texture.width * texture.height))
+        } catch let Errors {
+            fatalError("Could not run shader: " + Errors.localizedDescription)
+        }
     }
     
     func testPerformanceExample() {
