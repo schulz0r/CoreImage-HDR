@@ -27,27 +27,29 @@ kernel void getCardinality(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> 
                            uint warpID [[simdgroup_index_in_threadgroup]],
                            uint warpSize [[threads_per_simdgroup]],
                            uint3 blockSize [[threads_per_threadgroup]],
-                           uint3 threadgroupID [[threadgroup_position_in_grid]]) {
+                           uint3 threadgroupID [[threadgroup_position_in_grid]],
+                           uint3 gridSize [[threads_per_grid]],
+                           uint laneID [[thread_index_in_simdgroup]]) {
     
     const thread uint & imageSlice = gid.z;
     const uint replicationOffset = (BIN_COUNT + 1) * (threadID % ReplicationFactor);
-    const uint interleavedReadAccessOffset = (imageDimensions.x / warpsPerThreadgroup) * warpID + warpSize * threadgroupID.x + threadID;
+    const uint interleavedReadAccessOffset = (gridSize.x / warpsPerThreadgroup) * warpID + warpSize * threadgroupID.x + laneID;
     
-    const uint3 pixel = (uint3)images[imageSlice].read(uint2(interleavedReadAccessOffset, gid.y)).rgb * BIN_COUNT;
-    
-    atomic_fetch_add_explicit(&buffer_red[replicationOffset + pixel.r], 1, memory_order::memory_order_relaxed);
-    atomic_fetch_add_explicit(&buffer_green[replicationOffset + pixel.b], 1, memory_order::memory_order_relaxed);
-    atomic_fetch_add_explicit(&buffer_blue[replicationOffset + pixel.b], 1, memory_order::memory_order_relaxed);
-    
-    for(uint pos = threadID; pos < BIN_COUNT; pos += blockSize.x) {
-        uint3 sum = 0;
-        for(uint base = 0; base < (BIN_COUNT + 1) * ReplicationFactor; base += BIN_COUNT + 1) {
-            sum.r += atomic_load_explicit(&buffer_red[pos + base], memory_order::memory_order_relaxed);
-            sum.g += atomic_load_explicit(&buffer_green[pos + base], memory_order::memory_order_relaxed);
-            sum.b += atomic_load_explicit(&buffer_blue[pos + base], memory_order::memory_order_relaxed);
-        }
-        atomic_fetch_add_explicit(&Cardinality_red[pos], sum.r, memory_order::memory_order_relaxed);
-        atomic_fetch_add_explicit(&Cardinality_green[pos], sum.g, memory_order::memory_order_relaxed);
-        atomic_fetch_add_explicit(&Cardinality_blue[pos], sum.b, memory_order::memory_order_relaxed);
+    if(interleavedReadAccessOffset < imageDimensions.x){
+        const uint3 pixel = (uint3)(images[imageSlice].read(uint2(interleavedReadAccessOffset, gid.y)).rgb * (BIN_COUNT - 1));
+        atomic_fetch_add_explicit(&buffer_red[replicationOffset + pixel.r], 1, memory_order::memory_order_relaxed);
+        atomic_fetch_add_explicit(&buffer_green[replicationOffset + pixel.b], 1, memory_order::memory_order_relaxed);
+        atomic_fetch_add_explicit(&buffer_blue[replicationOffset + pixel.b], 1, memory_order::memory_order_relaxed);
+        
+        for(uint pos = threadID; pos < BIN_COUNT; pos += blockSize.x) {
+            uint3 sum = 0;
+            for(uint base = 0; base < (BIN_COUNT + 1) * ReplicationFactor; base += BIN_COUNT + 1) {
+                sum.r += atomic_load_explicit(&buffer_red[pos + base], memory_order::memory_order_relaxed);
+                sum.g += atomic_load_explicit(&buffer_green[pos + base], memory_order::memory_order_relaxed);
+                sum.b += atomic_load_explicit(&buffer_blue[pos + base], memory_order::memory_order_relaxed);
+            }
+            atomic_fetch_add_explicit(&Cardinality_red[pos], sum.r, memory_order::memory_order_relaxed);
+            atomic_fetch_add_explicit(&Cardinality_green[pos], sum.g, memory_order::memory_order_relaxed);
+            atomic_fetch_add_explicit(&Cardinality_blue[pos], sum.b, memory_order::memory_order_relaxed);
     }
 }

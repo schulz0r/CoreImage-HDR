@@ -77,6 +77,7 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
             
             var imageSize = uint2(uint(inputImages[0].width), uint(inputImages[0].height))
             let blocksize = CardinalityState.threadExecutionWidth * 4
+            let remainer = imageSize.x % uint(blocksize)
             var replicationFactor_R = min(uint(device.maxThreadgroupMemoryLength / (blocksize * MemoryLayout<uint>.size * 257 * 3)), uint(CardinalityState.threadExecutionWidth)) // replicate histograms, but not more than simd group length
             cardEncoder.setComputePipelineState(CardinalityState)
             cardEncoder.setTextures(inputImages, range: Range<Int>(0..<inputImages.count))
@@ -86,7 +87,7 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
             cardEncoder.setThreadgroupMemoryLength(MemoryLayout<uint>.size * 257 * Int(replicationFactor_R), index: 0)
             cardEncoder.setThreadgroupMemoryLength(MemoryLayout<uint>.size * 257 * Int(replicationFactor_R), index: 1)
             cardEncoder.setThreadgroupMemoryLength(MemoryLayout<uint>.size * 257 * Int(replicationFactor_R), index: 2)
-            cardEncoder.dispatchThreads(MTLSizeMake(inputImages[0].width, inputImages[0].height, inputImages.count), threadsPerThreadgroup: MTLSizeMake(blocksize, 1, 1))
+            cardEncoder.dispatchThreads(MTLSizeMake(inputImages[0].width + (remainer == 0 ? 0 : blocksize - (inputImages[0].width % blocksize)), inputImages[0].height, inputImages.count), threadsPerThreadgroup: MTLSizeMake(blocksize, 1, 1))
             cardEncoder.endEncoding()
             
             // repeat training x times
