@@ -25,6 +25,7 @@ void swap(threadgroup T & L, threadgroup T & R) {
     R = buff;
 }
 
+
 template<typename T, typename T2>
 void bitonicSortAndCount(const uint tid, const uint threads, threadgroup SortAndCountElement<T,T2> * data) {
     uint log2k = 1;
@@ -32,12 +33,12 @@ void bitonicSortAndCount(const uint tid, const uint threads, threadgroup SortAnd
         uint b_id = tid >> (log2k - 1);
         uint log2j = log2k - 1;
         
-        for(uint j = k >> 1; j > 0; log2j--) {
+        for(uint j = k >> 1; j > 0; j >>= 1, log2j--) {
             uint i1 = ((tid >> log2j) << (log2j + 1)) + (tid & (j - 1));
             uint i2 = i1 + j;
             
-            switch(b_id & 1) {
-            case 0:
+            switch(b_id & 1) {  // is odd?
+            case 0: // if even
                 if(data[i1].element > data[i2].element) {
                     swap(data[i1], data[i2]);
                 } else if (data[i1].element == data[i2].element) {
@@ -45,7 +46,7 @@ void bitonicSortAndCount(const uint tid, const uint threads, threadgroup SortAnd
                     data[i1].counter = 0;
                 }
                 break;
-            default:
+            default:    // if odd
                 if(data[i1].element < data[i2].element) {
                     swap(data[i1], data[i2]);
                 } else if (data[i1].element == data[i2].element) {
