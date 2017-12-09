@@ -124,12 +124,13 @@ class CoreImage_HDRTests: XCTestCase {
             
             let CardinalityState = try device.makeComputePipelineState(function: cardinalityFunction)
             
-            let blocksize = CardinalityState.threadExecutionWidth * 4
+            let streamingMultiprocessorsPerBlock = 4
+            let blocksize = CardinalityState.threadExecutionWidth * streamingMultiprocessorsPerBlock
             var imageSize = uint2(uint(texture.width), uint(texture.height))
             let remainer = imageSize.x % uint(blocksize)
-            var replicationFactor_R = min(uint(device.maxThreadgroupMemoryLength / (blocksize * MemoryLayout<uint>.size * 257 * 3)), uint(CardinalityState.threadExecutionWidth)) // replicate histograms, but not more than simd group length
+            var replicationFactor_R:uint = max(uint(device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * MemoryLayout<uint>.size * 257 * 3)), 1)
             cardEncoder.setComputePipelineState(CardinalityState)
-            cardEncoder.setTextures([texture], range: Range<Int>(0...0))
+            cardEncoder.setTexture(texture, index: 0)
             cardEncoder.setBytes(&imageSize, length: MemoryLayout<uint2>.size, index: 0)
             cardEncoder.setBytes(&replicationFactor_R, length: MemoryLayout<uint>.size, index: 1)
             cardEncoder.setBuffers(MTLCardinalities, offsets: [0,0,0], range: Range<Int>(2...4))

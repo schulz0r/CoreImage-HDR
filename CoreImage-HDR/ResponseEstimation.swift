@@ -74,11 +74,12 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
             }
             
             let CardinalityState = try device.makeComputePipelineState(function: cardinalityFunction)
-            
+            let streamingMultiprocessorsPerBlock = 4
             var imageSize = uint2(uint(inputImages[0].width), uint(inputImages[0].height))
-            let blocksize = CardinalityState.threadExecutionWidth * 4
+            let blocksize = CardinalityState.threadExecutionWidth * streamingMultiprocessorsPerBlock
             let remainer = imageSize.x % uint(blocksize)
-            var replicationFactor_R = min(uint(device.maxThreadgroupMemoryLength / (blocksize * MemoryLayout<uint>.size * 257 * 3)), uint(CardinalityState.threadExecutionWidth)) // replicate histograms, but not more than simd group length
+            
+            var replicationFactor_R:uint = max(uint(device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * MemoryLayout<uint>.size * 257 * 3)), 1) // replicate histograms, but not more than simd group length
             cardEncoder.setComputePipelineState(CardinalityState)
             cardEncoder.setTextures(inputImages, range: Range<Int>(0..<inputImages.count))
             cardEncoder.setBytes(&imageSize, length: MemoryLayout<uint2>.size, index: 0)
