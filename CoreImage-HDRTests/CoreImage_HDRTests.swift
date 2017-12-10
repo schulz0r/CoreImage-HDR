@@ -100,10 +100,8 @@ class CoreImage_HDRTests: XCTestCase {
     }
     
     func testHistogramShader() {
-        
-        let MTLCardinalities = [device.makeBuffer(length: 256 * MemoryLayout<uint>.size, options: .storageModeShared),
-                                device.makeBuffer(length: 256 * MemoryLayout<uint>.size, options: .storageModeShared),
-                                device.makeBuffer(length: 256 * MemoryLayout<uint>.size, options: .storageModeShared)]
+        let ColourHistogramSize = MemoryLayout<uint>.size * 256 * 3
+        let MTLCardinalities = device.makeBuffer(length: ColourHistogramSize, options: .storageModeShared)
         
         guard
             let commandQ = device.makeCommandQueue(),
@@ -123,7 +121,7 @@ class CoreImage_HDRTests: XCTestCase {
             }
             
             let CardinalityState = try device.makeComputePipelineState(function: cardinalityFunction)
-            
+            let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
             let streamingMultiprocessorsPerBlock = 4
             let blocksize = CardinalityState.threadExecutionWidth * streamingMultiprocessorsPerBlock
             var imageSize = uint2(uint(texture.width), uint(texture.height))
@@ -133,8 +131,8 @@ class CoreImage_HDRTests: XCTestCase {
             cardEncoder.setTexture(texture, index: 0)
             cardEncoder.setBytes(&imageSize, length: MemoryLayout<uint2>.size, index: 0)
             cardEncoder.setBytes(&replicationFactor_R, length: MemoryLayout<uint>.size, index: 1)
-            cardEncoder.setBuffers(MTLCardinalities, offsets: [0,0,0], range: Range<Int>(2...4))
-            cardEncoder.setThreadgroupMemoryLength(MemoryLayout<uint>.size * 257 * Int(replicationFactor_R) * 3, index: 0)
+            cardEncoder.setBuffer(MTLCardinalities, offset: 0, index: 2)
+            cardEncoder.setThreadgroupMemoryLength(sharedColourHistogramSize * Int(replicationFactor_R), index: 0)
             cardEncoder.dispatchThreads(MTLSizeMake(texture.width + (remainer == 0 ? 0 : blocksize - (texture.width % blocksize)), texture.height, 1), threadsPerThreadgroup: MTLSizeMake(blocksize, 1, 1))
             cardEncoder.endEncoding()
             
@@ -142,13 +140,10 @@ class CoreImage_HDRTests: XCTestCase {
             commandBuffer.waitUntilCompleted() // the shader is running...
             
             // now lets check the value of the cardinality histogram
-            var Cardinalities_red = [uint](repeating: 0, count: 256)
-            memcpy(&Cardinalities_red, MTLCardinalities[0]!.contents(), MTLCardinalities[0]!.length)
+            var Cardinality_Host = [uint](repeating: 0, count: 256 * 3)
+            memcpy(&Cardinality_Host, MTLCardinalities!.contents(), MTLCardinalities!.length)
             
-            print(Cardinalities_red.description)
-            print(Cardinalities_red.reduce(0, +))
-            
-            XCTAssert(Cardinalities_red.reduce(0, +) == (texture.width * texture.height))
+            XCTAssert(Cardinality_Host.reduce(0, +) == (3 * texture.width * texture.height))
         } catch let Errors {
             fatalError("Could not run shader: " + Errors.localizedDescription)
         }

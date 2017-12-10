@@ -7,25 +7,17 @@
 //
 
 #include <metal_stdlib>
-#include <metal_atomic>
 using namespace metal;
+#include "colourHistogram.h"
 
 #define MAX_IMAGE_COUNT 5
 #define BIN_COUNT 256
 
-struct colourHistogram {
-    metal::array<atomic_uint, 257> red;
-    metal::array<atomic_uint, 257> blue;
-    metal::array<atomic_uint, 257> green;
-};
-
 kernel void getCardinality(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> images [[texture(0)]],
                            constant uint2 & imageDimensions [[buffer(0)]],
                            constant uint & ReplicationFactor [[buffer(1)]],
-                           device atomic_uint * Cardinality_red [[buffer(2)]],
-                           device atomic_uint * Cardinality_green [[buffer(3)]],
-                           device atomic_uint * Cardinality_blue [[buffer(4)]],
-                           threadgroup colourHistogram * sharedHistograms [[threadgroup(0)]],
+                           device colourHistogram<BIN_COUNT> & Cardinality [[buffer(2)]],
+                           threadgroup colourHistogram<BIN_COUNT+1> * sharedHistograms [[threadgroup(0)]],
                            uint3 gid [[thread_position_in_grid]],
                            uint threadID [[thread_index_in_threadgroup]],
                            uint warpsPerThreadgroup [[simdgroups_per_threadgroup]],
@@ -48,9 +40,8 @@ kernel void getCardinality(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> 
     threadgroup_barrier(mem_flags::mem_threadgroup);
     
     const thread uint & imageSlice = gid.z;
-    // associate each thread to another histogram in shared memory to reduce collisions
-    threadgroup colourHistogram & threadHistogram = sharedHistograms[threadID % ReplicationFactor];
-    
+    // Give each thread another histogram in shared memory to reduce collisions
+    threadgroup colourHistogram<BIN_COUNT+1> & threadHistogram = sharedHistograms[threadID % ReplicationFactor];
     // spread locations of reads to gather diverse pixels in order to reduce collides
     const uint interleavedReadAccessOffset = (gridSize.x / warpsPerThreadgroup) * warpID + warpSize * threadgroupID.x + laneID;
     
@@ -65,18 +56,16 @@ kernel void getCardinality(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> 
         // sum up results from buffer
         uint3 sum = 0;
         for(uint pos = threadID; pos < BIN_COUNT; pos += blockSize.x, sum = uint3(0)) {
-            for(uint base = 0; base < ReplicationFactor; base++) {
-                /*sum.r += (threadgroup uint &)buffer_red[pos + base];
-                sum.g += (threadgroup uint &)buffer_green[pos + base];
-                sum.b += (threadgroup uint &)buffer_blue[pos + base];
-                */
-                sum.r += atomic_load_explicit(&sharedHistograms[base].red[pos], memory_order::memory_order_relaxed);
-                sum.g += atomic_load_explicit(&sharedHistograms[base].green[pos], memory_order::memory_order_relaxed);
-                sum.b += atomic_load_explicit(&sharedHistograms[base].blue[pos], memory_order::memory_order_relaxed);
+            for(uint replHistIndex = 0; replHistIndex < ReplicationFactor; replHistIndex++) {
+                // atomicity is not needed here because there won't be any further writes.
+                sum.r += (threadgroup uint &)sharedHistograms[replHistIndex].red[pos];
+                sum.g += (threadgroup uint &)sharedHistograms[replHistIndex].green[pos];
+                sum.b += (threadgroup uint &)sharedHistograms[replHistIndex].blue[pos];
+                
             }
-            atomic_fetch_add_explicit(&Cardinality_red[pos], sum.r, memory_order::memory_order_relaxed);
-            atomic_fetch_add_explicit(&Cardinality_green[pos], sum.g, memory_order::memory_order_relaxed);
-            atomic_fetch_add_explicit(&Cardinality_blue[pos], sum.b, memory_order::memory_order_relaxed);
+            atomic_fetch_add_explicit(&Cardinality.red[pos], sum.r, memory_order::memory_order_relaxed);
+            atomic_fetch_add_explicit(&Cardinality.green[pos], sum.g, memory_order::memory_order_relaxed);
+            atomic_fetch_add_explicit(&Cardinality.blue[pos], sum.b, memory_order::memory_order_relaxed);
         }
     }
 }

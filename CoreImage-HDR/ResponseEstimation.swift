@@ -48,9 +48,8 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
         let MTLExposureTimes = device.makeBuffer(bytes: exposureTimes, length: MemoryLayout<Float>.size * inputImages.count, options: .cpuCacheModeWriteCombined)
         let MTLWeightFunc = device.makeBuffer(bytesNoCopy: &weightFunction, length: weightFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
         let MTLResponseFunc = device.makeBuffer(bytesNoCopy: &cameraResponse, length: cameraResponse.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
-        let MTLCardinalities = [device.makeBuffer(length: 256 * MemoryLayout<uint>.size, options: .storageModePrivate),
-                                device.makeBuffer(length: 256 * MemoryLayout<uint>.size, options: .storageModePrivate),
-                                device.makeBuffer(length: 256 * MemoryLayout<uint>.size, options: .storageModePrivate)]
+        let ColourHistogramSize = MemoryLayout<uint>.size * 256 * 3
+        let MTLCardinalities = device.makeBuffer(length: ColourHistogramSize, options: .storageModeShared)
         var bufferLength = half3_size * (inputImages.first!.height / binningBlock.height) * (inputImages.first!.width / binningBlock.width)
         guard let buffer = device.makeBuffer(length: bufferLength, options: .storageModePrivate) else {fatalError("Could not allocate Memory in Video RAM.")}
         
@@ -78,16 +77,15 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
             var imageSize = uint2(uint(inputImages[0].width), uint(inputImages[0].height))
             let blocksize = CardinalityState.threadExecutionWidth * streamingMultiprocessorsPerBlock
             let remainer = imageSize.x % uint(blocksize)
+            let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
             
-            var replicationFactor_R:uint = max(uint(device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * MemoryLayout<uint>.size * 257 * 3)), 1) // replicate histograms, but not more than simd group length
+            var replicationFactor_R:uint = max(uint(device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize)), 1) // replicate histograms, but not more than simd group length
             cardEncoder.setComputePipelineState(CardinalityState)
             cardEncoder.setTextures(inputImages, range: Range<Int>(0..<inputImages.count))
             cardEncoder.setBytes(&imageSize, length: MemoryLayout<uint2>.size, index: 0)
             cardEncoder.setBytes(&replicationFactor_R, length: MemoryLayout<uint>.size, index: 1)
-            cardEncoder.setBuffers(MTLCardinalities, offsets: [0,0,0], range: Range<Int>(2...4))
-            cardEncoder.setThreadgroupMemoryLength(MemoryLayout<uint>.size * 257 * Int(replicationFactor_R), index: 0)
-            cardEncoder.setThreadgroupMemoryLength(MemoryLayout<uint>.size * 257 * Int(replicationFactor_R), index: 1)
-            cardEncoder.setThreadgroupMemoryLength(MemoryLayout<uint>.size * 257 * Int(replicationFactor_R), index: 2)
+            cardEncoder.setBuffer(MTLCardinalities, offset: 0, index: 2)
+            cardEncoder.setThreadgroupMemoryLength(sharedColourHistogramSize * Int(replicationFactor_R), index: 0)
             cardEncoder.dispatchThreads(MTLSizeMake(inputImages[0].width + (remainer == 0 ? 0 : blocksize - (inputImages[0].width % blocksize)), inputImages[0].height, inputImages.count), threadsPerThreadgroup: MTLSizeMake(blocksize, 1, 1))
             cardEncoder.endEncoding()
             
@@ -124,7 +122,7 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
             BinReductionEncoder.setBuffer(buffer, offset: 0, index: 0)
             BinReductionEncoder.setBytes(&bufferLength, length: MemoryLayout<uint>.size, index: 1)
             BinReductionEncoder.setBuffer(MTLCameraShifts, offset: 0, index: 2)
-            BinReductionEncoder.setBuffers(MTLCardinalities, offsets: [0,0,0], range: Range<Int>(3...5))
+            BinReductionEncoder.setBuffer(MTLCardinalities, offset: 0, index: 3)
             BinReductionEncoder.dispatchThreadgroups(MTLSizeMake(1,1,1), threadsPerThreadgroup: MTLSizeMake(256, 1, 1))
             BinReductionEncoder.endEncoding()
             
