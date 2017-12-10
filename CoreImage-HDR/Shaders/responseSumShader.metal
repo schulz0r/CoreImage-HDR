@@ -14,31 +14,42 @@ using namespace metal;
 #define MAX_IMAGE_COUNT 5
 #define BINS 256
 
+/*  write MeasureToBins
+ This function implements the response estimation function in:
+ 
+ Robertson, Mark A., Sean Borman, and Robert L. Stevenson. "Estimation-theoretic approach to dynamic range enhancement using multiple exposures." Journal of Electronic Imaging 12.2 (2003): 219-228.
+ 
+ Here, only the summands needed for the response function estimation are calculated and written into a buffer.
+ The summation and division by the cardinality are done in "binReduction.metal". Since this algorithm is hardly
+ parallel, following approach has been used to avoid collisions:
+ 
+ Shams, Ramtin, et al. "Parallel computation of mutual information on the GPU with application to real-time registration of 3D medical images." Computer methods and programs in biomedicine 99.2 (2010): 133-146.
+ */
 kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>, MAX_IMAGE_COUNT> inputArray [[texture(0)]],
-                        texture2d<half, access::read> valuesFromLastIter [[texture(MAX_IMAGE_COUNT)]],
                         device half3 * outputbuffer [[buffer(0)]],
                         constant uint & NumberOfinputImages [[buffer(1)]],
                         constant int2 * cameraShifts [[buffer(2)]],
                         constant float * exposureTimes [[buffer(3)]],
                         constant float3 * response [[buffer(4)]],
                         constant float3 * weights [[buffer(5)]],
-                        threadgroup metal::array<SortAndCountElement<half, uchar>, 256> & DataBuffer [[threadgroup(0)]],
+                        threadgroup SortAndCountElement<ushort, half> * DataBuffer [[threadgroup(0)]],
                         uint2 gid [[thread_position_in_grid]],
                         uint tid [[thread_index_in_threadgroup]],
                         uint2 threadgroupSize [[threads_per_threadgroup]],
-                        uint2 threadgroupID [[threadgroup_position_in_grid]]) {
+                        uint2 threadgroupID [[threadgroup_position_in_grid]],
+                        uint2 numberOfThreadgroups [[threadgroups_per_grid]]) {
     
     const uint numberOfThreadsPerThreadgroup = threadgroupSize.x * threadgroupSize.y;
-    const uint threadgroupIndex = threadgroupID.x * threadgroupID.y;
-    half3 buff = 0;
+    const uint threadgroupIndex = threadgroupID.x + numberOfThreadgroups.x * threadgroupID.y;
+    half buff = 0;
     
-    metal::array<uchar3, MAX_IMAGE_COUNT> PixelIndices;
+    metal::array<ushort3, MAX_IMAGE_COUNT> PixelIndices;
     metal::array<half3, MAX_IMAGE_COUNT> linearizedPixels;
     
     // linearize pixel
     for(uint i = 0; i < NumberOfinputImages; i++) {
         const half3 pixel = inputArray[i].read(uint2(int2(gid) + cameraShifts[i])).rgb;
-        PixelIndices[i] = uchar3(pixel * 255);
+        PixelIndices[i] = ushort3(pixel * 255);
         linearizedPixels[i] = half3(response[PixelIndices[i].x].x, response[PixelIndices[i].y].y, response[PixelIndices[i].z].z);
     }
     
@@ -50,10 +61,13 @@ kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>,
         for(uint colorChannelIndex = 0; colorChannelIndex < 3; colorChannelIndex++) {
             DataBuffer[tid].element = PixelIndices[imageIndex][colorChannelIndex];
             DataBuffer[tid].counter = µ[colorChannelIndex];
-            bitonicSortAndCount(tid, numberOfThreadsPerThreadgroup, DataBuffer);
+            bitonicSortAndCount(tid, numberOfThreadsPerThreadgroup, DataBuffer);    // fehler hier
             buff = DataBuffer[tid].counter;
+            
+            if(buff != 0) {
+                outputbuffer[threadgroupIndex * BINS + DataBuffer[tid].element][colorChannelIndex] = buff;
+            }
         }
-        const half3 value = valuesFromLastIter.read(uint2(tid,threadgroupIndex)).rgb;
-        outputbuffer[threadgroupIndex * BINS + tid] = buff + value;
+        
     }
 }

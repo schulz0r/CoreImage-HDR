@@ -31,12 +31,21 @@ fileprivate extension CIImage {
 class CoreImage_HDRTests: XCTestCase {
     
     let device = MTLCreateSystemDefaultDevice()!
+    
     var URLs:[URL] = []
     var Testimages:[CIImage] = []
     var ExposureTimes:[Float] = []
+    var library:MTLLibrary?
     
     override func setUp() {
         super.setUp()
+        
+        do {
+            library = try device.makeDefaultLibrary(bundle: Bundle(for: HDRCameraResponseProcessor.self))
+        } catch let Errors {
+            fatalError(Errors.localizedDescription)
+        }
+    
         let imageNames = ["dark", "medium", "bright"]
         
         /* Why does the Bundle Assets never contain images? Probably a XCode bug.
@@ -110,11 +119,10 @@ class CoreImage_HDRTests: XCTestCase {
             fatalError("Could not make command queue or Buffer.")
         }
         do {
-            let library = try device.makeDefaultLibrary(bundle: Bundle(for: HDRCameraResponseProcessor.self))
             let texture = try MTKTextureLoader(device: device).newTexture(URL: URLs[2], options: nil)
             
             guard
-                let cardinalityFunction = library.makeFunction(name: "getCardinality"),
+                let cardinalityFunction = library!.makeFunction(name: "getCardinality"),
                 let cardEncoder = commandBuffer.makeComputeCommandEncoder()
             else {
                 fatalError()
@@ -147,6 +155,79 @@ class CoreImage_HDRTests: XCTestCase {
         } catch let Errors {
             fatalError("Could not run shader: " + Errors.localizedDescription)
         }
+    }
+    
+    func testBinningShader(){
+        guard let commandQ = device.makeCommandQueue() else {fatalError()}
+        
+        var TextureFill = [Float](repeating: Float(1.0), count: 256)
+        
+        // allocate half size buffer
+        guard let imageBuffer = device.makeBuffer(length: 256 * MemoryLayout<Float>.size / 2, options: .storageModeManaged) else {fatalError()}
+        
+        let testTextureDescriptor = MTLTextureDescriptor()
+        testTextureDescriptor.height = 16
+        testTextureDescriptor.width = 16
+        testTextureDescriptor.depth = 1
+        testTextureDescriptor.pixelFormat = .r16Float
+        testTextureDescriptor.textureType = .type2D
+        guard let testTexture = device.makeTexture(descriptor: testTextureDescriptor) else {fatalError()}
+        
+        let binningBlock = MTLSizeMake(16, 16, 1)
+        let bufferLength = MemoryLayout<Float>.size/2 * (testTexture.height / binningBlock.height) * (testTexture.width / binningBlock.width)
+        
+        let imageDimensions = MTLSizeMake(testTexture.width, testTexture.height, 1)
+        
+        // collect image in bins
+        guard
+            let biningFunc = library!.makeFunction(name: "writeMeasureToBins"),
+            let commandBuffer = commandQ.makeCommandBuffer(),
+            let blitencoder = commandBuffer.makeBlitCommandEncoder(),
+            let buffer = device.makeBuffer(length: bufferLength, options: .storageModeManaged)
+        else {
+                fatalError("Failed to create command encoder.")
+        }
+        
+        blitencoder.copy(from: imageBuffer,
+                         sourceOffset: 0,
+                         sourceBytesPerRow: imageBuffer.length,
+                         sourceBytesPerImage: imageBuffer.length,
+                         sourceSize: MTLSizeMake(16,16,1),
+                         to: testTexture,
+                         destinationSlice: 0,
+                         destinationLevel: 1,
+                         destinationOrigin: MTLOriginMake(0, 0, 0))
+        blitencoder.endEncoding()
+        
+        guard let BinEncoder = commandBuffer.makeComputeCommandEncoder() else {fatalError()}
+        
+        var imageCount = 1
+        var cameraShifts = int2(0,0)
+        var exposureTime:Float = 1
+        
+        do {
+            let biningState = try device.makeComputePipelineState(function: biningFunc)
+            BinEncoder.setComputePipelineState(biningState)
+            BinEncoder.setTexture(testTexture, index: 0)
+            BinEncoder.setBuffer(buffer, offset: 0, index: 0)
+            BinEncoder.setBytes(&imageCount, length: MemoryLayout<uint>.size, index: 1)
+            BinEncoder.setBytes(&cameraShifts, length: MemoryLayout<int2>.size, index: 2)
+            BinEncoder.setBytes(&exposureTime, length: MemoryLayout<Float>.size, index: 3)
+            BinEncoder.setBuffers([imageBuffer, imageBuffer], offsets: [0,0], range: Range<Int>(4...5)) // only write ones here
+            BinEncoder.setThreadgroupMemoryLength((MemoryLayout<Float>.size/2 + MemoryLayout<ushort>.size) * binningBlock.width * binningBlock.height, index: 0)    // threadgroup memory for each thread
+            BinEncoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: binningBlock)
+            BinEncoder.endEncoding()
+            
+        } catch let Errors {
+            fatalError(Errors.localizedDescription)
+        }
+        
+        commandBuffer.commit()
+        commandBuffer.waitUntilCompleted()
+        
+        memcpy(&TextureFill, buffer.contents(), buffer.length)
+        
+        XCTAssert(TextureFill.last! == 256.0)
     }
     
     func testPerformanceExample() {

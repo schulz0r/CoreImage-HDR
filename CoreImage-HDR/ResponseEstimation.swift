@@ -51,7 +51,7 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
         let ColourHistogramSize = MemoryLayout<uint>.size * 256 * 3
         let MTLCardinalities = device.makeBuffer(length: ColourHistogramSize, options: .storageModeShared)
         var bufferLength = half3_size * (inputImages.first!.height / binningBlock.height) * (inputImages.first!.width / binningBlock.width)
-        guard let buffer = device.makeBuffer(length: bufferLength, options: .storageModePrivate) else {fatalError("Could not allocate Memory in Video RAM.")}
+        
         
         
         
@@ -93,7 +93,8 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
             
             // collect image in bins
             guard
-                let BinEncoder = commandBuffer.makeComputeCommandEncoder()
+                let BinEncoder = commandBuffer.makeComputeCommandEncoder(),
+                let buffer = device.makeBuffer(length: bufferLength, options: .storageModePrivate)
                 else {
                     fatalError("Failed to create command encoder.")
             }
