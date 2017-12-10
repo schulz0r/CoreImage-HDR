@@ -41,11 +41,11 @@ kernel void getCardinality(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> 
     
     // Allocated threadgroup memory initially contains random values.
     // You MUST set it to zero first.
-    for(uint sharedHistogramIndex = 0; sharedHistogramIndex < ReplicationFactor; sharedHistogramIndex++){
+    for(uint replHistIndex = 0; replHistIndex < ReplicationFactor; replHistIndex++){
         for(uint i = threadID; i < (BIN_COUNT + 1); i += blockSize.x) {
-            (threadgroup uint &)sharedHistograms[sharedHistogramIndex].red[i] = 0;
-            (threadgroup uint &)sharedHistograms[sharedHistogramIndex].blue[i] = 0;
-            (threadgroup uint &)sharedHistograms[sharedHistogramIndex].green[i] = 0;
+            (threadgroup uint &)sharedHistograms[replHistIndex].red[i] = 0;
+            (threadgroup uint &)sharedHistograms[replHistIndex].blue[i] = 0;
+            (threadgroup uint &)sharedHistograms[replHistIndex].green[i] = 0;
         }
     }
     threadgroup_barrier(mem_flags::mem_threadgroup);
