@@ -159,22 +159,25 @@ class CoreImage_HDRTests: XCTestCase {
     
     func testBinningShader(){
         guard let commandQ = device.makeCommandQueue() else {fatalError()}
-        
-        var TextureFill = [Float](repeating: Float(1.0), count: 256)
+        var TextureFill = [float3](repeating: float3(1.0), count: 256)
+        var FunctionDummy = [float3](repeating: float3(1.0), count: 256)
         
         // allocate half size buffer
-        guard let imageBuffer = device.makeBuffer(length: 256 * MemoryLayout<Float>.size / 2, options: .storageModeManaged) else {fatalError()}
+        guard
+            let imageBuffer = device.makeBuffer(bytes: &TextureFill, length: 256 * MemoryLayout<float3>.size, options: .storageModeManaged),
+            let MTLFunctionDummyBuffer = device.makeBuffer(bytes: &FunctionDummy, length: 256 * MemoryLayout<float3>.size, options: .storageModeManaged)
+        else {fatalError()}
         
         let testTextureDescriptor = MTLTextureDescriptor()
+        testTextureDescriptor.textureType = .type2D
         testTextureDescriptor.height = 16
         testTextureDescriptor.width = 16
         testTextureDescriptor.depth = 1
-        testTextureDescriptor.pixelFormat = .r16Float
-        testTextureDescriptor.textureType = .type2D
+        testTextureDescriptor.pixelFormat = .rgba32Float
         guard let testTexture = device.makeTexture(descriptor: testTextureDescriptor) else {fatalError()}
         
         let binningBlock = MTLSizeMake(16, 16, 1)
-        let bufferLength = MemoryLayout<Float>.size/2 * (testTexture.height / binningBlock.height) * (testTexture.width / binningBlock.width)
+        let bufferLength = MemoryLayout<float3>.size * 256
         
         let imageDimensions = MTLSizeMake(testTexture.width, testTexture.height, 1)
         
@@ -190,18 +193,18 @@ class CoreImage_HDRTests: XCTestCase {
         
         blitencoder.copy(from: imageBuffer,
                          sourceOffset: 0,
-                         sourceBytesPerRow: imageBuffer.length,
+                         sourceBytesPerRow: imageBuffer.length / imageDimensions.width,
                          sourceBytesPerImage: imageBuffer.length,
-                         sourceSize: MTLSizeMake(16,16,1),
+                         sourceSize: imageDimensions,
                          to: testTexture,
                          destinationSlice: 0,
-                         destinationLevel: 1,
+                         destinationLevel: 0,
                          destinationOrigin: MTLOriginMake(0, 0, 0))
         blitencoder.endEncoding()
         
         guard let BinEncoder = commandBuffer.makeComputeCommandEncoder() else {fatalError()}
         
-        var imageCount = 1
+        var imageCount:uint = 1
         var cameraShifts = int2(0,0)
         var exposureTime:Float = 1
         
@@ -213,21 +216,22 @@ class CoreImage_HDRTests: XCTestCase {
             BinEncoder.setBytes(&imageCount, length: MemoryLayout<uint>.size, index: 1)
             BinEncoder.setBytes(&cameraShifts, length: MemoryLayout<int2>.size, index: 2)
             BinEncoder.setBytes(&exposureTime, length: MemoryLayout<Float>.size, index: 3)
-            BinEncoder.setBuffers([imageBuffer, imageBuffer], offsets: [0,0], range: Range<Int>(4...5)) // only write ones here
+            BinEncoder.setBuffers([MTLFunctionDummyBuffer, MTLFunctionDummyBuffer], offsets: [0,0], range: Range<Int>(4...5)) // only write ones here
             BinEncoder.setThreadgroupMemoryLength((MemoryLayout<Float>.size/2 + MemoryLayout<ushort>.size) * binningBlock.width * binningBlock.height, index: 0)    // threadgroup memory for each thread
             BinEncoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: binningBlock)
             BinEncoder.endEncoding()
-            
         } catch let Errors {
             fatalError(Errors.localizedDescription)
         }
-        
+        /**/
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
         
-        memcpy(&TextureFill, buffer.contents(), buffer.length)
+        memcpy(&FunctionDummy, buffer.contents(), buffer.length)
         
-        XCTAssert(TextureFill.last! == 256.0)
+        let redChannel = FunctionDummy.map{$0.x}
+        print(redChannel)
+        XCTAssert(TextureFill.last!.x == 256.0)
     }
     
     func testPerformanceExample() {

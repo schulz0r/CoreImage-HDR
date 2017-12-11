@@ -50,10 +50,7 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
         let MTLResponseFunc = device.makeBuffer(bytesNoCopy: &cameraResponse, length: cameraResponse.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
         let ColourHistogramSize = MemoryLayout<uint>.size * 256 * 3
         let MTLCardinalities = device.makeBuffer(length: ColourHistogramSize, options: .storageModeShared)
-        var bufferLength = half3_size * (inputImages.first!.height / binningBlock.height) * (inputImages.first!.width / binningBlock.width)
-        
-        
-        
+        var bufferLength = half3_size * (inputImages.first!.height / binningBlock.height) * (inputImages.first!.width / binningBlock.width) * 256
         
         
         do{
