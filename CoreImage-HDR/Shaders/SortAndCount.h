@@ -13,7 +13,7 @@
 using namespace metal;
 
 template<typename T, typename T2>
-struct SortAndCountElement {
+struct SortAndCountElement final{
     T element = 0;
     T2 counter = 0;
 };
@@ -37,23 +37,20 @@ void bitonicSortAndCount(const uint tid, const uint threads, threadgroup SortAnd
             uint i1 = ((tid >> log2j) << (log2j + 1)) + (tid & (j - 1));
             uint i2 = i1 + j;
             
-            switch(b_id & 1) {  // is odd?
-            case 0: // if even
+            if((b_id & 1) == 0) {  // is odd?
                 if(data[i1].element > data[i2].element) {
                     swap(data[i1], data[i2]);
                 } else if (data[i1].element == data[i2].element) {
-                    data[i2].counter = data[i1].counter + data[i2].counter;
+                    data[i2].counter += data[i1].counter;
                     data[i1].counter = 0;
                 }
-                break;
-            default:    // if odd
+            } else { // if odd
                 if(data[i1].element < data[i2].element) {
                     swap(data[i1], data[i2]);
                 } else if (data[i1].element == data[i2].element) {
-                    data[i1].counter = data[i1].counter + data[i2].counter;
+                    data[i1].counter += data[i2].counter;
                     data[i2].counter = 0;
                 }
-                break;
             }
             
             threadgroup_barrier(mem_flags::mem_threadgroup);
