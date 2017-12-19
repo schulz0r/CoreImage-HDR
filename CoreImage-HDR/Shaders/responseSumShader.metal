@@ -32,14 +32,13 @@ kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>,
                                constant float * exposureTimes [[buffer(3)]],
                                constant float3 * cameraResponse [[buffer(4)]],
                                constant float3 * weights [[buffer(5)]],
-                               threadgroup void * DataBuffer [[threadgroup(0)]], // metal bug when replacing void with SortAndCountElement<ushort, half>
+                               threadgroup SortAndCountElement<ushort, half> * ElementsToSort [[threadgroup(0)]],
                                uint2 gid [[thread_position_in_grid]],
                                uint tid [[thread_index_in_threadgroup]],
                                uint2 threadgroupSize [[threads_per_threadgroup]],
                                uint2 threadgroupID [[threadgroup_position_in_grid]],
                                uint2 numberOfThreadgroups [[threadgroups_per_grid]]) {
     
-    threadgroup SortAndCountElement<ushort, half> * ElementsToSort = (threadgroup SortAndCountElement<ushort, half> *) DataBuffer;
     const uint numberOfThreadsPerThreadgroup = threadgroupSize.x * threadgroupSize.y;
     const uint threadgroupIndex = threadgroupID.x + numberOfThreadgroups.x * threadgroupID.y;
     
