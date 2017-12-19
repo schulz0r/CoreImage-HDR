@@ -229,9 +229,48 @@ class CoreImage_HDRTests: XCTestCase {
         
         memcpy(&FunctionDummy, buffer.contents(), buffer.length)
         
-        let redChannel = FunctionDummy.map{$0.x}
-        print(redChannel)
-        XCTAssert(TextureFill.last!.x == 256.0)
+        let SummedElements = FunctionDummy.map{$0.x}.filter{$0 != 0}
+        
+        XCTAssert(SummedElements[0] == 256.0)
+    }
+    
+    func testSortAlgorithm() {
+        guard
+            let commandQ = device.makeCommandQueue(),
+            let commandBuffer = commandQ.makeCommandBuffer()
+            else {fatalError()}
+        
+        let threadgroupSize = MTLSizeMake(256, 1, 1)
+        
+        do {
+            let library = try device.makeDefaultLibrary(bundle: Bundle(for: CoreImage_HDRTests.self))
+            
+            guard
+                let TestBuffer = device.makeBuffer(length: MemoryLayout<float2>.size * threadgroupSize.width, options: .storageModeShared),
+                let testShader = library.makeFunction(name: "testSortAlgorithm"),
+                let encoder = commandBuffer.makeComputeCommandEncoder()
+            else { fatalError() }
+            
+            let testState = try device.makeComputePipelineState(function: testShader)
+            
+            encoder.setComputePipelineState(testState)
+            encoder.setBuffer(TestBuffer, offset: 0, index: 0)
+            encoder.setThreadgroupMemoryLength(4 * threadgroupSize.width, index: 0)
+            encoder.dispatchThreads(threadgroupSize, threadsPerThreadgroup: threadgroupSize)
+            encoder.endEncoding()
+            
+            commandBuffer.commit()
+            commandBuffer.waitUntilCompleted()
+            
+            var data = [float2](repeating: float2(0), count: threadgroupSize.width)
+            memcpy(&data, TestBuffer.contents(), TestBuffer.length)
+            
+            let counts = data.map{$0.y}.filter{$0 != 0}
+            
+            XCTAssert(counts.count == 4)
+        } catch let Errors {
+            fatalError(Errors.localizedDescription)
+        }
     }
     
     func testPerformanceExample() {
