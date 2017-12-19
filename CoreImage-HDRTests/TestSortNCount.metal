@@ -21,10 +21,10 @@ kernel void testSortAlgorithm(device float2 * output [[buffer(0)]],
                               uint threadCount [[threads_per_threadgroup]],
                               uint simdGroup [[simdgroup_index_in_threadgroup]]){
     
-    Buffer[threadID].element = threadID % 4;
+    Buffer[threadID].element = threadID % 4;    // arbitrary number for element
     Buffer[threadID].counter = 1.0;
     
-    bitonicSortAndCount(threadID, threadCount, Buffer);
+    bitonicSortAndCount(threadID, threadCount / 2, Buffer);
     
     output[threadID].x = Buffer[threadID].element;
     output[threadID].y = Buffer[threadID].counter;
