@@ -14,7 +14,7 @@ using namespace metal;
 
 kernel void reduceBins(device half3 * buffer [[buffer(0)]],
                        constant uint & bufferSize [[buffer(1)]],
-                       device half3 * cameraResponse [[buffer(2)]],
+                       device float3 * cameraResponse [[buffer(2)]],
                        constant colourHistogram<BIN_COUNT> & Cardinality [[buffer(3)]],
                        uint threadID [[thread_index_in_threadgroup]],
                        uint warpSize [[threads_per_threadgroup]]) {
@@ -26,6 +26,6 @@ kernel void reduceBins(device half3 * buffer [[buffer(0)]],
         localSum += buffer[globalPosition];
     }
     
-    cameraResponse[threadID] = localSum / half3((constant uint &)Cardinality.red[threadID], (constant uint &)Cardinality.green[threadID], (constant uint &)Cardinality.blue[threadID]) ;
+    cameraResponse[threadID] = float3(localSum / half3((constant uint &)Cardinality.red[threadID], (constant uint &)Cardinality.green[threadID], (constant uint &)Cardinality.blue[threadID]));
 }
 

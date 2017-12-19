@@ -30,7 +30,7 @@ kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>,
                                constant uint & NumberOfinputImages [[buffer(1)]],
                                constant int2 * cameraShifts [[buffer(2)]],
                                constant float * exposureTimes [[buffer(3)]],
-                               constant float3 * response [[buffer(4)]],
+                               constant float3 * cameraResponse [[buffer(4)]],
                                constant float3 * weights [[buffer(5)]],
                                threadgroup void * DataBuffer [[threadgroup(0)]], // metal bug when replacing void with SortAndCountElement<ushort, half>
                                uint2 gid [[thread_position_in_grid]],
@@ -51,7 +51,7 @@ kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>,
     for(uint i = 0; i < NumberOfinputImages; i++) {
         const half3 pixel = inputArray[i].read(uint2(int2(gid) + cameraShifts[i])).rgb;
         PixelIndices[i] = ushort3(pixel * 255);
-        linearizedPixels[i] = half3(response[PixelIndices[i].x].x, response[PixelIndices[i].y].y, response[PixelIndices[i].z].z);
+        linearizedPixels[i] = half3(cameraResponse[PixelIndices[i].x].x, cameraResponse[PixelIndices[i].y].y, cameraResponse[PixelIndices[i].z].z);
     }
     
     // calculate HDR Value
