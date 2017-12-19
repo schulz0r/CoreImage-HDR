@@ -8,8 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		171D8F4D1FC7B41900B608CF /* ResponseEstimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171D8F4C1FC7B41900B608CF /* ResponseEstimation.swift */; };
+		17215BFF1FDF43B700912238 /* TestSortNCount.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17215BFA1FDF321800912238 /* TestSortNCount.metal */; };
+		17215C011FDF444800912238 /* SortAndCount.h in Headers */ = {isa = PBXBuildFile; fileRef = 177753051FD1C88B00C427E8 /* SortAndCount.h */; };
 		177753041FD1C81200C427E8 /* responseSumShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 177753031FD1C81200C427E8 /* responseSumShader.metal */; };
-		1777530F1FD3430E00C427E8 /* SortAndCount.h in Headers */ = {isa = PBXBuildFile; fileRef = 177753051FD1C88B00C427E8 /* SortAndCount.h */; };
 		177753101FD3431300C427E8 /* calculateHDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17ACF5371FBBC57300BFBF41 /* calculateHDR.h */; };
 		177753141FD382FC00C427E8 /* getCardinality.metal in Sources */ = {isa = PBXBuildFile; fileRef = 177753131FD382FC00C427E8 /* getCardinality.metal */; };
 		177753171FD4A6AA00C427E8 /* binReduction.metal in Sources */ = {isa = PBXBuildFile; fileRef = 177753161FD4A6AA00C427E8 /* binReduction.metal */; };
@@ -33,9 +34,11 @@
 
 /* Begin PBXFileReference section */
 		171D8F4C1FC7B41900B608CF /* ResponseEstimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseEstimation.swift; sourceTree = "<group>"; };
+		17215BFA1FDF321800912238 /* TestSortNCount.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = TestSortNCount.metal; sourceTree = "<group>"; };
+		17215C031FDF460400912238 /* SortAndCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
 		172259A31FDDAA18009B0925 /* colourHistogram.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = colourHistogram.h; sourceTree = "<group>"; };
 		177753031FD1C81200C427E8 /* responseSumShader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = responseSumShader.metal; sourceTree = "<group>"; };
-		177753051FD1C88B00C427E8 /* SortAndCount.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
+		177753051FD1C88B00C427E8 /* SortAndCount.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = SortAndCount.h; sourceTree = "<group>"; };
 		177753131FD382FC00C427E8 /* getCardinality.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = getCardinality.metal; sourceTree = "<group>"; };
 		177753161FD4A6AA00C427E8 /* binReduction.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = binReduction.metal; sourceTree = "<group>"; };
 		17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreImage_HDR.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -70,6 +73,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		17215BFC1FDF321F00912238 /* ShaderTests */ = {
+			isa = PBXGroup;
+			children = (
+				17215C031FDF460400912238 /* SortAndCount.h */,
+				17215BFA1FDF321800912238 /* TestSortNCount.metal */,
+			);
+			name = ShaderTests;
+			sourceTree = "<group>";
+		};
 		175005351FBA608D005F6856 /* Framework */ = {
 			isa = PBXGroup;
 			children = (
@@ -94,8 +106,8 @@
 			children = (
 				17ACF5371FBBC57300BFBF41 /* calculateHDR.h */,
 				17832D121FB51A0C00E19938 /* movingAverage.h */,
-				177753051FD1C88B00C427E8 /* SortAndCount.h */,
 				172259A31FDDAA18009B0925 /* colourHistogram.h */,
+				177753051FD1C88B00C427E8 /* SortAndCount.h */,
 			);
 			name = Headers;
 			sourceTree = "<group>";
@@ -145,6 +157,7 @@
 			children = (
 				17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */,
 				17832D031FB49C1500E19938 /* Info.plist */,
+				17215BFC1FDF321F00912238 /* ShaderTests */,
 			);
 			path = "CoreImage-HDRTests";
 			sourceTree = "<group>";
@@ -156,8 +169,8 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17215C011FDF444800912238 /* SortAndCount.h in Headers */,
 				177753101FD3431300C427E8 /* calculateHDR.h in Headers */,
-				1777530F1FD3430E00C427E8 /* SortAndCount.h in Headers */,
 				17832D041FB49C1500E19938 /* CoreImage_HDR.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -277,6 +290,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				17832D021FB49C1500E19938 /* CoreImage_HDRTests.swift in Sources */,
+				17215BFF1FDF43B700912238 /* TestSortNCount.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

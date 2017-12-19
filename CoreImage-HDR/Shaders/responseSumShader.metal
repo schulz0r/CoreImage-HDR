@@ -26,22 +26,23 @@ using namespace metal;
  Shams, Ramtin, et al. "Parallel computation of mutual information on the GPU with application to real-time registration of 3D medical images." Computer methods and programs in biomedicine 99.2 (2010): 133-146.
  */
 kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>, MAX_IMAGE_COUNT> inputArray [[texture(0)]],
-                        device half3 * outputbuffer [[buffer(0)]],
-                        constant uint & NumberOfinputImages [[buffer(1)]],
-                        constant int2 * cameraShifts [[buffer(2)]],
-                        constant float * exposureTimes [[buffer(3)]],
-                        constant float3 * response [[buffer(4)]],
-                        constant float3 * weights [[buffer(5)]],
-                        threadgroup SortAndCountElement<ushort, half> * DataBuffer [[threadgroup(0)]],
-                        uint2 gid [[thread_position_in_grid]],
-                        uint tid [[thread_index_in_threadgroup]],
-                        uint2 threadgroupSize [[threads_per_threadgroup]],
-                        uint2 threadgroupID [[threadgroup_position_in_grid]],
-                        uint2 numberOfThreadgroups [[threadgroups_per_grid]]) {
+                               device float3 * outputbuffer [[buffer(0)]],
+                               constant uint & NumberOfinputImages [[buffer(1)]],
+                               constant int2 * cameraShifts [[buffer(2)]],
+                               constant float * exposureTimes [[buffer(3)]],
+                               constant float3 * response [[buffer(4)]],
+                               constant float3 * weights [[buffer(5)]],
+                               threadgroup void * DataBuffer [[threadgroup(0)]], // metal bug when replacing void with SortAndCountElement<ushort, half>
+                               uint2 gid [[thread_position_in_grid]],
+                               uint tid [[thread_index_in_threadgroup]],
+                               uint2 threadgroupSize [[threads_per_threadgroup]],
+                               uint2 threadgroupID [[threadgroup_position_in_grid]],
+                               uint2 numberOfThreadgroups [[threadgroups_per_grid]]) {
     
+    threadgroup SortAndCountElement<ushort, half> * ElementsToSort = (threadgroup SortAndCountElement<ushort, half> *) DataBuffer;
     const uint numberOfThreadsPerThreadgroup = threadgroupSize.x * threadgroupSize.y;
     const uint threadgroupIndex = threadgroupID.x + numberOfThreadgroups.x * threadgroupID.y;
-    half buff = 0;
+    
     
     metal::array<ushort3, MAX_IMAGE_COUNT> PixelIndices;
     metal::array<half3, MAX_IMAGE_COUNT> linearizedPixels;
@@ -59,15 +60,14 @@ kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>,
     for(uint imageIndex = 0; imageIndex < NumberOfinputImages; imageIndex++) {
         const half3 µ = HDRPixel * exposureTimes[imageIndex];   // X * t_i is the mean value according to the model
         for(uint colorChannelIndex = 0; colorChannelIndex < 3; colorChannelIndex++) {
-            DataBuffer[tid].element = PixelIndices[imageIndex][colorChannelIndex];
-            DataBuffer[tid].counter = µ[colorChannelIndex];
-            bitonicSortAndCount(tid, numberOfThreadsPerThreadgroup, DataBuffer);    // fehler hier
-            buff = DataBuffer[tid].counter;
+            ElementsToSort[tid].element = PixelIndices[imageIndex][colorChannelIndex];
+            ElementsToSort[tid].counter = µ[colorChannelIndex];
             
-            if(buff != 0) {
-                outputbuffer[threadgroupIndex * BINS + DataBuffer[tid].element][colorChannelIndex] = buff;
+            bitonicSortAndCount<ushort, half>(tid, numberOfThreadsPerThreadgroup / 2, ElementsToSort);
+            
+            if(ElementsToSort[tid].counter > 0) {
+                outputbuffer[threadgroupIndex * BINS + ElementsToSort[tid].element][colorChannelIndex] = ElementsToSort[tid].counter;
             }
         }
-        
     }
 }

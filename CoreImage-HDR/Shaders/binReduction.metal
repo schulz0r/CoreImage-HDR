@@ -8,14 +8,14 @@
 
 #include <metal_stdlib>
 using namespace metal;
+#include "colourHistogram.h"
 
+#define BIN_COUNT 256
 
 kernel void reduceBins(device half3 * buffer [[buffer(0)]],
                        constant uint & bufferSize [[buffer(1)]],
                        device half3 * cameraResponse [[buffer(2)]],
-                       constant uint * cardinality_red [[buffer(3)]],
-                       constant uint * cardinality_green [[buffer(4)]],
-                       constant uint * cardinality_blue [[buffer(5)]],
+                       constant colourHistogram<BIN_COUNT> & Cardinality [[buffer(3)]],
                        uint threadID [[thread_index_in_threadgroup]],
                        uint warpSize [[threads_per_threadgroup]]) {
     
@@ -26,6 +26,6 @@ kernel void reduceBins(device half3 * buffer [[buffer(0)]],
         localSum += buffer[globalPosition];
     }
     
-    cameraResponse[threadID] = localSum / half3(cardinality_red[threadID], cardinality_green[threadID], cardinality_blue[threadID]);
+    cameraResponse[threadID] = localSum / half3((constant uint &)Cardinality.red[threadID], (constant uint &)Cardinality.green[threadID], (constant uint &)Cardinality.blue[threadID]) ;
 }
 
