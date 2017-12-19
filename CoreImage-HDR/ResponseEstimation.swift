@@ -11,6 +11,8 @@ import MetalKit
 
 final class HDRCameraResponseProcessor: CIImageProcessorKernel {
     
+    //override var outputIsOpaque:Bool = true
+    override class var outputIsOpaque:Bool {return true}
     static let device = MTLCreateSystemDefaultDevice()
     
     override final class func process(with inputs: [CIImageProcessorInput]?, arguments: [String : Any]?, output: CIImageProcessorOutput) throws {
@@ -119,7 +121,7 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
             BinReductionEncoder.setComputePipelineState(binredState)
             BinReductionEncoder.setBuffer(buffer, offset: 0, index: 0)
             BinReductionEncoder.setBytes(&bufferLength, length: MemoryLayout<uint>.size, index: 1)
-            BinReductionEncoder.setBuffer(MTLCameraShifts, offset: 0, index: 2)
+            BinReductionEncoder.setBuffer(MTLResponseFunc, offset: 0, index: 2)
             BinReductionEncoder.setBuffer(MTLCardinalities, offset: 0, index: 3)
             BinReductionEncoder.dispatchThreadgroups(MTLSizeMake(1,1,1), threadsPerThreadgroup: MTLSizeMake(256, 1, 1))
             BinReductionEncoder.endEncoding()
