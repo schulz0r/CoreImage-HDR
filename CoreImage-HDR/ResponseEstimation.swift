@@ -54,7 +54,7 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
         let MTLResponseFunc = device.makeBuffer(bytesNoCopy: &cameraResponse, length: cameraResponse.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
         let ColourHistogramSize = MemoryLayout<uint>.size * 256 * 3
         let MTLCardinalities = device.makeBuffer(length: ColourHistogramSize, options: .storageModeShared)
-        var bufferLength = half3_size * totalBlocksCount * 256
+        var bufferLength:uint = uint(half3_size * totalBlocksCount * 256)
         
         
         do{
@@ -91,47 +91,48 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
             cardEncoder.endEncoding()
             
             // repeat training x times
-            
-            // collect image in bins
-            guard
-                let BinEncoder = commandBuffer.makeComputeCommandEncoder(),
-                let buffer = device.makeBuffer(length: bufferLength, options: .storageModePrivate)
-                else {
-                    fatalError("Failed to create command encoder.")
+            for _ in 0...0 {
+                // collect image in bins
+                guard
+                    let BinEncoder = commandBuffer.makeComputeCommandEncoder(),
+                    let buffer = device.makeBuffer(length: Int(bufferLength), options: .storageModePrivate)
+                    else {
+                        fatalError("Failed to create command encoder.")
+                }
+                
+                let biningState = try device.makeComputePipelineState(function: biningFunc)
+                BinEncoder.setComputePipelineState(biningState)
+                BinEncoder.setTextures(inputImages, range: Range<Int>(0..<inputImages.count))
+                BinEncoder.setBuffer(buffer, offset: 0, index: 0)
+                BinEncoder.setBuffer(MTLNumberOfImages, offset: 0, index: 1)
+                BinEncoder.setBuffer(MTLCameraShifts, offset: 0, index: 2)
+                BinEncoder.setBuffer(MTLExposureTimes, offset: 0, index: 3)
+                BinEncoder.setBuffers([MTLResponseFunc, MTLWeightFunc], offsets: [0,0], range: Range<Int>(4...5))
+                BinEncoder.setThreadgroupMemoryLength((MemoryLayout<Float>.size/2 + MemoryLayout<ushort>.size) * binningBlock.width * binningBlock.height, index: 0)    // threadgroup memory for each thread
+                BinEncoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: binningBlock)
+                BinEncoder.endEncoding()
+                
+                // reduce bins and calculate response
+                guard
+                    let BinReductionEncoder = commandBuffer.makeComputeCommandEncoder()
+                    else {
+                        fatalError("Failed to create command encoder.")
+                }
+                
+                let binredState = try device.makeComputePipelineState(function: binReductionState)
+                BinReductionEncoder.setComputePipelineState(binredState)
+                BinReductionEncoder.setBuffer(buffer, offset: 0, index: 0)
+                BinReductionEncoder.setBytes(&bufferLength, length: MemoryLayout<uint>.size, index: 1)
+                BinReductionEncoder.setBuffer(MTLResponseFunc, offset: 0, index: 2)
+                BinReductionEncoder.setBuffer(MTLCardinalities, offset: 0, index: 3)
+                BinReductionEncoder.dispatchThreadgroups(MTLSizeMake(1,1,1), threadsPerThreadgroup: MTLSizeMake(256, 1, 1))
+                BinReductionEncoder.endEncoding()
+                
+                // flush buffer for next iteration
+                guard let flushBlitEncoder = commandBuffer.makeBlitCommandEncoder() else {fatalError()}
+                flushBlitEncoder.fill(buffer: buffer, range: Range(0...buffer.length), value: 0)
+                flushBlitEncoder.endEncoding()
             }
-            
-            let biningState = try device.makeComputePipelineState(function: biningFunc)
-            BinEncoder.setComputePipelineState(biningState)
-            BinEncoder.setTextures(inputImages, range: Range<Int>(0..<inputImages.count))
-            BinEncoder.setBuffer(buffer, offset: 0, index: 0)
-            BinEncoder.setBuffer(MTLNumberOfImages, offset: 0, index: 1)
-            BinEncoder.setBuffer(MTLCameraShifts, offset: 0, index: 2)
-            BinEncoder.setBuffer(MTLExposureTimes, offset: 0, index: 3)
-            BinEncoder.setBuffers([MTLResponseFunc, MTLWeightFunc], offsets: [0,0], range: Range<Int>(4...5))
-            BinEncoder.setThreadgroupMemoryLength((MemoryLayout<Float>.size/2 + MemoryLayout<ushort>.size) * binningBlock.width * binningBlock.height, index: 0)    // threadgroup memory for each thread
-            BinEncoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: binningBlock)
-            BinEncoder.endEncoding()
-            
-            // reduce bins and calculate response
-            guard
-                let BinReductionEncoder = commandBuffer.makeComputeCommandEncoder()
-                else {
-                    fatalError("Failed to create command encoder.")
-            }
-            
-            let binredState = try device.makeComputePipelineState(function: binReductionState)
-            BinReductionEncoder.setComputePipelineState(binredState)
-            BinReductionEncoder.setBuffer(buffer, offset: 0, index: 0)
-            BinReductionEncoder.setBytes(&bufferLength, length: MemoryLayout<uint>.size, index: 1)
-            BinReductionEncoder.setBuffer(MTLResponseFunc, offset: 0, index: 2)
-            BinReductionEncoder.setBuffer(MTLCardinalities, offset: 0, index: 3)
-            BinReductionEncoder.dispatchThreadgroups(MTLSizeMake(1,1,1), threadsPerThreadgroup: MTLSizeMake(256, 1, 1))
-            BinReductionEncoder.endEncoding()
-            
-            // flush buffer for next iteration
-            guard let flushBlitEncoder = commandBuffer.makeBlitCommandEncoder() else {fatalError()}
-            flushBlitEncoder.fill(buffer: buffer, range: Range(0...buffer.length), value: 0)
-            flushBlitEncoder.endEncoding()
             
             // after training, make HDR
             guard
