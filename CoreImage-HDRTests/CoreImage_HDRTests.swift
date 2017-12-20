@@ -279,8 +279,8 @@ class CoreImage_HDRTests: XCTestCase {
             let commandBuffer = commandQ.makeCommandBuffer(),
             let reduceShader = lib.makeFunction(name: "reduceBins") else {fatalError()}
         
-        var lengthOfBuffer = 512;
-        var buffer = [float3](repeating: float3(1.0), count: lengthOfBuffer)
+        var lengthOfBuffer:uint = 512;
+        var buffer = [float3](repeating: float3(1.0), count: Int(lengthOfBuffer))
         
         var cardinalities = [uint](repeating: 0, count: 256 * 3)
         
@@ -307,6 +307,9 @@ class CoreImage_HDRTests: XCTestCase {
         } catch let ErrorMessage {
             XCTFail(ErrorMessage.localizedDescription)
         }
+        
+        commandBuffer.commit()
+        commandBuffer.waitUntilCompleted()
         
         var result = [float3](repeating: float3(0), count: 256)
         memcpy(&result, MTLResponseFunc?.contents(), 256 * MemoryLayout<float3>.size)
