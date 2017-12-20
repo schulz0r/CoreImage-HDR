@@ -41,11 +41,11 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
         let totalBlocksCount = (inputImages.first!.height / binningBlock.height) * (inputImages.first!.width / binningBlock.width)
         
         let imageDimensions = MTLSizeMake(inputImages[0].width, inputImages[0].height, 1)
-        var cameraResponse = Array<Float>(stride(from: 0.0, to: 2.0, by: 2.0/256.0)).map{float3($0)}
+        var cameraResponse:[float3] = Array<Float>(stride(from: 0.0, to: 2.0, by: 2.0/256.0)).map{float3($0)}
+        var weightFunction:[float3] = (0...255).map{ float3( exp(-TrainingWeight * pow( (Float($0)-127.5)/127.5, 2)) ) }
         
         var numberOfInputImages = uint(inputImages.count)
         var cameraShifts = arguments?["CameraShifts"] ?? [int2](repeating: int2(0,0), count: inputImages.count)
-        var weightFunction = (0...255).map{ exp(-TrainingWeight * pow( (Float($0)-127.5)/127.5, 2) ) }
         
         let MTLNumberOfImages = device.makeBuffer(bytes: &numberOfInputImages, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)
         let MTLCameraShifts = device.makeBuffer(bytes: &cameraShifts, length: MemoryLayout<uint2>.size * inputImages.count, options: .cpuCacheModeWriteCombined)
