@@ -158,32 +158,33 @@ class CoreImage_HDRTests: XCTestCase {
     }
     
     func testBinningShader(){
+        let lengthOfBuffer = 512;
         guard let commandQ = device.makeCommandQueue() else {fatalError()}
-        var TextureFill = [float3](repeating: float3(1.0), count: 256)
-        var FunctionDummy = [float3](repeating: float3(1.0), count: 256)
+        var TextureFill = [float3](repeating: float3(1.0), count: lengthOfBuffer)
+        var FunctionDummy = [float3](repeating: float3(1.0), count: lengthOfBuffer)
         
         // allocate half size buffer
         guard
-            let imageBuffer = device.makeBuffer(bytes: &TextureFill, length: 256 * MemoryLayout<float3>.size, options: .storageModeManaged),
-            let MTLFunctionDummyBuffer = device.makeBuffer(bytes: &FunctionDummy, length: 256 * MemoryLayout<float3>.size, options: .storageModeManaged)
+            let imageBuffer = device.makeBuffer(bytes: &TextureFill, length: lengthOfBuffer * MemoryLayout<float3>.size, options: .storageModeManaged),
+            let MTLFunctionDummyBuffer = device.makeBuffer(bytes: &FunctionDummy, length: lengthOfBuffer * MemoryLayout<float3>.size, options: .storageModeManaged)
         else {fatalError()}
         
         let testTextureDescriptor = MTLTextureDescriptor()
         testTextureDescriptor.textureType = .type2D
         testTextureDescriptor.height = 16
-        testTextureDescriptor.width = 16
+        testTextureDescriptor.width = 32
         testTextureDescriptor.depth = 1
         testTextureDescriptor.pixelFormat = .rgba32Float
         guard let testTexture = device.makeTexture(descriptor: testTextureDescriptor) else {fatalError()}
         
         let binningBlock = MTLSizeMake(16, 16, 1)
-        let bufferLength = MemoryLayout<float3>.size * 256
+        let bufferLength = MemoryLayout<float3>.size * lengthOfBuffer
         
         let imageDimensions = MTLSizeMake(testTexture.width, testTexture.height, 1)
         
         // collect image in bins
         guard
-            let biningFunc = library!.makeFunction(name: "writeMeasureToBins"),
+            let biningFunc = library!.makeFunction(name: "writeMeasureToBins<float3>"),
             let commandBuffer = commandQ.makeCommandBuffer(),
             let blitencoder = commandBuffer.makeBlitCommandEncoder(),
             let buffer = device.makeBuffer(length: bufferLength, options: .storageModeManaged)
@@ -193,7 +194,7 @@ class CoreImage_HDRTests: XCTestCase {
         
         blitencoder.copy(from: imageBuffer,
                          sourceOffset: 0,
-                         sourceBytesPerRow: imageBuffer.length / imageDimensions.width,
+                         sourceBytesPerRow: imageBuffer.length / imageDimensions.height,
                          sourceBytesPerImage: imageBuffer.length,
                          sourceSize: imageDimensions,
                          to: testTexture,
@@ -223,15 +224,15 @@ class CoreImage_HDRTests: XCTestCase {
         } catch let Errors {
             fatalError(Errors.localizedDescription)
         }
-        /**/
+        
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
         
         memcpy(&FunctionDummy, buffer.contents(), buffer.length)
-        
         let SummedElements = FunctionDummy.map{$0.x}.filter{$0 != 0}
         
         XCTAssert(SummedElements[0] == 256.0)
+        XCTAssert(SummedElements[1] == 256.0)
     }
     
     func testSortAlgorithm() {
@@ -246,7 +247,7 @@ class CoreImage_HDRTests: XCTestCase {
             let library = try device.makeDefaultLibrary(bundle: Bundle(for: CoreImage_HDRTests.self))
             
             guard
-                let TestBuffer = device.makeBuffer(length: MemoryLayout<float2>.size * threadgroupSize.width, options: .storageModeShared),
+                let TestBuffer = device.makeBuffer(length: MemoryLayout<Float>.size * 4, options: .storageModeShared),
                 let testShader = library.makeFunction(name: "testSortAlgorithm"),
                 let encoder = commandBuffer.makeComputeCommandEncoder()
             else { fatalError() }
@@ -262,10 +263,8 @@ class CoreImage_HDRTests: XCTestCase {
             commandBuffer.commit()
             commandBuffer.waitUntilCompleted()
             
-            var data = [float2](repeating: float2(0), count: threadgroupSize.width)
-            memcpy(&data, TestBuffer.contents(), TestBuffer.length)
-            
-            let counts = data.map{$0.y}.filter{$0 != 0}
+            var counts = [Float](repeating: 0.0, count: 4)
+            memcpy(&counts, TestBuffer.contents(), TestBuffer.length)
             
             XCTAssert(counts.count == 4)
         } catch let Errors {

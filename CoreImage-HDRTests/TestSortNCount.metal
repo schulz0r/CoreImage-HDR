@@ -15,7 +15,7 @@ using namespace metal;
 #include "SortAndCount.h"
 
 // thus include a copy of the shader
-kernel void testSortAlgorithm(device float2 * output [[buffer(0)]],
+kernel void testSortAlgorithm(device float * output [[buffer(0)]],
                               threadgroup SortAndCountElement<ushort, half> * Buffer [[threadgroup(0)]],
                               uint threadID [[thread_position_in_threadgroup]],
                               uint threadCount [[threads_per_threadgroup]],
@@ -26,6 +26,7 @@ kernel void testSortAlgorithm(device float2 * output [[buffer(0)]],
     
     bitonicSortAndCount(threadID, threadCount / 2, Buffer);
     
-    output[threadID].x = Buffer[threadID].element;
-    output[threadID].y = Buffer[threadID].counter;
+    if(Buffer[threadID].counter > 0) {
+        output[Buffer[threadID].element] = Buffer[threadID].counter;
+    }
 }

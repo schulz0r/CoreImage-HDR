@@ -38,6 +38,8 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
         }
         
         let binningBlock = MTLSizeMake(16, 16, 1)
+        let totalBlocksCount = (inputImages.first!.height / binningBlock.height) * (inputImages.first!.width / binningBlock.width)
+        
         let imageDimensions = MTLSizeMake(inputImages[0].width, inputImages[0].height, 1)
         var cameraResponse = Array<Float>(stride(from: 0.0, to: 2.0, by: 2.0/256.0)).map{float3($0)}
         
@@ -52,7 +54,7 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
         let MTLResponseFunc = device.makeBuffer(bytesNoCopy: &cameraResponse, length: cameraResponse.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
         let ColourHistogramSize = MemoryLayout<uint>.size * 256 * 3
         let MTLCardinalities = device.makeBuffer(length: ColourHistogramSize, options: .storageModeShared)
-        var bufferLength = half3_size * (inputImages.first!.height / binningBlock.height) * (inputImages.first!.width / binningBlock.width) * 256
+        var bufferLength = half3_size * totalBlocksCount * 256
         
         
         do{
@@ -85,7 +87,7 @@ final class HDRCameraResponseProcessor: CIImageProcessorKernel {
             cardEncoder.setBytes(&replicationFactor_R, length: MemoryLayout<uint>.size, index: 1)
             cardEncoder.setBuffer(MTLCardinalities, offset: 0, index: 2)
             cardEncoder.setThreadgroupMemoryLength(sharedColourHistogramSize * Int(replicationFactor_R), index: 0)
-            cardEncoder.dispatchThreads(MTLSizeMake(inputImages[0].width + (remainer == 0 ? 0 : blocksize - (inputImages[0].width % blocksize)), inputImages[0].height, inputImages.count), threadsPerThreadgroup: MTLSizeMake(blocksize, 1, 1))
+            cardEncoder.dispatchThreads(MTLSizeMake(inputImages[0].width + (remainer == 0 ? 0 : blocksize - Int(remainer)), inputImages[0].height, inputImages.count), threadsPerThreadgroup: MTLSizeMake(blocksize, 1, 1))
             cardEncoder.endEncoding()
             
             // repeat training x times
