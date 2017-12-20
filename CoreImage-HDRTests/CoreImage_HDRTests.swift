@@ -282,7 +282,7 @@ class CoreImage_HDRTests: XCTestCase {
         var lengthOfBuffer:uint = 512;
         var buffer = [float3](repeating: float3(1.0), count: Int(lengthOfBuffer))
         
-        var cardinalities = [uint](repeating: 0, count: 256 * 3)
+        var cardinalities = [uint](repeating: 1, count: 256 * 3)
         
         guard
             let BinReductionEncoder = commandBuffer.makeComputeCommandEncoder()
