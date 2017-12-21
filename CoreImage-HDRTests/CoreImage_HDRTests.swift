@@ -320,6 +320,135 @@ class CoreImage_HDRTests: XCTestCase {
         XCTAssert( resultX.allIs(value: Float(expectedSum)) )
     }
     
+    func testResponseFunctionEstimation() {
+        
+        var Error:NSErrorPointer
+        let loader = MTKTextureLoader(device: self.device)
+        let inputImages:[MTLTexture] = loader.newTextures(URLs: URLs, options: nil, error: Error)
+        
+        guard Error == nil else {
+            fatalError(Error!.pointee!.localizedDescription)
+        }
+        
+        guard
+            let lib = library,
+            let commandQ = device.makeCommandQueue(),
+            let commandBuffer = commandQ.makeCommandBuffer()
+        else {
+                fatalError()
+        }
+        
+        let MaxImageCount = 5
+        let TrainingWeight:Float = 4.0
+        let half3_size = 8
+        
+        let binningBlock = MTLSizeMake(16, 16, 1)
+        let totalBlocksCount = (inputImages.first!.height / binningBlock.height) * (inputImages.first!.width / binningBlock.width)
+        
+        let imageDimensions = MTLSizeMake(inputImages[0].width, inputImages[0].height, 1)
+        var cameraResponse:[float3] = Array<Float>(stride(from: 0.0, to: 2.0, by: 2.0/256.0)).map{float3($0)}
+        var weightFunction:[float3] = (0...255).map{ float3( exp(-TrainingWeight * pow( (Float($0)-127.5)/127.5, 2)) ) }
+        
+        var numberOfInputImages = uint(inputImages.count)
+        var cameraShifts = [int2](repeating: int2(0,0), count: inputImages.count)
+        
+        let MTLNumberOfImages = device.makeBuffer(bytes: &numberOfInputImages, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)
+        let MTLCameraShifts = device.makeBuffer(bytes: &cameraShifts, length: MemoryLayout<uint2>.size * inputImages.count, options: .cpuCacheModeWriteCombined)
+        let MTLExposureTimes = device.makeBuffer(bytes: self.ExposureTimes, length: MemoryLayout<Float>.size * inputImages.count, options: .cpuCacheModeWriteCombined)
+        let MTLWeightFunc = device.makeBuffer(bytesNoCopy: &weightFunction, length: weightFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
+        let MTLResponseFunc = device.makeBuffer(bytesNoCopy: &cameraResponse, length: cameraResponse.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
+        let ColourHistogramSize = MemoryLayout<uint>.size * 256 * 3
+        let MTLCardinalities = device.makeBuffer(length: ColourHistogramSize, options: .storageModeShared)
+        var bufferLength:uint = uint(half3_size * totalBlocksCount * 256)
+        
+        
+        do{
+            let library = try device.makeDefaultLibrary(bundle: Bundle(for: HDRProcessor.self))
+            guard
+                let biningFunc = library.makeFunction(name: "writeMeasureToBins"),
+                let cardinalityFunction = library.makeFunction(name: "getCardinality"),
+                let binReductionState = library.makeFunction(name: "reduceBins"),
+                let HDRFunc = library.makeFunction(name: "makeHDR")
+                else { fatalError() }
+            
+            // get cardinality of pixels in all images
+            guard
+                let cardEncoder = commandBuffer.makeComputeCommandEncoder()
+                else {
+                    fatalError("Failed to create command encoder.")
+            }
+            
+            let CardinalityState = try device.makeComputePipelineState(function: cardinalityFunction)
+            let streamingMultiprocessorsPerBlock = 4
+            var imageSize = uint2(uint(inputImages[0].width), uint(inputImages[0].height))
+            let blocksize = CardinalityState.threadExecutionWidth * streamingMultiprocessorsPerBlock
+            let remainer = imageSize.x % uint(blocksize)
+            let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
+            
+            var replicationFactor_R:uint = max(uint(device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize)), 1) // replicate histograms, but not more than simd group length
+            cardEncoder.setComputePipelineState(CardinalityState)
+            cardEncoder.setTextures(inputImages, range: Range<Int>(0..<inputImages.count))
+            cardEncoder.setBytes(&imageSize, length: MemoryLayout<uint2>.size, index: 0)
+            cardEncoder.setBytes(&replicationFactor_R, length: MemoryLayout<uint>.size, index: 1)
+            cardEncoder.setBuffer(MTLCardinalities, offset: 0, index: 2)
+            cardEncoder.setThreadgroupMemoryLength(sharedColourHistogramSize * Int(replicationFactor_R), index: 0)
+            cardEncoder.dispatchThreads(MTLSizeMake(inputImages[0].width + (remainer == 0 ? 0 : blocksize - Int(remainer)), inputImages[0].height, inputImages.count), threadsPerThreadgroup: MTLSizeMake(blocksize, 1, 1))
+            cardEncoder.endEncoding()
+            
+            // repeat training x times
+                // collect image in bins
+                guard
+                    let BinEncoder = commandBuffer.makeComputeCommandEncoder(),
+                    let buffer = device.makeBuffer(length: Int(bufferLength), options: .storageModePrivate)
+                    else {
+                        fatalError("Failed to create command encoder.")
+                }
+                
+                let biningState = try device.makeComputePipelineState(function: biningFunc)
+                BinEncoder.setComputePipelineState(biningState)
+                BinEncoder.setTextures(inputImages, range: Range<Int>(0..<inputImages.count))
+                BinEncoder.setBuffer(buffer, offset: 0, index: 0)
+                BinEncoder.setBuffer(MTLNumberOfImages, offset: 0, index: 1)
+                BinEncoder.setBuffer(MTLCameraShifts, offset: 0, index: 2)
+                BinEncoder.setBuffer(MTLExposureTimes, offset: 0, index: 3)
+                BinEncoder.setBuffers([MTLResponseFunc, MTLWeightFunc], offsets: [0,0], range: Range<Int>(4...5))
+                BinEncoder.setThreadgroupMemoryLength((MemoryLayout<Float>.size/2 + MemoryLayout<ushort>.size) * binningBlock.width * binningBlock.height, index: 0)    // threadgroup memory for each thread
+                BinEncoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: binningBlock)
+                BinEncoder.endEncoding()
+                
+                // reduce bins and calculate response
+                guard
+                    let BinReductionEncoder = commandBuffer.makeComputeCommandEncoder()
+                    else {
+                        fatalError("Failed to create command encoder.")
+                }
+                
+                let binredState = try device.makeComputePipelineState(function: binReductionState)
+                BinReductionEncoder.setComputePipelineState(binredState)
+                BinReductionEncoder.setBuffer(buffer, offset: 0, index: 0)
+                BinReductionEncoder.setBytes(&bufferLength, length: MemoryLayout<uint>.size, index: 1)
+                BinReductionEncoder.setBuffer(MTLResponseFunc, offset: 0, index: 2)
+                BinReductionEncoder.setBuffer(MTLCardinalities, offset: 0, index: 3)
+                BinReductionEncoder.dispatchThreadgroups(MTLSizeMake(1,1,1), threadsPerThreadgroup: MTLSizeMake(256, 1, 1))
+                BinReductionEncoder.endEncoding()
+                
+                // flush buffer for next iteration
+                guard let flushBlitEncoder = commandBuffer.makeBlitCommandEncoder() else {fatalError()}
+                flushBlitEncoder.fill(buffer: buffer, range: Range(0...buffer.length), value: 0)
+                flushBlitEncoder.endEncoding()
+        } catch let Errors {
+            XCTFail(Errors.localizedDescription)
+        }
+        
+        commandBuffer.commit()
+        commandBuffer.waitUntilCompleted()
+        
+        var result = [float3](repeating: float3(0), count: 256)
+        memcpy(&result, MTLResponseFunc?.contents(), 256 * MemoryLayout<float3>.size)
+        
+        XCTAssert(true)
+    }
+    
     func testPerformanceExample() {
         // This is an example of a performance test case.
         self.measure {
