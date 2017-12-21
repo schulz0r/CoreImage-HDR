@@ -18,6 +18,7 @@
 		17832D021FB49C1500E19938 /* CoreImage_HDRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */; };
 		17832D041FB49C1500E19938 /* CoreImage_HDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17832CF61FB49C1500E19938 /* CoreImage_HDR.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D0D1FB49C4500E19938 /* HDRProcessor.swift */; };
+		17A323FA1FEAF0CC00CFDAA8 /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A323F91FEAF0CC00CFDAA8 /* extensions.swift */; };
 		17ACF53A1FBBC7C200BFBF41 /* makeHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */; };
 		17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AEAA621FC57E2400CE17DF /* extensions.swift */; };
 /* End PBXBuildFile section */
@@ -49,6 +50,7 @@
 		17832D031FB49C1500E19938 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		17832D0D1FB49C4500E19938 /* HDRProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRProcessor.swift; sourceTree = "<group>"; };
 		17832D121FB51A0C00E19938 /* movingAverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = movingAverage.h; sourceTree = "<group>"; };
+		17A323F91FEAF0CC00CFDAA8 /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
 		17ACF5371FBBC57300BFBF41 /* calculateHDR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calculateHDR.h; sourceTree = "<group>"; };
 		17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = makeHDR.metal; sourceTree = "<group>"; };
 		17AEAA621FC57E2400CE17DF /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
@@ -158,6 +160,7 @@
 				17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */,
 				17832D031FB49C1500E19938 /* Info.plist */,
 				17215BFC1FDF321F00912238 /* ShaderTests */,
+				17A323F91FEAF0CC00CFDAA8 /* extensions.swift */,
 			);
 			path = "CoreImage-HDRTests";
 			sourceTree = "<group>";
@@ -291,6 +294,7 @@
 			files = (
 				17832D021FB49C1500E19938 /* CoreImage_HDRTests.swift in Sources */,
 				17215BFF1FDF43B700912238 /* TestSortNCount.metal in Sources */,
+				17A323FA1FEAF0CC00CFDAA8 /* extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

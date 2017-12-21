@@ -26,6 +26,6 @@ kernel void reduceBins(device half3 * buffer [[buffer(0)]],
         localSum += buffer[globalPosition];
     }
     
-    cameraResponse[threadID] = float3(localSum / half3((constant uint &)Cardinality.red[threadID], (constant uint &)Cardinality.green[threadID], (constant uint &)Cardinality.blue[threadID]));
+    cameraResponse[threadID].rgb = float3(localSum / half3((constant uint &)Cardinality.red[threadID], (constant uint &)Cardinality.green[threadID], (constant uint &)Cardinality.blue[threadID]));
 }
 
