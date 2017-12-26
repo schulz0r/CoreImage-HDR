@@ -19,6 +19,9 @@
 		17832D041FB49C1500E19938 /* CoreImage_HDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17832CF61FB49C1500E19938 /* CoreImage_HDR.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D0D1FB49C4500E19938 /* HDRProcessor.swift */; };
 		17A323FA1FEAF0CC00CFDAA8 /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A323F91FEAF0CC00CFDAA8 /* extensions.swift */; };
+		17A3254C1FEDCA0900CFDAA8 /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17A3254B1FEDCA0900CFDAA8 /* MetalKitPlus.framework */; };
+		17A3254F1FEDCA3E00CFDAA8 /* IOProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A3254E1FEDCA3E00CFDAA8 /* IOProvider.swift */; };
+		17A325511FEDCD0200CFDAA8 /* CardinalityShaderIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A325501FEDCD0200CFDAA8 /* CardinalityShaderIO.swift */; };
 		17ACF53A1FBBC7C200BFBF41 /* makeHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */; };
 		17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AEAA621FC57E2400CE17DF /* extensions.swift */; };
 /* End PBXBuildFile section */
@@ -51,6 +54,9 @@
 		17832D0D1FB49C4500E19938 /* HDRProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRProcessor.swift; sourceTree = "<group>"; };
 		17832D121FB51A0C00E19938 /* movingAverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = movingAverage.h; sourceTree = "<group>"; };
 		17A323F91FEAF0CC00CFDAA8 /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
+		17A3254B1FEDCA0900CFDAA8 /* MetalKitPlus.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MetalKitPlus.framework; sourceTree = "<group>"; };
+		17A3254E1FEDCA3E00CFDAA8 /* IOProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOProvider.swift; sourceTree = "<group>"; };
+		17A325501FEDCD0200CFDAA8 /* CardinalityShaderIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardinalityShaderIO.swift; sourceTree = "<group>"; };
 		17ACF5371FBBC57300BFBF41 /* calculateHDR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calculateHDR.h; sourceTree = "<group>"; };
 		17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = makeHDR.metal; sourceTree = "<group>"; };
 		17AEAA621FC57E2400CE17DF /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
@@ -61,6 +67,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17A3254C1FEDCA0900CFDAA8 /* MetalKitPlus.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -127,6 +134,7 @@
 		17832CE91FB49C1500E19938 = {
 			isa = PBXGroup;
 			children = (
+				17A3254B1FEDCA0900CFDAA8 /* MetalKitPlus.framework */,
 				17832CF51FB49C1500E19938 /* CoreImage-HDR */,
 				17832D001FB49C1500E19938 /* CoreImage-HDRTests */,
 				17832CF41FB49C1500E19938 /* Products */,
@@ -145,6 +153,7 @@
 		17832CF51FB49C1500E19938 /* CoreImage-HDR */ = {
 			isa = PBXGroup;
 			children = (
+				17A3254D1FEDCA1E00CFDAA8 /* ResponseFunc */,
 				177753111FD3435500C427E8 /* Shaders */,
 				17AEAA621FC57E2400CE17DF /* extensions.swift */,
 				175005351FBA608D005F6856 /* Framework */,
@@ -163,6 +172,15 @@
 				17A323F91FEAF0CC00CFDAA8 /* extensions.swift */,
 			);
 			path = "CoreImage-HDRTests";
+			sourceTree = "<group>";
+		};
+		17A3254D1FEDCA1E00CFDAA8 /* ResponseFunc */ = {
+			isa = PBXGroup;
+			children = (
+				17A3254E1FEDCA3E00CFDAA8 /* IOProvider.swift */,
+				17A325501FEDCD0200CFDAA8 /* CardinalityShaderIO.swift */,
+			);
+			path = ResponseFunc;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -284,7 +302,9 @@
 				17ACF53A1FBBC7C200BFBF41 /* makeHDR.metal in Sources */,
 				17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */,
 				177753141FD382FC00C427E8 /* getCardinality.metal in Sources */,
+				17A3254F1FEDCA3E00CFDAA8 /* IOProvider.swift in Sources */,
 				177753171FD4A6AA00C427E8 /* binReduction.metal in Sources */,
+				17A325511FEDCD0200CFDAA8 /* CardinalityShaderIO.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -433,6 +453,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = "CoreImage-HDR/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -458,6 +482,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = "CoreImage-HDR/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
