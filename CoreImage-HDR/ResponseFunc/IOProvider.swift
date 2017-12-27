@@ -13,15 +13,19 @@ final class ResponseEstimationIO: MTKPShaderIO {
     
     let Assets = MTKPAssets()
     
-    convenience init(InputImages: [CIImage]) {
-        self.init()
+    init(InputImages: [CIImage]) {
+        super.init()
         
         guard self.device != nil else {
             fatalError("No Device Available.")
         }
-        //let Textures = InputImages.map{self.textureLoader.load($0)}    // load textures
+        
+        let context = CIContext(mtlDevice: self.device!)
+        
+        let Textures:[MTLTexture] = InputImages.map{self.textureLoader.load($0)}    // load textures
+        
         let ColourHistogramSize = 256 * 3
-        let MTLCardinalities = self.device!.makeBuffer(length: MemoryLayout<uint>.size * ColourHistogramSize, options: .storageModeShared)
+        guard let MTLCardinalities = self.device!.makeBuffer(length: MemoryLayout<uint>.size * ColourHistogramSize, options: .storageModeShared) else {fatalError()}
         
         let threadExecutionWidth:Int = {
             var someState:MTLComputePipelineState
@@ -37,8 +41,8 @@ final class ResponseEstimationIO: MTKPShaderIO {
         let streamingMultiprocessorsPerBlock = 4 // TODO: replace with actual number of streaming multiprocessors which share memory
         let blocksize = threadExecutionWidth * streamingMultiprocessorsPerBlock
         
-        let CardinalityShaderRessources = CardinalityShaderIO(inputImages: <#T##[MTLTexture]#>, cardinalityBuffer: MTLCardinalities)
-        let CardinalityShader = MTKPShader(name: "getCardinality", io: CardinalityShaderRessources, tgSize: MTLSizeMake(blocksize, 1, 1))
+        let CardinalityShaderRessources = CardinalityShaderIO(inputImages: Textures, cardinalityBuffer: MTLCardinalities)
+        let CardinalityShader = MTKPShader(name: "getCardinality", io: CardinalityShaderRessources, tgSize: (blocksize, 1, 1))
         
         Assets.add(shader: CardinalityShader)
     }
