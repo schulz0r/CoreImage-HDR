@@ -94,6 +94,7 @@ class CoreImage_HDRTests: XCTestCase {
         XCTAssertTrue(true)
     }
     
+    // test cardinality (histogram) shader for correct functionality
     func testHistogramShader() {
         let assets = ResponseEstimationIO(InputImages: self.Testimages).Assets
         guard
@@ -101,8 +102,8 @@ class CoreImage_HDRTests: XCTestCase {
             let MTLCardinalities = cardinalityShaderDescriptor.buffers?[2] else {
             fatalError("Initialization of assets failed.")
         }
-        let MTLComputer = MTKPComputer(assets: assets)
         
+        let MTLComputer = MTKPComputer(assets: assets)
         MTLComputer.execute("getCardinality")
         
         var Cardinality_Host = [uint](repeating: 0, count: 256 * 3)

@@ -11,7 +11,7 @@ import CoreImage
 
 final class ResponseEstimationIO: MTKPShaderIO {
     
-    var Assets = MTKPAssets()
+    var Assets = MTKPAssets(ResponseEstimationIO.self)
     
     init(InputImages: [CIImage]) {
         super.init()
