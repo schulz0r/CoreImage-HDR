@@ -24,6 +24,8 @@
 		17ACF53A1FBBC7C200BFBF41 /* makeHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */; };
 		17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AEAA621FC57E2400CE17DF /* extensions.swift */; };
 		17E68ADB1FF1CD3E008F9DCE /* textureLoaderExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */; };
+		17F1EFB31FF3602800B8FAB8 /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17F1EFB21FF3602700B8FAB8 /* MetalKitPlus.framework */; };
+		17F1EFB41FF3CCCD00B8FAB8 /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17F1EFB21FF3602700B8FAB8 /* MetalKitPlus.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +62,7 @@
 		17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = makeHDR.metal; sourceTree = "<group>"; };
 		17AEAA621FC57E2400CE17DF /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
 		17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = textureLoaderExtensions.swift; sourceTree = "<group>"; };
+		17F1EFB21FF3602700B8FAB8 /* MetalKitPlus.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MetalKitPlus.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17F1EFB31FF3602800B8FAB8 /* MetalKitPlus.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,6 +79,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */,
+				17F1EFB41FF3CCCD00B8FAB8 /* MetalKitPlus.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -133,6 +138,7 @@
 		17832CE91FB49C1500E19938 = {
 			isa = PBXGroup;
 			children = (
+				17F1EFB21FF3602700B8FAB8 /* MetalKitPlus.framework */,
 				17832CF51FB49C1500E19938 /* CoreImage-HDR */,
 				17832D001FB49C1500E19938 /* CoreImage-HDRTests */,
 				17832CF41FB49C1500E19938 /* Products */,
@@ -505,6 +511,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 529Y8Q5FKY;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = "CoreImage-HDRTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "PhilippWaxweiler.CoreImage-HDRTests";
@@ -520,6 +530,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 529Y8Q5FKY;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = "CoreImage-HDRTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "PhilippWaxweiler.CoreImage-HDRTests";

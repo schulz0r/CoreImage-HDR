@@ -8,25 +8,11 @@
 
 import XCTest
 import CoreImage
-import AppKit
 import ImageIO
 import MetalKit
+import MetalKitPlus
 @testable import CoreImage_HDR
 
-fileprivate extension CIImage {
-    func write(url: URL) {
-        
-        guard let pngFile = NSBitmapImageRep(ciImage: self).representation(using: NSBitmapImageRep.FileType.png, properties: [:]) else {
-            fatalError("Could not convert to png.")
-        }
-        
-        do {
-            try pngFile.write(to: url)
-        } catch let Error {
-            print(Error.localizedDescription)
-        }
-    }
-}
 
 class CoreImage_HDRTests: XCTestCase {
     
@@ -108,53 +94,21 @@ class CoreImage_HDRTests: XCTestCase {
         XCTAssertTrue(true)
     }
     
-    func testHistogramShader() {
-        let ColourHistogramSize = MemoryLayout<uint>.size * 256 * 3
-        let MTLCardinalities = device.makeBuffer(length: ColourHistogramSize, options: .storageModeShared)
-        
+    func testHistogramShader_Claudio() {
+        let assets = ResponseEstimationIO(InputImages: self.Testimages).Assets
         guard
-            let commandQ = device.makeCommandQueue(),
-            let commandBuffer = commandQ.makeCommandBuffer()
-        else {
-            fatalError("Could not make command queue or Buffer.")
+            let cardinalityShaderDescriptor = assets["getCardinality"],
+            let MTLCardinalities = cardinalityShaderDescriptor.buffers?[2] else {
+            fatalError("Initialization of assets failed.")
         }
-        do {
-            let texture = try MTKTextureLoader(device: device).newTexture(URL: URLs[2], options: nil)
-            
-            guard
-                let cardinalityFunction = library!.makeFunction(name: "getCardinality"),
-                let cardEncoder = commandBuffer.makeComputeCommandEncoder()
-            else {
-                fatalError()
-            }
-            
-            let CardinalityState = try device.makeComputePipelineState(function: cardinalityFunction)
-            let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
-            let streamingMultiprocessorsPerBlock = 4
-            let blocksize = CardinalityState.threadExecutionWidth * streamingMultiprocessorsPerBlock
-            var imageSize = uint2(uint(texture.width), uint(texture.height))
-            let remainer = imageSize.x % uint(blocksize)
-            var replicationFactor_R:uint = max(uint(device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * MemoryLayout<uint>.size * 257 * 3)), 1)
-            cardEncoder.setComputePipelineState(CardinalityState)
-            cardEncoder.setTexture(texture, index: 0)
-            cardEncoder.setBytes(&imageSize, length: MemoryLayout<uint2>.size, index: 0)
-            cardEncoder.setBytes(&replicationFactor_R, length: MemoryLayout<uint>.size, index: 1)
-            cardEncoder.setBuffer(MTLCardinalities, offset: 0, index: 2)
-            cardEncoder.setThreadgroupMemoryLength(sharedColourHistogramSize * Int(replicationFactor_R), index: 0)
-            cardEncoder.dispatchThreads(MTLSizeMake(texture.width + (remainer == 0 ? 0 : blocksize - (texture.width % blocksize)), texture.height, 1), threadsPerThreadgroup: MTLSizeMake(blocksize, 1, 1))
-            cardEncoder.endEncoding()
-            
-            commandBuffer.commit()
-            commandBuffer.waitUntilCompleted() // the shader is running...
-            
-            // now lets check the value of the cardinality histogram
-            var Cardinality_Host = [uint](repeating: 0, count: 256 * 3)
-            memcpy(&Cardinality_Host, MTLCardinalities!.contents(), MTLCardinalities!.length)
-            
-            XCTAssert(Cardinality_Host.reduce(0, +) == (3 * texture.width * texture.height))
-        } catch let Errors {
-            fatalError("Could not run shader: " + Errors.localizedDescription)
-        }
+        let MTLComputer = MTKPComputer(assets: assets)
+        
+        MTLComputer.execute("getCardinality")
+        
+        var Cardinality_Host = [uint](repeating: 0, count: 256 * 3)
+        memcpy(&Cardinality_Host, MTLCardinalities.contents(), MTLCardinalities.length)
+        
+        XCTAssert(Cardinality_Host.reduce(0, +) == (3 * uint(self.Testimages.first!.extent.size.height * self.Testimages.first!.extent.size.width)) )
     }
     
     func testBinningShader(){

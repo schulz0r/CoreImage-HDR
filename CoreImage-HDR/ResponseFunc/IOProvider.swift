@@ -11,18 +11,21 @@ import CoreImage
 
 final class ResponseEstimationIO: MTKPShaderIO {
     
-    let Assets = MTKPAssets()
+    var Assets = MTKPAssets()
     
     init(InputImages: [CIImage]) {
         super.init()
         
-        guard self.device != nil else {
+        guard
+            self.device != nil,
+            self.textureLoader != nil
+        else {
             fatalError("No Device Available.")
         }
         
         let context = CIContext(mtlDevice: self.device!)
         
-        let Textures:[MTLTexture] = InputImages.map{self.textureLoader.load($0)}    // load textures
+        let Textures:[MTLTexture] = InputImages.map{self.textureLoader!.newTexture(CIImage: $0, context: context)}    // load textures
         
         let ColourHistogramSize = 256 * 3
         guard let MTLCardinalities = self.device!.makeBuffer(length: MemoryLayout<uint>.size * ColourHistogramSize, options: .storageModeShared) else {fatalError()}
