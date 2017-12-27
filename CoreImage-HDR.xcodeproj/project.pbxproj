@@ -25,7 +25,6 @@
 		17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AEAA621FC57E2400CE17DF /* extensions.swift */; };
 		17E68ADB1FF1CD3E008F9DCE /* textureLoaderExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */; };
 		17F1EFB31FF3602800B8FAB8 /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17F1EFB21FF3602700B8FAB8 /* MetalKitPlus.framework */; };
-		17F1EFB41FF3CCCD00B8FAB8 /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17F1EFB21FF3602700B8FAB8 /* MetalKitPlus.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,7 +78,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */,
-				17F1EFB41FF3CCCD00B8FAB8 /* MetalKitPlus.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -516,7 +514,7 @@
 					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = "CoreImage-HDRTests/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks $(PROJECT_DIR)";
 				PRODUCT_BUNDLE_IDENTIFIER = "PhilippWaxweiler.CoreImage-HDRTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
@@ -535,7 +533,7 @@
 					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = "CoreImage-HDRTests/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks $(PROJECT_DIR)";
 				PRODUCT_BUNDLE_IDENTIFIER = "PhilippWaxweiler.CoreImage-HDRTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;

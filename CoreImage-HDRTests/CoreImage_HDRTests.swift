@@ -94,7 +94,7 @@ class CoreImage_HDRTests: XCTestCase {
         XCTAssertTrue(true)
     }
     
-    func testHistogramShader_Claudio() {
+    func testHistogramShader() {
         let assets = ResponseEstimationIO(InputImages: self.Testimages).Assets
         guard
             let cardinalityShaderDescriptor = assets["getCardinality"],
