@@ -96,7 +96,11 @@ class CoreImage_HDRTests: XCTestCase {
     
     // test cardinality (histogram) shader for correct functionality
     func testHistogramShader() {
-        let assets = ResponseEstimationIO(InputImages: self.Testimages).Assets
+        let assets = MTKPAssets()
+        let sharedRessources = sharedAssets(InputImages: self.Testimages)
+        let CardinalityShaderRessources = CardinalityShaderIO(sharedRessources: sharedRessources)
+        let CardinalityShader = MTKPShader(name: "getCardinality", io: CardinalityShaderRessources, tgSize: (1,1,1))
+        
         guard
             let cardinalityShaderDescriptor = assets["getCardinality"],
             let MTLCardinalities = cardinalityShaderDescriptor.buffers?[2] else {
