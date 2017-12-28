@@ -10,7 +10,7 @@ import MetalKit
 import CoreImage
 
 extension MTKTextureLoader {
-    func newTexture(CIImage: CIImage, context: CIContext, mips: Int = 0) -> MTLTexture {
+    func newTexture(CIImage: CIImage, context: CIContext, mips: Int = 1) -> MTLTexture {
         
         let colorspace = CIImage.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!
         
