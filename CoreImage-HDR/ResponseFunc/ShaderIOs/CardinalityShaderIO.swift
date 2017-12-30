@@ -9,26 +9,25 @@ import MetalKit
 import MetalKitPlus
 
 final class CardinalityShaderIO: MTKPIOProvider, MTKPDeviceUser {
-    public var device: MTLDevice?
     
-    private let inputImages:[MTLTexture]
-    private let cardinalityBuffer:MTLBuffer
-    private let imageDimensions:MTLBuffer
-    private let R:MTLBuffer
+    private var inputImages:[MTLTexture]! = nil
+    private var cardinalityBuffer:MTLBuffer! = nil
+    private var imageDimensions:MTLBuffer! = nil
+    private var R:MTLBuffer! = nil
     let streamingMultiprocessorsPerBlock = 4
     
     
-    init(sharedRessources: sharedAssets){
+    init(inputTextures: [MTLTexture], cardinalityBuffer: MTLBuffer){
         guard self.device != nil else {
             fatalError()
         }
+        self.inputImages = inputTextures
+        self.cardinalityBuffer = cardinalityBuffer
         
-        var imageDim = uint2(uint(sharedRessources.Textures[0].width), uint(sharedRessources.Textures[0].height))
+        var imageDim = uint2(uint(inputTextures[0].width), uint(inputTextures[0].height))
         let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
         var replicationFactor_R:uint = max(uint(self.device!.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize)), 1)
         
-        self.inputImages = sharedRessources.Textures
-        self.cardinalityBuffer = sharedRessources.MTLCardinalities
         self.imageDimensions = self.device!.makeBuffer(bytes: &imageDim, length: MemoryLayout<uint2>.size, options: .cpuCacheModeWriteCombined)!
         self.R = self.device!.makeBuffer(bytes: &replicationFactor_R, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)!
     }

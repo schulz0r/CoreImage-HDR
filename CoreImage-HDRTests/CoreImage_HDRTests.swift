@@ -96,16 +96,21 @@ class CoreImage_HDRTests: XCTestCase {
     
     // test cardinality (histogram) shader for correct functionality
     func testHistogramShader() {
-        let assets = MTKPAssets(ResponseCurveComputer.self)
-        let sharedRessources = sharedAssets(InputImages: self.Testimages)
-        let CardinalityShaderRessources = CardinalityShaderIO(sharedRessources: sharedRessources)
+        let ColourHistogramSize = 256 * 3
+        
+        // input images as textures
+        let textureLoader = MTKTextureLoader(device: self.device)
+        let context = CIContext(mtlDevice: self.device)
+        let Textures = Testimages.map{textureLoader.newTexture(CIImage: $0, context: context)}
+        
+        // cardinality of pixel values
+        let MTLCardinalities = self.device.makeBuffer(length: MemoryLayout<uint>.size * ColourHistogramSize, options: .storageModeShared)!
+        
+        var assets = MTKPAssets(ResponseCurveComputer.self)
+        let CardinalityShaderRessources = CardinalityShaderIO(inputTextures: Textures, cardinalityBuffer: MTLCardinalities)
         let CardinalityShader = MTKPShader(name: "getCardinality", io: CardinalityShaderRessources, tgSize: (64,1,1))
         
-        guard
-            let cardinalityShaderDescriptor = assets["getCardinality"],
-            let MTLCardinalities = cardinalityShaderDescriptor.buffers?[2] else {
-            fatalError("Initialization of assets failed.")
-        }
+        assets.add(shader: CardinalityShader)
         
         let MTLComputer = ResponseCurveComputer(assets: assets)
         MTLComputer.executeCardinalityShader()
