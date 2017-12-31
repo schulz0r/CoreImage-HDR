@@ -108,17 +108,19 @@ class CoreImage_HDRTests: XCTestCase {
         
         var assets = MTKPAssets(ResponseCurveComputer.self)
         let CardinalityShaderRessources = CardinalityShaderIO(inputTextures: Textures, cardinalityBuffer: MTLCardinalities)
-        let CardinalityShader = MTKPShader(name: "getCardinality", io: CardinalityShaderRessources, tgSize: (64,1,1))
+        let CardinalityShader = MTKPShader(name: "getCardinality", io: CardinalityShaderRessources, tgSize: (0,0,0))
         
         assets.add(shader: CardinalityShader)
         
         let MTLComputer = ResponseCurveComputer(assets: assets)
         MTLComputer.executeCardinalityShader()
         
-        var Cardinality_Host = [uint](repeating: 0, count: 256 * 3)
+        var Cardinality_Host = [uint](repeating: 0, count: ColourHistogramSize)
         memcpy(&Cardinality_Host, MTLCardinalities.contents(), MTLCardinalities.length)
         
-        XCTAssert(Cardinality_Host.reduce(0, +) == (3 * uint(self.Testimages.first!.extent.size.height * self.Testimages.first!.extent.size.width)) )
+        let allPixelCount = Testimages.reduce(0){$0 + 3 * Int($1.extent.size.height * $1.extent.size.width)}
+        
+        XCTAssert(Int(Cardinality_Host.reduce(0, +)) == allPixelCount )
     }
     
     func testBinningShader(){
