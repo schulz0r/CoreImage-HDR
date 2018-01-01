@@ -26,7 +26,6 @@ kernel void getCardinality(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> 
                            constant uint2 & imageDimensions [[buffer(0)]],
                            constant uint & ReplicationFactor [[buffer(1)]],
                            device colourHistogram<BIN_COUNT> & Cardinality [[buffer(2)]],
-                           constant uint & remainder [[buffer(3)]],
                            threadgroup colourHistogram<BIN_COUNT+1> * sharedHistograms [[threadgroup(0)]],
                            uint3 gid [[thread_position_in_grid]],
                            uint threadID [[thread_index_in_threadgroup]],
@@ -35,6 +34,7 @@ kernel void getCardinality(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> 
                            uint warpSize [[threads_per_simdgroup]],
                            uint3 blockSize [[threads_per_threadgroup]],
                            uint3 threadgroupID [[threadgroup_position_in_grid]],
+                           uint3 gridSize [[threads_per_grid]],
                            uint laneID [[thread_index_in_simdgroup]]) {
     
     const thread uint & imageSlice = gid.z;
@@ -54,7 +54,7 @@ kernel void getCardinality(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> 
     threadgroup colourHistogram<BIN_COUNT+1> & threadHistogram = sharedHistograms[threadID % ReplicationFactor];
     
     // spread locations of reads over the image to gather diverse pixels to further reduce collisions
-    const uint interleavedReadAccessOffset = ((imageDimensions.x + remainder) / warpsPerThreadgroup) * warpID + warpSize * threadgroupID.x + laneID;
+    const uint interleavedReadAccessOffset = (gridSize.x / warpsPerThreadgroup) * warpID + warpSize * threadgroupID.x + laneID;
     
     if(interleavedReadAccessOffset < imageDimensions.x){ // grid size may be unequal to image size...
         const uchar3 pixel = (uchar3) ( images[imageSlice].read(uint2(interleavedReadAccessOffset, gid.y)).rgb * (BIN_COUNT - 1) );

@@ -72,16 +72,15 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         guard let histogramBuffer = descriptor.buffers?[2] else { fatalError("Cardinality Buffer does not exist.") }
         guard let ImageCount = descriptor.textures?.count else { fatalError("NumberOfTextures is Unknown.") }
         
-        let computeState = computeEncoder.setComputePipelineState(descriptor.state!)
+        computeEncoder.setComputePipelineState(descriptor.state!)
         computeEncoder.setTextures(textures, range: 0..<textures.count)
         if let buffers = descriptor.buffers {
             computeEncoder.setBuffers(buffers, offsets: [Int](repeating: 0, count: buffers.count), range: 0..<buffers.count)
         }
         
-        let threads = MTLSizeMake(firstTexture.width, firstTexture.height, ImageCount)
         let blocksize = descriptor.state!.threadExecutionWidth * streamingMultiprocessorsPerBlock
-        var remainer:uint = uint(threads.width) % uint(blocksize)
-        computeEncoder.setBuffer(device?.makeBuffer(bytes: &remainer, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined), offset: 0, index: 3)
+        let remainder = firstTexture.width % blocksize
+        let threads = MTLSizeMake(firstTexture.width + remainder, firstTexture.height, ImageCount)
         computeEncoder.setThreadgroupMemoryLength(replicationFactor_R * (histogramBuffer.length + MemoryLayout<uint>.size * 3), index: 0)
         computeEncoder.dispatchThreads(threads, threadsPerThreadgroup: MTLSizeMake(blocksize, 1, 1))
         computeEncoder.endEncoding()
