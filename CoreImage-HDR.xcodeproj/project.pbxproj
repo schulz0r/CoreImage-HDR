@@ -24,6 +24,7 @@
 		17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AEAA621FC57E2400CE17DF /* extensions.swift */; };
 		17B45F451FF5573F009BE0BF /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17B45F441FF5573F009BE0BF /* MetalKitPlus.framework */; };
 		17B45F471FF557DC009BE0BF /* ResponseCurveComputer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B45F461FF557DC009BE0BF /* ResponseCurveComputer.swift */; };
+		17DA9C3A1FFAC9610041E9BA /* ResponseSummationShaderIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DA9C391FFAC9610041E9BA /* ResponseSummationShaderIO.swift */; };
 		17E68ADB1FF1CD3E008F9DCE /* textureLoaderExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */; };
 /* End PBXBuildFile section */
 
@@ -61,6 +62,7 @@
 		17AEAA621FC57E2400CE17DF /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
 		17B45F441FF5573F009BE0BF /* MetalKitPlus.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MetalKitPlus.framework; sourceTree = "<group>"; };
 		17B45F461FF557DC009BE0BF /* ResponseCurveComputer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseCurveComputer.swift; sourceTree = "<group>"; };
+		17DA9C391FFAC9610041E9BA /* ResponseSummationShaderIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseSummationShaderIO.swift; sourceTree = "<group>"; };
 		17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = textureLoaderExtensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -190,6 +192,7 @@
 			isa = PBXGroup;
 			children = (
 				17A325501FEDCD0200CFDAA8 /* CardinalityShaderIO.swift */,
+				17DA9C391FFAC9610041E9BA /* ResponseSummationShaderIO.swift */,
 			);
 			path = ShaderIOs;
 			sourceTree = "<group>";
@@ -316,6 +319,7 @@
 				177753141FD382FC00C427E8 /* getCardinality.metal in Sources */,
 				17B45F471FF557DC009BE0BF /* ResponseCurveComputer.swift in Sources */,
 				177753171FD4A6AA00C427E8 /* binReduction.metal in Sources */,
+				17DA9C3A1FFAC9610041E9BA /* ResponseSummationShaderIO.swift in Sources */,
 				17A325511FEDCD0200CFDAA8 /* CardinalityShaderIO.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
