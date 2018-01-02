@@ -150,12 +150,10 @@ class ResponseEstimationTests: XCTestCase {
         commandBuffer.commit()
         
         var assets = MTKPAssets(ResponseCurveComputer.self)
-        let context = CIContext(mtlDevice: self.device)
-        let Textures = Testimages.map{textureLoader.newTexture(CIImage: $0, context: context)}
         let MTLexposureTimes = device.makeBuffer(bytes: &exposureTime, length: MemoryLayout<Float>.size, options: .cpuCacheModeWriteCombined)
         let MTLCameraShifts = device.makeBuffer(bytes: &cameraShifts, length: MemoryLayout<int2>.size, options: .cpuCacheModeWriteCombined)
         
-        let reponseSumShaderIO = ResponseSummationShaderIO(inputTextures: Textures,
+        let reponseSumShaderIO = ResponseSummationShaderIO(inputTextures: [testTexture],
                                                            BinBuffer: buffer,
                                                            exposureTimes: MTLexposureTimes!,
                                                            cameraShifts: MTLCameraShifts!,
