@@ -14,7 +14,7 @@ import MetalKitPlus
 @testable import CoreImage_HDR
 
 
-class CoreImage_HDRTests: XCTestCase {
+class ResponseEstimationTests: XCTestCase {
     
     let device = MTLCreateSystemDefaultDevice()!
     
