@@ -22,6 +22,7 @@ class CoreImage_HDRTests: XCTestCase {
     var Testimages:[CIImage] = []
     var ExposureTimes:[Float] = []
     var library:MTLLibrary?
+    var textureLoader:MTKTextureLoader!
     
     override func setUp() {
         super.setUp()
@@ -56,6 +57,8 @@ class CoreImage_HDRTests: XCTestCase {
             }
             return metaData["ExposureTime"] as! Float
         }
+        
+        textureLoader = MTKTextureLoader(device: self.device)
     }
     
     override func tearDown() {
@@ -99,7 +102,6 @@ class CoreImage_HDRTests: XCTestCase {
         let ColourHistogramSize = 256 * 3
         
         // input images as textures
-        let textureLoader = MTKTextureLoader(device: self.device)
         let context = CIContext(mtlDevice: self.device)
         let Textures = Testimages.map{textureLoader.newTexture(CIImage: $0, context: context)}
         
@@ -124,6 +126,9 @@ class CoreImage_HDRTests: XCTestCase {
     }
     
     func testBinningShader(){
+        var cameraShifts = int2(0,0)
+        var exposureTime:Float = 1
+        
         let lengthOfBuffer = 512;
         guard let commandQ = device.makeCommandQueue() else {fatalError()}
         var TextureFill = [float3](repeating: float3(1.0), count: lengthOfBuffer)
@@ -143,14 +148,12 @@ class CoreImage_HDRTests: XCTestCase {
         testTextureDescriptor.pixelFormat = .rgba32Float
         guard let testTexture = device.makeTexture(descriptor: testTextureDescriptor) else {fatalError()}
         
-        let binningBlock = MTLSizeMake(16, 16, 1)
         let bufferLength = MemoryLayout<float3>.size * lengthOfBuffer
         
         let imageDimensions = MTLSizeMake(testTexture.width, testTexture.height, 1)
         
         // collect image in bins
         guard
-            let biningFunc = library!.makeFunction(name: "writeMeasureToBins<float3>"),
             let commandBuffer = commandQ.makeCommandBuffer(),
             let blitencoder = commandBuffer.makeBlitCommandEncoder(),
             let buffer = device.makeBuffer(length: bufferLength, options: .storageModeManaged)
@@ -168,35 +171,25 @@ class CoreImage_HDRTests: XCTestCase {
                          destinationLevel: 0,
                          destinationOrigin: MTLOriginMake(0, 0, 0))
         blitencoder.endEncoding()
-        
-        guard let BinEncoder = commandBuffer.makeComputeCommandEncoder() else {fatalError()}
-        
-        var imageCount:uint = 1
-        var cameraShifts = int2(0,0)
-        var exposureTime:Float = 1
-        
-        do {
-            let biningState = try device.makeComputePipelineState(function: biningFunc)
-            BinEncoder.setComputePipelineState(biningState)
-            BinEncoder.setTexture(testTexture, index: 0)
-            BinEncoder.setBuffer(buffer, offset: 0, index: 0)
-            BinEncoder.setBytes(&imageCount, length: MemoryLayout<uint>.size, index: 1)
-            BinEncoder.setBytes(&cameraShifts, length: MemoryLayout<int2>.size, index: 2)
-            BinEncoder.setBytes(&exposureTime, length: MemoryLayout<Float>.size, index: 3)
-            BinEncoder.setBuffers([MTLFunctionDummyBuffer, MTLFunctionDummyBuffer], offsets: [0,0], range: Range<Int>(4...5)) // only write ones here
-            BinEncoder.setThreadgroupMemoryLength((MemoryLayout<Float>.size/2 + MemoryLayout<ushort>.size) * binningBlock.width * binningBlock.height, index: 0)    // threadgroup memory for each thread
-            BinEncoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: binningBlock)
-            BinEncoder.endEncoding()
-        } catch let Errors {
-            fatalError(Errors.localizedDescription)
-        }
-        
         commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
+        
+        var assets = MTKPAssets(ResponseCurveComputer.self)
+        let context = CIContext(mtlDevice: self.device)
+        let Textures = Testimages.map{textureLoader.newTexture(CIImage: $0, context: context)}
+        let MTLexposureTimes = device.makeBuffer(bytes: &exposureTime, length: MemoryLayout<Float>.size, options: .cpuCacheModeWriteCombined)
+        let MTLCameraShifts = device.makeBuffer(bytes: &cameraShifts, length: MemoryLayout<Float>.size, options: .cpuCacheModeWriteCombined)
+        let reponseSumShaderIO = ResponseSummationShaderIO(inputTextures: Textures, BinBuffer: buffer, exposureTimes: MTLexposureTimes!, cameraShifts: MTLCameraShifts!, cameraResponse: MTLFunctionDummyBuffer, weights: MTLFunctionDummyBuffer)
+        
+        let function = MTKPShader(name: "writeMeasureToBins_float32", io: reponseSumShaderIO, tgSize: (16,16,1))
+        assets.add(shader: function)
+        let computer = ResponseCurveComputer(assets: assets)
+        computer.executeResponseSummationShader()
+     
         
         memcpy(&FunctionDummy, buffer.contents(), buffer.length)
         let SummedElements = FunctionDummy.map{$0.x}.filter{$0 != 0}
         
+        XCTAssertFalse(SummedElements.isEmpty)
         XCTAssert(SummedElements[0] == 256.0)
         XCTAssert(SummedElements[1] == 256.0)
     }

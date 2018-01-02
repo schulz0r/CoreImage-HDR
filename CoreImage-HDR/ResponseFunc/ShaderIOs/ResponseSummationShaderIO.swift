@@ -12,7 +12,7 @@ import MetalKitPlus
 final class ResponseSummationShaderIO: MTKPIOProvider, MTKPDeviceUser {
     
     private var inputImages:[MTLTexture]! = nil
-    private var imageDimensions:MTLBuffer! = nil
+    private var imageCount:MTLBuffer! = nil
     private var BinBuffer:MTLBuffer! = nil
     private var cameraShifts:MTLBuffer! = nil
     private var exposureTimes:MTLBuffer! = nil
@@ -24,10 +24,10 @@ final class ResponseSummationShaderIO: MTKPIOProvider, MTKPDeviceUser {
             fatalError()
         }
         self.inputImages = inputTextures
-        var imageDim = uint2(uint(inputTextures[0].width), uint(inputTextures[0].height))
+        var imageCount = uint(self.inputImages.count)
         self.BinBuffer = BinBuffer
         
-        self.imageDimensions = self.device!.makeBuffer(bytes: &imageDim, length: MemoryLayout<uint2>.size, options: .cpuCacheModeWriteCombined)!
+        self.imageCount = self.device!.makeBuffer(bytes: &imageCount, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)!
         self.exposureTimes = exposureTimes
         self.cameraShifts = cameraShifts
         self.weights = weights
@@ -39,7 +39,7 @@ final class ResponseSummationShaderIO: MTKPIOProvider, MTKPDeviceUser {
     }
     
     func fetchBuffers() -> [MTLBuffer]? {
-        return [self.BinBuffer, self.imageDimensions, self.imageDimensions, self.cameraShifts, self.exposureTimes, self.cameraResponse, self.weights]
+        return [self.BinBuffer, self.imageCount, self.cameraShifts, self.exposureTimes, self.cameraResponse, self.weights]
     }
 }
 

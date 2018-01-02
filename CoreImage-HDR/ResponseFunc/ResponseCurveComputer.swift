@@ -88,4 +88,45 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         cmdBuffer.commit()
         cmdBuffer.waitUntilCompleted()
     }
+    
+    public func executeResponseSummationShader() {
+        guard self.device != nil else {
+            fatalError("Device was not initialized.")
+        }
+        //guard self.commandQueue != nil else {fatalError()}
+        guard let CommandQ = self.commandQueue ?? device!.makeCommandQueue() else { fatalError("Could not intitialize command queue.") }
+        
+        let name = "writeMeasureToBins"
+        
+        guard
+            let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,
+            descriptor.state != nil,
+            let cmdBuffer = CommandQ.makeCommandBuffer(),
+            let computeEncoder = cmdBuffer.makeComputeCommandEncoder(),
+            let textures = descriptor.textures,
+            let firstTexture = textures.first,
+            let sharedMemSize = descriptor.tgSize
+            else {fatalError()}
+        
+        guard descriptor.tgSize != nil else {
+            fatalError("execute func")
+        }
+        
+        guard let ImageCount = descriptor.textures?.count else { fatalError("NumberOfTextures is Unknown.") }
+        
+        computeEncoder.setComputePipelineState(descriptor.state!)
+        computeEncoder.setTextures(textures, range: 0..<textures.count)
+        
+        if let buffers = descriptor.buffers {
+            computeEncoder.setBuffers(buffers, offsets: [Int](repeating: 0, count: buffers.count), range: 0..<buffers.count)
+        }
+        
+        let threads = MTLSizeMake(firstTexture.width, firstTexture.height, 1)
+        computeEncoder.setThreadgroupMemoryLength(4 * sharedMemSize.0 * sharedMemSize.1, index: 0)
+        computeEncoder.dispatchThreads(threads, threadsPerThreadgroup: MTLSizeMake(sharedMemSize.0, sharedMemSize.1, sharedMemSize.2))
+        computeEncoder.endEncoding()
+        
+        cmdBuffer.commit()
+        cmdBuffer.waitUntilCompleted()
+    }
 }
