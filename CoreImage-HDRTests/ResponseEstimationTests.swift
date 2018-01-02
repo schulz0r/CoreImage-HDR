@@ -121,26 +121,18 @@ class ResponseEstimationTests: XCTestCase {
         // allocate half size buffer
         guard
             let imageBuffer = device.makeBuffer(bytes: &TextureFill, length: lengthOfBuffer * MemoryLayout<float3>.size, options: .storageModeManaged),
-            let MTLFunctionDummyBuffer = device.makeBuffer(bytes: &FunctionDummy, length: lengthOfBuffer * MemoryLayout<float3>.size, options: .storageModeManaged)
+            let MTLFunctionDummyBuffer = device.makeBuffer(bytes: &FunctionDummy, length: FunctionDummy.count * MemoryLayout<float3>.size, options: .storageModeManaged)
             else {fatalError()}
         
-        let testTextureDescriptor = MTLTextureDescriptor()
-        testTextureDescriptor.textureType = .type2D
-        testTextureDescriptor.height = 16
-        testTextureDescriptor.width = 32
-        testTextureDescriptor.depth = 1
-        testTextureDescriptor.pixelFormat = .rgba32Float
+        let testTextureDescriptor = MTLTextureDescriptor().makeTestTextureDescriptor(width: 32, height: 16)
         guard let testTexture = device.makeTexture(descriptor: testTextureDescriptor) else {fatalError()}
-        
-        let bufferLength = MemoryLayout<float3>.size * lengthOfBuffer
-        
         let imageDimensions = MTLSizeMake(testTexture.width, testTexture.height, 1)
         
         // collect image in bins
         guard
             let commandBuffer = commandQ.makeCommandBuffer(),
             let blitencoder = commandBuffer.makeBlitCommandEncoder(),
-            let buffer = device.makeBuffer(length: bufferLength, options: .storageModeManaged)
+            let buffer = device.makeBuffer(length: MemoryLayout<float3>.size * lengthOfBuffer, options: .storageModeManaged)
             else {
                 fatalError("Failed to create command encoder.")
         }
@@ -161,8 +153,14 @@ class ResponseEstimationTests: XCTestCase {
         let context = CIContext(mtlDevice: self.device)
         let Textures = Testimages.map{textureLoader.newTexture(CIImage: $0, context: context)}
         let MTLexposureTimes = device.makeBuffer(bytes: &exposureTime, length: MemoryLayout<Float>.size, options: .cpuCacheModeWriteCombined)
-        let MTLCameraShifts = device.makeBuffer(bytes: &cameraShifts, length: MemoryLayout<Float>.size, options: .cpuCacheModeWriteCombined)
-        let reponseSumShaderIO = ResponseSummationShaderIO(inputTextures: Textures, BinBuffer: buffer, exposureTimes: MTLexposureTimes!, cameraShifts: MTLCameraShifts!, cameraResponse: MTLFunctionDummyBuffer, weights: MTLFunctionDummyBuffer)
+        let MTLCameraShifts = device.makeBuffer(bytes: &cameraShifts, length: MemoryLayout<int2>.size, options: .cpuCacheModeWriteCombined)
+        
+        let reponseSumShaderIO = ResponseSummationShaderIO(inputTextures: Textures,
+                                                           BinBuffer: buffer,
+                                                           exposureTimes: MTLexposureTimes!,
+                                                           cameraShifts: MTLCameraShifts!,
+                                                           cameraResponse: MTLFunctionDummyBuffer,
+                                                           weights: MTLFunctionDummyBuffer)
         
         let function = MTKPShader(name: "writeMeasureToBins_float32", io: reponseSumShaderIO, tgSize: (16,16,1))
         assets.add(shader: function)

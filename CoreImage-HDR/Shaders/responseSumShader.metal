@@ -71,7 +71,7 @@ kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>,
     }
 }
 
-kernel void writeMeasureToBins_float32(const metal::array<texture2d<half, access::read>, MAX_IMAGE_COUNT> inputArray [[texture(0)]],
+kernel void writeMeasureToBins_float32(const metal::array<texture2d<float, access::read>, MAX_IMAGE_COUNT> inputArray [[texture(0)]],
                                        device metal::array<float3, 256> * outputbuffer [[buffer(0)]],
                                        constant uint & NumberOfinputImages [[buffer(1)]],
                                        constant int2 * cameraShifts [[buffer(2)]],
@@ -94,7 +94,7 @@ kernel void writeMeasureToBins_float32(const metal::array<texture2d<half, access
     
     // linearize pixel
     for(uint i = 0; i < NumberOfinputImages; i++) {
-        const half3 pixel = inputArray[i].read(uint2(int2(gid) + cameraShifts[i])).rgb;
+        const float3 pixel = inputArray[i].read(uint2(int2(gid) + cameraShifts[i])).rgb;
         PixelIndices[i] = ushort3(pixel * 255);
         linearizedPixels[i] = half3(cameraResponse[PixelIndices[i].x].x, cameraResponse[PixelIndices[i].y].y, cameraResponse[PixelIndices[i].z].z);
     }

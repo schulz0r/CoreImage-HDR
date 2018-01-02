@@ -20,7 +20,9 @@ final class ResponseSummationShaderIO: MTKPIOProvider, MTKPDeviceUser {
     private var weights:MTLBuffer! = nil
     
     init(inputTextures: [MTLTexture], BinBuffer: MTLBuffer, exposureTimes: MTLBuffer, cameraShifts: MTLBuffer, cameraResponse: MTLBuffer, weights: MTLBuffer){
-        guard self.device != nil else {
+        guard self.device != nil,
+            inputTextures.count > 0
+        else {
             fatalError()
         }
         self.inputImages = inputTextures

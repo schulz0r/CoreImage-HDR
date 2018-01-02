@@ -96,7 +96,7 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         //guard self.commandQueue != nil else {fatalError()}
         guard let CommandQ = self.commandQueue ?? device!.makeCommandQueue() else { fatalError("Could not intitialize command queue.") }
         
-        let name = "writeMeasureToBins"
+        let name = "writeMeasureToBins_float32"
         
         guard
             let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,
@@ -111,8 +111,6 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         guard descriptor.tgSize != nil else {
             fatalError("execute func")
         }
-        
-        guard let ImageCount = descriptor.textures?.count else { fatalError("NumberOfTextures is Unknown.") }
         
         computeEncoder.setComputePipelineState(descriptor.state!)
         computeEncoder.setTextures(textures, range: 0..<textures.count)

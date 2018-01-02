@@ -29,3 +29,15 @@ extension CIImage {
         }
     }
 }
+
+extension MTLTextureDescriptor {
+    func makeTestTextureDescriptor(width: Int, height: Int) -> MTLTextureDescriptor {
+        let testTextureDescriptor = MTLTextureDescriptor()
+        testTextureDescriptor.textureType = .type2D
+        testTextureDescriptor.height = height
+        testTextureDescriptor.width = width
+        testTextureDescriptor.depth = 1
+        testTextureDescriptor.pixelFormat = .rgba32Float
+        return testTextureDescriptor
+    }
+}
