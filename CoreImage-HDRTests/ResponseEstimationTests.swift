@@ -100,6 +100,8 @@ class ResponseEstimationTests: XCTestCase {
         
         let MTLComputer = ResponseCurveComputer(assets: assets)
         MTLComputer.executeCardinalityShader()
+        MTLComputer.commandBuffer.commit()
+        MTLComputer.commandBuffer.waitUntilCompleted()
         
         var Cardinality_Host = [uint](repeating: 0, count: ColourHistogramSize)
         memcpy(&Cardinality_Host, MTLCardinalities.contents(), MTLCardinalities.length)
@@ -164,6 +166,8 @@ class ResponseEstimationTests: XCTestCase {
         assets.add(shader: function)
         let computer = ResponseCurveComputer(assets: assets)
         computer.executeResponseSummationShader()
+        computer.commandBuffer.commit()
+        computer.commandBuffer.waitUntilCompleted()
         
         
         memcpy(&FunctionDummy, buffer.contents(), buffer.length)
@@ -234,6 +238,8 @@ class ResponseEstimationTests: XCTestCase {
         
         let computer = ResponseCurveComputer(assets: assets)
         computer.executeBufferReductionShader()
+        computer.commandBuffer.commit()
+        computer.commandBuffer.waitUntilCompleted()
         
         
         var result = [float3](repeating: float3(0), count: 256)
