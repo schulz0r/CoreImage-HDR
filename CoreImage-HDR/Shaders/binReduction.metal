@@ -29,3 +29,19 @@ kernel void reduceBins(device half3 * buffer [[buffer(0)]],
     cameraResponse[threadID].rgb = float3(localSum / half3((constant uint &)Cardinality.red[threadID], (constant uint &)Cardinality.green[threadID], (constant uint &)Cardinality.blue[threadID]));
 }
 
+kernel void reduceBins_float(device float3 * buffer [[buffer(0)]],
+                       constant uint & bufferSize [[buffer(1)]],
+                       device float3 * cameraResponse [[buffer(2)]],
+                       constant colourHistogram<BIN_COUNT> & Cardinality [[buffer(3)]],
+                       uint threadID [[thread_index_in_threadgroup]],
+                       uint warpSize [[threads_per_threadgroup]]) {
+    
+    float3 localSum = 0;
+    
+    // collect all results
+    for(uint globalPosition = threadID; globalPosition < bufferSize; globalPosition += warpSize) {
+        localSum += buffer[globalPosition];
+    }
+    
+    cameraResponse[threadID].rgb = localSum / float3((constant uint &)Cardinality.red[threadID], (constant uint &)Cardinality.green[threadID], (constant uint &)Cardinality.blue[threadID]);
+}

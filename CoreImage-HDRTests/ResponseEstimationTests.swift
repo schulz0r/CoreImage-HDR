@@ -212,46 +212,32 @@ class ResponseEstimationTests: XCTestCase {
     }
     
     func testBufferReductionShader() {
-        guard
-            let lib = library,
-            let commandQ = device.makeCommandQueue(),
-            let commandBuffer = commandQ.makeCommandBuffer(),
-            let reduceShader = lib.makeFunction(name: "reduceBins") else {fatalError()}
         
         var lengthOfBuffer:uint = 512;
         var buffer = [float3](repeating: float3(1.0), count: Int(lengthOfBuffer))
-        
         var cardinalities = [uint](repeating: 1, count: 256 * 3)
         
-        guard
-            let BinReductionEncoder = commandBuffer.makeComputeCommandEncoder()
-            else {
-                fatalError("Failed to create command encoder.")
-        }
-        
         // Assets
-        let MTLbuffer = device.makeBuffer(bytes: &buffer, length: MemoryLayout<float3>.size * buffer.count, options: .cpuCacheModeWriteCombined)
-        let MTLResponseFunc = device.makeBuffer(length: MemoryLayout<float3>.size * 256, options: .cpuCacheModeWriteCombined)
-        let MTLCardinalities = device.makeBuffer(bytes: &cardinalities, length: MemoryLayout<uint>.size * cardinalities.count, options: .cpuCacheModeWriteCombined)
-        
-        do {
-            let binredState = try device.makeComputePipelineState(function: reduceShader)
-            BinReductionEncoder.setComputePipelineState(binredState)
-            BinReductionEncoder.setBuffer(MTLbuffer, offset: 0, index: 0)
-            BinReductionEncoder.setBytes(&lengthOfBuffer, length: MemoryLayout<uint>.size, index: 1)
-            BinReductionEncoder.setBuffer(MTLResponseFunc, offset: 0, index: 2)
-            BinReductionEncoder.setBuffer(MTLCardinalities, offset: 0, index: 3)
-            BinReductionEncoder.dispatchThreadgroups(MTLSizeMake(1,1,1), threadsPerThreadgroup: MTLSizeMake(256, 1, 1))
-            BinReductionEncoder.endEncoding()
-        } catch let ErrorMessage {
-            XCTFail(ErrorMessage.localizedDescription)
+        guard
+            let MTLbuffer = device.makeBuffer(bytes: &buffer, length: MemoryLayout<float3>.size * buffer.count, options: .cpuCacheModeWriteCombined),
+            let MTLResponseFunc = device.makeBuffer(length: MemoryLayout<float3>.size * 256, options: .cpuCacheModeWriteCombined),
+            let MTLCardinalities = device.makeBuffer(bytes: &cardinalities, length: MemoryLayout<uint>.size * cardinalities.count, options: .cpuCacheModeWriteCombined)
+        else {
+            fatalError()
         }
         
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
+        
+        var assets = MTKPAssets(ResponseCurveComputer.self)
+        let ShaderIO = bufferReductionShaderIO(BinBuffer: MTLbuffer, bufferlength: buffer.count, cameraResponse: MTLResponseFunc, Cardinality: MTLCardinalities)
+        let Shader = MTKPShader(name: "reduceBins_float", io: ShaderIO, tgSize: (256,1,1))
+        assets.add(shader: Shader)
+        
+        let computer = ResponseCurveComputer(assets: assets)
+        computer.executeBufferReductionShader()
+        
         
         var result = [float3](repeating: float3(0), count: 256)
-        memcpy(&result, MTLResponseFunc?.contents(), 256 * MemoryLayout<float3>.size)
+        memcpy(&result, MTLResponseFunc.contents(), 256 * MemoryLayout<float3>.size)
         
         let resultX = result.map{$0.x}
         let expectedSum = lengthOfBuffer / 256

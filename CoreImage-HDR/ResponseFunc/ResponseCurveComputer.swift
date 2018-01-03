@@ -127,4 +127,40 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         cmdBuffer.commit()
         cmdBuffer.waitUntilCompleted()
     }
+    
+    public func executeBufferReductionShader() {
+        guard self.device != nil else {
+            fatalError("Device was not initialized.")
+        }
+        //guard self.commandQueue != nil else {fatalError()}
+        guard let CommandQ = self.commandQueue ?? device!.makeCommandQueue() else { fatalError("Could not intitialize command queue.") }
+        
+        let name = "reduceBins_float"
+        
+        guard
+            let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,
+            descriptor.state != nil,
+            let cmdBuffer = CommandQ.makeCommandBuffer(),
+            let computeEncoder = cmdBuffer.makeComputeCommandEncoder(),
+            let sharedMemSize = descriptor.tgSize
+            else {fatalError()}
+        
+        guard descriptor.tgSize != nil else {
+            fatalError("execute func")
+        }
+        
+        computeEncoder.setComputePipelineState(descriptor.state!)
+        
+        if let buffers = descriptor.buffers {
+            computeEncoder.setBuffers(buffers, offsets: [Int](repeating: 0, count: buffers.count), range: 0..<buffers.count)
+        }
+        
+        let threads = MTLSizeMake(256, 1, 1)
+        computeEncoder.setThreadgroupMemoryLength(4 * sharedMemSize.0 * sharedMemSize.1, index: 0)
+        computeEncoder.dispatchThreads(threads, threadsPerThreadgroup: MTLSizeMake(sharedMemSize.0, sharedMemSize.1, sharedMemSize.2))
+        computeEncoder.endEncoding()
+        
+        cmdBuffer.commit()
+        cmdBuffer.waitUntilCompleted()
+    }
 }
