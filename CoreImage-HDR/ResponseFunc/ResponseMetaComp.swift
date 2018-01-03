@@ -9,7 +9,8 @@ import MetalKit
 import MetalKitPlus
 
 public final class ResponseEstimator : MTKPDeviceUser {
-    private var assets = MTKPAssets(ResponseEstimator.self)
+    internal var assets = MTKPAssets(ResponseEstimator.self)
+    internal var computer : ResponseCurveComputer! = nil
     private var textureLoader: MTKTextureLoader! = nil
     private var textures: [MTLTexture]! = nil
     
@@ -17,8 +18,11 @@ public final class ResponseEstimator : MTKPDeviceUser {
         guard self.device != nil else {
             fatalError("Device is not initialized.")
         }
-        guard ImageBracket.count > 1 else {
-            fatalError("Image bracket count must be at least 2.")
+        guard
+            ImageBracket.count > 1,
+            ImageBracket.count <= 5
+        else {
+            fatalError("Image bracket length must be at least 2 and 5 at maximum.")
         }
         
         let ExposureTimes:[Float] = ImageBracket.map{
@@ -32,9 +36,9 @@ public final class ResponseEstimator : MTKPDeviceUser {
         textures = ImageBracket.map{textureLoader.newTexture(CIImage: $0, context: context ?? CIContext(mtlDevice: self.device!))}
         
         // create shared ressources
-        let TrainingWeight:Float = 4
-        let TGSizeOfSummationShader = MTLSizeMake(16, 16, 1)
-        let totalBlocksCount = (textures.first!.height / TGSizeOfSummationShader.height) * (textures.first!.width / TGSizeOfSummationShader.width)
+        let TrainingWeight:Float = 4    // TODO: let user decide about this weight
+        let TGSizeOfSummationShader = (16, 16, 1)
+        let totalBlocksCount = (textures.first!.height / TGSizeOfSummationShader.1) * (textures.first!.width / TGSizeOfSummationShader.0)
         let bufferLen = totalBlocksCount * 256
         // define intial functions which are to estimate
         var initialCamResponse:[float3] = Array<Float>(stride(from: 0.0, to: 2.0, by: 2.0/256.0)).map{float3($0)}
@@ -56,11 +60,35 @@ public final class ResponseEstimator : MTKPDeviceUser {
         let bufferReductionAssets = bufferReductionShaderIO(BinBuffer: buffer, bufferlength: bufferLen, cameraResponse: MTLResponseFunc, Cardinality: MTLCardinalities)
         
         assets.add(shader: MTKPShader(name: "getCardinality", io: CardinalityShaderAssets, tgSize: (0,0,0)))
-        assets.add(shader: MTKPShader(name: "writeMeasureToBins", io: ResponseSummationAssets, tgSize: (16,16,1)))
+        assets.add(shader: MTKPShader(name: "writeMeasureToBins", io: ResponseSummationAssets, tgSize: TGSizeOfSummationShader))
         assets.add(shader: MTKPShader(name: "reduceBins", io: bufferReductionAssets, tgSize: (256,1,1)))
+        
+        computer = ResponseCurveComputer(assets: assets)
     }
     
-    public func estimateCameraResponse() {
+    public func estimateCameraResponse() -> [Float] {
+        var Cardinality = [Float](repeating: 0, count: 3 * 256)
+        guard
+            let summationShader = computer.assets["writeMeasureToBins"],
+            let buffer = summationShader.buffers?[0],
+            let MTLCardinality = summationShader.buffers?[2]
+        else {
+            fatalError()
+        }
         
+        computer.executeCardinalityShader()
+        
+        (0...1).forEach{ _ in
+            computer.executeResponseSummationShader()
+            computer.executeBufferReductionShader()
+            computer.flush(buffer: buffer)
+        }
+        
+        computer.commandBuffer.commit()
+        computer.commandBuffer.waitUntilCompleted()
+        
+        memcpy(&Cardinality, MTLCardinality.contents(), MTLCardinality.length)
+        
+        return Cardinality
     }
 }

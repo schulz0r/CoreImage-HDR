@@ -10,9 +10,13 @@ import MetalKitPlus
 
 final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
     var assets: MTKPAssets
+    internal var commandQueue: MTLCommandQueue!
+    internal var commandBuffer: MTLCommandBuffer!
     
     init(assets: MTKPAssets) {
         self.assets = assets
+        self.commandQueue = self.commandQueue ?? device!.makeCommandQueue()
+        self.commandBuffer = self.commandQueue.makeCommandBuffer()
     }
     
     // shader execution functions
@@ -39,8 +43,6 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         let threads = MTLSizeMake(firstTexture.width, firstTexture.height, 1)
         computeEncoder.dispatchThreads(threads, threadsPerThreadgroup: MTLSizeMake(descriptor.tgSize!.0, descriptor.tgSize!.1, descriptor.tgSize!.2))
         computeEncoder.endEncoding()
-        
-        cmdBuffer.commit()
     }
     
     public func executeCardinalityShader() {
@@ -84,9 +86,6 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         computeEncoder.setThreadgroupMemoryLength(replicationFactor_R * (histogramBuffer.length + MemoryLayout<uint>.size * 3), index: 0)
         computeEncoder.dispatchThreads(threads, threadsPerThreadgroup: MTLSizeMake(blocksize, 1, 1))
         computeEncoder.endEncoding()
-        
-        cmdBuffer.commit()
-        cmdBuffer.waitUntilCompleted()
     }
     
     public func executeResponseSummationShader() {
@@ -123,9 +122,6 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         computeEncoder.setThreadgroupMemoryLength(4 * sharedMemSize.0 * sharedMemSize.1, index: 0)
         computeEncoder.dispatchThreads(threads, threadsPerThreadgroup: MTLSizeMake(sharedMemSize.0, sharedMemSize.1, sharedMemSize.2))
         computeEncoder.endEncoding()
-        
-        cmdBuffer.commit()
-        cmdBuffer.waitUntilCompleted()
     }
     
     public func executeBufferReductionShader() {
@@ -159,8 +155,11 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         computeEncoder.setThreadgroupMemoryLength(4 * sharedMemSize.0 * sharedMemSize.1, index: 0)
         computeEncoder.dispatchThreads(threads, threadsPerThreadgroup: MTLSizeMake(sharedMemSize.0, sharedMemSize.1, sharedMemSize.2))
         computeEncoder.endEncoding()
-        
-        cmdBuffer.commit()
-        cmdBuffer.waitUntilCompleted()
+    }
+    
+    public func flush(buffer: MTLBuffer) {
+        guard let flushBlitEncoder = self.commandBuffer.makeBlitCommandEncoder() else {fatalError()}
+        flushBlitEncoder.fill(buffer: buffer, range: Range(0...buffer.length), value: 0)
+        flushBlitEncoder.endEncoding()
     }
 }
