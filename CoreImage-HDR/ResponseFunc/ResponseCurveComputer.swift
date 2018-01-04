@@ -147,11 +147,12 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         
         computeEncoder.setComputePipelineState(descriptor.state!)
         
-        if let buffers = descriptor.buffers {
-            computeEncoder.setBuffers(buffers, offsets: [Int](repeating: 0, count: buffers.count), range: 0..<buffers.count)
+        guard descriptor.buffers != nil else {
+            fatalError()
         }
         
-        let threads = MTLSizeMake(256, 1, 1)
+        computeEncoder.setBuffers(descriptor.buffers!, offsets: [Int](repeating: 0, count: descriptor.buffers!.count), range: 0..<descriptor.buffers!.count)
+        
         computeEncoder.setThreadgroupMemoryLength(4 * sharedMemSize.0 * sharedMemSize.1, index: 0)
         computeEncoder.dispatchThreadgroups(MTLSizeMake(1, 1, 1), threadsPerThreadgroup: MTLSizeMake(sharedMemSize.0, sharedMemSize.1, sharedMemSize.2))
         computeEncoder.endEncoding()

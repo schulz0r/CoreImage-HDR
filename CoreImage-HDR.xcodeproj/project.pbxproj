@@ -8,18 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		17215BFF1FDF43B700912238 /* TestSortNCount.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17215BFA1FDF321800912238 /* TestSortNCount.metal */; };
-		17215C011FDF444800912238 /* SortAndCount.h in Headers */ = {isa = PBXBuildFile; fileRef = 177753051FD1C88B00C427E8 /* SortAndCount.h */; };
-		177753041FD1C81200C427E8 /* responseSumShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 177753031FD1C81200C427E8 /* responseSumShader.metal */; };
-		177753101FD3431300C427E8 /* calculateHDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17ACF5371FBBC57300BFBF41 /* calculateHDR.h */; };
-		177753141FD382FC00C427E8 /* getCardinality.metal in Sources */ = {isa = PBXBuildFile; fileRef = 177753131FD382FC00C427E8 /* getCardinality.metal */; };
-		177753171FD4A6AA00C427E8 /* binReduction.metal in Sources */ = {isa = PBXBuildFile; fileRef = 177753161FD4A6AA00C427E8 /* binReduction.metal */; };
 		17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */; };
 		17832D021FB49C1500E19938 /* CoreImage_HDRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */; };
 		17832D041FB49C1500E19938 /* CoreImage_HDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17832CF61FB49C1500E19938 /* CoreImage_HDR.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D0D1FB49C4500E19938 /* HDRProcessor.swift */; };
 		17A323FA1FEAF0CC00CFDAA8 /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A323F91FEAF0CC00CFDAA8 /* extensions.swift */; };
 		17A325511FEDCD0200CFDAA8 /* CardinalityShaderIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A325501FEDCD0200CFDAA8 /* CardinalityShaderIO.swift */; };
-		17ACF53A1FBBC7C200BFBF41 /* makeHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */; };
 		17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AEAA621FC57E2400CE17DF /* extensions.swift */; };
 		17B45F451FF5573F009BE0BF /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17B45F441FF5573F009BE0BF /* MetalKitPlus.framework */; };
 		17B45F471FF557DC009BE0BF /* ResponseCurveComputer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B45F461FF557DC009BE0BF /* ResponseCurveComputer.swift */; };
@@ -28,6 +22,14 @@
 		17E948061FFBE1AD007E0476 /* ResponseEstimationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948051FFBE1AD007E0476 /* ResponseEstimationTests.swift */; };
 		17E948081FFC1E01007E0476 /* bufferReductionIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948071FFC1E01007E0476 /* bufferReductionIO.swift */; };
 		17E9480A1FFD3EAC007E0476 /* ResponseMetaComp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948091FFD3EAC007E0476 /* ResponseMetaComp.swift */; };
+		17E9483D1FFEDECF007E0476 /* responseSumShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17E948361FFEDECF007E0476 /* responseSumShader.metal */; };
+		17E9483E1FFEDECF007E0476 /* SortAndCount.h in Headers */ = {isa = PBXBuildFile; fileRef = 17E948371FFEDECF007E0476 /* SortAndCount.h */; };
+		17E9483F1FFEDECF007E0476 /* movingAverage.h in Headers */ = {isa = PBXBuildFile; fileRef = 17E948381FFEDECF007E0476 /* movingAverage.h */; };
+		17E948401FFEDECF007E0476 /* getCardinality.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17E948391FFEDECF007E0476 /* getCardinality.metal */; };
+		17E948411FFEDECF007E0476 /* calculateHDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17E9483A1FFEDECF007E0476 /* calculateHDR.h */; };
+		17E948421FFEDECF007E0476 /* colourHistogram.h in Headers */ = {isa = PBXBuildFile; fileRef = 17E9483B1FFEDECF007E0476 /* colourHistogram.h */; };
+		17E948431FFEDECF007E0476 /* binReduction.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17E9483C1FFEDECF007E0476 /* binReduction.metal */; };
+		17E948481FFEDF2A007E0476 /* makeHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17E948471FFEDF2A007E0476 /* makeHDR.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,11 +45,6 @@
 /* Begin PBXFileReference section */
 		17215BFA1FDF321800912238 /* TestSortNCount.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = TestSortNCount.metal; sourceTree = "<group>"; };
 		17215C031FDF460400912238 /* SortAndCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
-		172259A31FDDAA18009B0925 /* colourHistogram.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = colourHistogram.h; sourceTree = "<group>"; };
-		177753031FD1C81200C427E8 /* responseSumShader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = responseSumShader.metal; sourceTree = "<group>"; };
-		177753051FD1C88B00C427E8 /* SortAndCount.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = SortAndCount.h; sourceTree = "<group>"; };
-		177753131FD382FC00C427E8 /* getCardinality.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = getCardinality.metal; sourceTree = "<group>"; };
-		177753161FD4A6AA00C427E8 /* binReduction.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = binReduction.metal; sourceTree = "<group>"; };
 		17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreImage_HDR.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		17832CF61FB49C1500E19938 /* CoreImage_HDR.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CoreImage_HDR.h; sourceTree = "<group>"; };
 		17832CF71FB49C1500E19938 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -55,11 +52,8 @@
 		17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreImage_HDRTests.swift; sourceTree = "<group>"; };
 		17832D031FB49C1500E19938 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		17832D0D1FB49C4500E19938 /* HDRProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRProcessor.swift; sourceTree = "<group>"; };
-		17832D121FB51A0C00E19938 /* movingAverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = movingAverage.h; sourceTree = "<group>"; };
 		17A323F91FEAF0CC00CFDAA8 /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
 		17A325501FEDCD0200CFDAA8 /* CardinalityShaderIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardinalityShaderIO.swift; sourceTree = "<group>"; };
-		17ACF5371FBBC57300BFBF41 /* calculateHDR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calculateHDR.h; sourceTree = "<group>"; };
-		17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = makeHDR.metal; sourceTree = "<group>"; };
 		17AEAA621FC57E2400CE17DF /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
 		17B45F441FF5573F009BE0BF /* MetalKitPlus.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MetalKitPlus.framework; sourceTree = "<group>"; };
 		17B45F461FF557DC009BE0BF /* ResponseCurveComputer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseCurveComputer.swift; sourceTree = "<group>"; };
@@ -68,6 +62,14 @@
 		17E948051FFBE1AD007E0476 /* ResponseEstimationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseEstimationTests.swift; sourceTree = "<group>"; };
 		17E948071FFC1E01007E0476 /* bufferReductionIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = bufferReductionIO.swift; sourceTree = "<group>"; };
 		17E948091FFD3EAC007E0476 /* ResponseMetaComp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseMetaComp.swift; sourceTree = "<group>"; };
+		17E948361FFEDECF007E0476 /* responseSumShader.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = responseSumShader.metal; sourceTree = "<group>"; };
+		17E948371FFEDECF007E0476 /* SortAndCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
+		17E948381FFEDECF007E0476 /* movingAverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = movingAverage.h; sourceTree = "<group>"; };
+		17E948391FFEDECF007E0476 /* getCardinality.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = getCardinality.metal; sourceTree = "<group>"; };
+		17E9483A1FFEDECF007E0476 /* calculateHDR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calculateHDR.h; sourceTree = "<group>"; };
+		17E9483B1FFEDECF007E0476 /* colourHistogram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = colourHistogram.h; sourceTree = "<group>"; };
+		17E9483C1FFEDECF007E0476 /* binReduction.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = binReduction.metal; sourceTree = "<group>"; };
+		17E948471FFEDF2A007E0476 /* makeHDR.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = makeHDR.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,37 +110,6 @@
 			name = Framework;
 			sourceTree = "<group>";
 		};
-		177753111FD3435500C427E8 /* Shaders */ = {
-			isa = PBXGroup;
-			children = (
-				177753121FD3440700C427E8 /* Headers */,
-				177753151FD4A69400C427E8 /* ResponseShader */,
-				17ACF5391FBBC7C200BFBF41 /* makeHDR.metal */,
-			);
-			path = Shaders;
-			sourceTree = "<group>";
-		};
-		177753121FD3440700C427E8 /* Headers */ = {
-			isa = PBXGroup;
-			children = (
-				17ACF5371FBBC57300BFBF41 /* calculateHDR.h */,
-				17832D121FB51A0C00E19938 /* movingAverage.h */,
-				172259A31FDDAA18009B0925 /* colourHistogram.h */,
-				177753051FD1C88B00C427E8 /* SortAndCount.h */,
-			);
-			name = Headers;
-			sourceTree = "<group>";
-		};
-		177753151FD4A69400C427E8 /* ResponseShader */ = {
-			isa = PBXGroup;
-			children = (
-				177753031FD1C81200C427E8 /* responseSumShader.metal */,
-				177753131FD382FC00C427E8 /* getCardinality.metal */,
-				177753161FD4A6AA00C427E8 /* binReduction.metal */,
-			);
-			name = ResponseShader;
-			sourceTree = "<group>";
-		};
 		17832CE91FB49C1500E19938 = {
 			isa = PBXGroup;
 			children = (
@@ -161,8 +132,8 @@
 		17832CF51FB49C1500E19938 /* CoreImage-HDR */ = {
 			isa = PBXGroup;
 			children = (
+				17E948351FFEDECF007E0476 /* Shader */,
 				17A3254D1FEDCA1E00CFDAA8 /* ResponseFunc */,
-				177753111FD3435500C427E8 /* Shaders */,
 				17AEAA621FC57E2400CE17DF /* extensions.swift */,
 				17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */,
 				175005351FBA608D005F6856 /* Framework */,
@@ -203,6 +174,30 @@
 			path = ShaderIOs;
 			sourceTree = "<group>";
 		};
+		17E948351FFEDECF007E0476 /* Shader */ = {
+			isa = PBXGroup;
+			children = (
+				17E948441FFEDEDE007E0476 /* Header */,
+				17E948471FFEDF2A007E0476 /* makeHDR.metal */,
+				17E948361FFEDECF007E0476 /* responseSumShader.metal */,
+				17E948391FFEDECF007E0476 /* getCardinality.metal */,
+				17E9483C1FFEDECF007E0476 /* binReduction.metal */,
+			);
+			name = Shader;
+			path = "CoreImage-HDR/Shader";
+			sourceTree = SOURCE_ROOT;
+		};
+		17E948441FFEDEDE007E0476 /* Header */ = {
+			isa = PBXGroup;
+			children = (
+				17E948371FFEDECF007E0476 /* SortAndCount.h */,
+				17E948381FFEDECF007E0476 /* movingAverage.h */,
+				17E9483A1FFEDECF007E0476 /* calculateHDR.h */,
+				17E9483B1FFEDECF007E0476 /* colourHistogram.h */,
+			);
+			name = Header;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -210,8 +205,10 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				17215C011FDF444800912238 /* SortAndCount.h in Headers */,
-				177753101FD3431300C427E8 /* calculateHDR.h in Headers */,
+				17E948411FFEDECF007E0476 /* calculateHDR.h in Headers */,
+				17E9483E1FFEDECF007E0476 /* SortAndCount.h in Headers */,
+				17E948421FFEDECF007E0476 /* colourHistogram.h in Headers */,
+				17E9483F1FFEDECF007E0476 /* movingAverage.h in Headers */,
 				17832D041FB49C1500E19938 /* CoreImage_HDR.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -316,15 +313,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17E948481FFEDF2A007E0476 /* makeHDR.metal in Sources */,
+				17E948431FFEDECF007E0476 /* binReduction.metal in Sources */,
 				17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */,
+				17E948401FFEDECF007E0476 /* getCardinality.metal in Sources */,
 				17E9480A1FFD3EAC007E0476 /* ResponseMetaComp.swift in Sources */,
-				177753041FD1C81200C427E8 /* responseSumShader.metal in Sources */,
-				17ACF53A1FBBC7C200BFBF41 /* makeHDR.metal in Sources */,
 				17E68ADB1FF1CD3E008F9DCE /* textureLoaderExtensions.swift in Sources */,
 				17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */,
-				177753141FD382FC00C427E8 /* getCardinality.metal in Sources */,
 				17B45F471FF557DC009BE0BF /* ResponseCurveComputer.swift in Sources */,
-				177753171FD4A6AA00C427E8 /* binReduction.metal in Sources */,
+				17E9483D1FFEDECF007E0476 /* responseSumShader.metal in Sources */,
 				17E948081FFC1E01007E0476 /* bufferReductionIO.swift in Sources */,
 				17DA9C3A1FFAC9610041E9BA /* ResponseSummationShaderIO.swift in Sources */,
 				17A325511FEDCD0200CFDAA8 /* CardinalityShaderIO.swift in Sources */,
