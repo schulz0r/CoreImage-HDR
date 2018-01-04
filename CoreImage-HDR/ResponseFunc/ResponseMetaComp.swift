@@ -9,6 +9,7 @@ import MetalKit
 import MetalKitPlus
 
 public final class ResponseEstimator : MTKPDeviceUser {
+    
     internal var assets = MTKPAssets(ResponseEstimator.self)
     internal var computer : ResponseCurveComputer! = nil
     private var textureLoader: MTKTextureLoader! = nil

@@ -153,7 +153,7 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         
         let threads = MTLSizeMake(256, 1, 1)
         computeEncoder.setThreadgroupMemoryLength(4 * sharedMemSize.0 * sharedMemSize.1, index: 0)
-        computeEncoder.dispatchThreads(threads, threadsPerThreadgroup: MTLSizeMake(sharedMemSize.0, sharedMemSize.1, sharedMemSize.2))
+        computeEncoder.dispatchThreadgroups(MTLSizeMake(1, 1, 1), threadsPerThreadgroup: MTLSizeMake(sharedMemSize.0, sharedMemSize.1, sharedMemSize.2))
         computeEncoder.endEncoding()
     }
     

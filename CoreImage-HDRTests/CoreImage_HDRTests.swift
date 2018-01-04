@@ -28,7 +28,7 @@ class CoreImage_HDRTests: XCTestCase {
         super.setUp()
         
         do {
-            library = try device.makeDefaultLibrary(bundle: Bundle(for: HDRCameraResponseProcessor.self))
+            library = try device.makeDefaultLibrary(bundle: Bundle(for: HDRProcessor.self))
         } catch let Errors {
             fatalError(Errors.localizedDescription)
         }

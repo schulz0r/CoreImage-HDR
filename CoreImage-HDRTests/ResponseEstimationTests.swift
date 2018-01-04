@@ -28,7 +28,7 @@ class ResponseEstimationTests: XCTestCase {
         super.setUp()
         
         do {
-            library = try device.makeDefaultLibrary(bundle: Bundle(for: HDRCameraResponseProcessor.self))
+            library = try device.makeDefaultLibrary(bundle: Bundle(for: ResponseEstimator.self))
         } catch let Errors {
             fatalError(Errors.localizedDescription)
         }
@@ -64,21 +64,6 @@ class ResponseEstimationTests: XCTestCase {
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
-    }
-    
-    func testCameraResponse() {
-        var HDR:CIImage = CIImage()
-        do{
-            HDR = try HDRCameraResponseProcessor.apply(withExtent: Testimages[0].extent,
-                                                       inputs: Testimages,
-                                                       arguments: ["ExposureTimes" : self.ExposureTimes])
-        } catch let Errors {
-            XCTFail(Errors.localizedDescription)
-        }
-        
-        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/CameraResponse.png"))
-        
-        XCTAssertTrue(true)
     }
     
     // test cardinality (histogram) shader for correct functionality
