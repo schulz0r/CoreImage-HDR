@@ -252,12 +252,14 @@ class ResponseEstimationTests: XCTestCase {
     }
     
     func testResponseFunctionEstimation() {
-        var cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
+        let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
         
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
-        let ResponseFunciton = metaComp.estimateCameraResponse()
+        let ResponseFunciton:[float3] = metaComp.estimateCameraResponse()
         
-        XCTAssert(true)
+        print(ResponseFunciton.description)
+        
+        XCTAssert(ResponseFunciton.reduce(true){$0 && ($1.x > 0) && ($1.y > 0) && ($1.z > 0)})
     }
     
     func testPerformanceExample() {

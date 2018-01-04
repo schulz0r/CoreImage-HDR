@@ -66,8 +66,8 @@ public final class ResponseEstimator : MTKPDeviceUser {
         computer = ResponseCurveComputer(assets: assets)
     }
     
-    public func estimateCameraResponse() -> [Float] {
-        var Cardinality = [Float](repeating: 0, count: 3 * 256)
+    public func estimateCameraResponse() -> [float3] {
+        var Cardinality = [float3](repeating: float3(0), count: 256)
         guard
             let summationShader = computer.assets["writeMeasureToBins"],
             let buffer = summationShader.buffers?[0],
@@ -78,7 +78,7 @@ public final class ResponseEstimator : MTKPDeviceUser {
         
         computer.executeCardinalityShader()
         
-        (0...1).forEach{ _ in
+        (0...5).forEach{ _ in
             computer.executeResponseSummationShader()
             computer.executeBufferReductionShader()
             computer.flush(buffer: buffer)
