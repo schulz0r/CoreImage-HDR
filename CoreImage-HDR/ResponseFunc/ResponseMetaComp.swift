@@ -49,8 +49,8 @@ public final class ResponseEstimator : MTKPDeviceUser {
             let MTLCameraShifts = device!.makeBuffer(bytes: CameraShifts, length: MemoryLayout<uint2>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
             let MTLExposureTimes = device!.makeBuffer(bytes: ExposureTimes, length: MemoryLayout<Float>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
             let buffer = device!.makeBuffer(length: bufferLen * MemoryLayout<float3>.size/2, options: .storageModePrivate),  // float3 / 2 = half3
-            let MTLWeightFunc = device!.makeBuffer(bytesNoCopy: &initialWeightFunc, length: initialWeightFunc.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
-            let MTLResponseFunc = device!.makeBuffer(bytesNoCopy: &initialCamResponse, length: initialCamResponse.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
+            let MTLWeightFunc = device!.makeBuffer(bytes: &initialWeightFunc, length: initialWeightFunc.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
+            let MTLResponseFunc = device!.makeBuffer(bytes: &initialCamResponse, length: initialCamResponse.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
         else {
                 fatalError("Could not initialize Buffers")
         }
@@ -71,7 +71,7 @@ public final class ResponseEstimator : MTKPDeviceUser {
         guard
             let summationShader = computer.assets["writeMeasureToBins"],
             let buffer = summationShader.buffers?[0],
-            let MTLCardinality = summationShader.buffers?[2]
+            let MTLCardinality = summationShader.buffers?[4]
         else {
             fatalError()
         }

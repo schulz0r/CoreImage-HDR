@@ -95,7 +95,7 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         //guard self.commandQueue != nil else {fatalError()}
         guard let CommandQ = self.commandQueue ?? device!.makeCommandQueue() else { fatalError("Could not intitialize command queue.") }
         
-        let name = "writeMeasureToBins_float32"
+        let name = "writeMeasureToBins"
         
         guard
             let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,
@@ -131,7 +131,7 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         //guard self.commandQueue != nil else {fatalError()}
         guard let CommandQ = self.commandQueue ?? device!.makeCommandQueue() else { fatalError("Could not intitialize command queue.") }
         
-        let name = "reduceBins_float"
+        let name = "reduceBins"
         
         guard
             let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,
