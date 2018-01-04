@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		171D8F4D1FC7B41900B608CF /* ResponseEstimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171D8F4C1FC7B41900B608CF /* ResponseEstimation.swift */; };
 		17215BFF1FDF43B700912238 /* TestSortNCount.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17215BFA1FDF321800912238 /* TestSortNCount.metal */; };
 		17215C011FDF444800912238 /* SortAndCount.h in Headers */ = {isa = PBXBuildFile; fileRef = 177753051FD1C88B00C427E8 /* SortAndCount.h */; };
 		177753041FD1C81200C427E8 /* responseSumShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 177753031FD1C81200C427E8 /* responseSumShader.metal */; };
@@ -42,7 +41,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		171D8F4C1FC7B41900B608CF /* ResponseEstimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseEstimation.swift; sourceTree = "<group>"; };
 		17215BFA1FDF321800912238 /* TestSortNCount.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = TestSortNCount.metal; sourceTree = "<group>"; };
 		17215C031FDF460400912238 /* SortAndCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
 		172259A31FDDAA18009B0925 /* colourHistogram.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = colourHistogram.h; sourceTree = "<group>"; };
@@ -168,7 +166,6 @@
 				17AEAA621FC57E2400CE17DF /* extensions.swift */,
 				17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */,
 				175005351FBA608D005F6856 /* Framework */,
-				171D8F4C1FC7B41900B608CF /* ResponseEstimation.swift */,
 				17832D0D1FB49C4500E19938 /* HDRProcessor.swift */,
 			);
 			path = "CoreImage-HDR";
@@ -321,7 +318,6 @@
 			files = (
 				17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */,
 				17E9480A1FFD3EAC007E0476 /* ResponseMetaComp.swift in Sources */,
-				171D8F4D1FC7B41900B608CF /* ResponseEstimation.swift in Sources */,
 				177753041FD1C81200C427E8 /* responseSumShader.metal in Sources */,
 				17ACF53A1FBBC7C200BFBF41 /* makeHDR.metal in Sources */,
 				17E68ADB1FF1CD3E008F9DCE /* textureLoaderExtensions.swift in Sources */,
