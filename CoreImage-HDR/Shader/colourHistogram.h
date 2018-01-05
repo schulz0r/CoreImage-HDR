@@ -10,13 +10,10 @@
 #define colourHistogram_h
 
 template<int N>
-union colourHistogram {
-    struct {
-        metal::array<atomic_uint, N> red;
-        metal::array<atomic_uint, N> green;
-        metal::array<atomic_uint, N> blue;
-    };
-    metal::array< metal::array<atomic_uint, N>, 3 > c;
+struct colourHistogram final {
+    metal::array<atomic_uint, N> red;
+    metal::array<atomic_uint, N> green;
+    metal::array<atomic_uint, N> blue;
 };
 
 #endif /* colourHistogram_h */
