@@ -79,11 +79,11 @@ public final class ResponseEstimator : MTKPDeviceUser {
         
         computer.executeCardinalityShader()
         
-        (0...5).forEach{ _ in
+        (0...5).forEach({ _ in
             computer.executeResponseSummationShader()
             computer.executeBufferReductionShader()
             computer.flush(buffer: buffer)
-        }
+        })
         
         computer.commandBuffer.commit()
         computer.commandBuffer.waitUntilCompleted()

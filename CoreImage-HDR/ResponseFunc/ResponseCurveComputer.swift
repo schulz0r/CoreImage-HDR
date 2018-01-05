@@ -24,8 +24,7 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         guard
             let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,
             descriptor.state != nil,
-            let cmdBuffer = self.commandQueue.makeCommandBuffer(),
-            let computeEncoder = cmdBuffer.makeComputeCommandEncoder(),
+            let computeEncoder = commandBuffer.makeComputeCommandEncoder(),
             let textures = descriptor.textures,
             let firstTexture = textures.first
             else {fatalError()}
@@ -49,8 +48,6 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         guard self.device != nil else {
             fatalError("Device was not initialized.")
         }
-        //guard self.commandQueue != nil else {fatalError()}
-        guard let CommandQ = self.commandQueue ?? device!.makeCommandQueue() else { fatalError("Could not intitialize command queue.") }
         
         let name = "getCardinality"
         
@@ -61,8 +58,7 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         guard
             let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,
             descriptor.state != nil,
-            let cmdBuffer = CommandQ.makeCommandBuffer(),
-            let computeEncoder = cmdBuffer.makeComputeCommandEncoder(),
+            let computeEncoder = commandBuffer.makeComputeCommandEncoder(),
             let textures = descriptor.textures,
             let firstTexture = textures.first
             else {fatalError()}
@@ -92,16 +88,13 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         guard self.device != nil else {
             fatalError("Device was not initialized.")
         }
-        //guard self.commandQueue != nil else {fatalError()}
-        guard let CommandQ = self.commandQueue ?? device!.makeCommandQueue() else { fatalError("Could not intitialize command queue.") }
         
         let name = "writeMeasureToBins"
         
         guard
             let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,
             descriptor.state != nil,
-            let cmdBuffer = CommandQ.makeCommandBuffer(),
-            let computeEncoder = cmdBuffer.makeComputeCommandEncoder(),
+            let computeEncoder = commandBuffer.makeComputeCommandEncoder(),
             let textures = descriptor.textures,
             let firstTexture = textures.first,
             let sharedMemSize = descriptor.tgSize
@@ -128,16 +121,13 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
         guard self.device != nil else {
             fatalError("Device was not initialized.")
         }
-        //guard self.commandQueue != nil else {fatalError()}
-        guard let CommandQ = self.commandQueue ?? device!.makeCommandQueue() else { fatalError("Could not intitialize command queue.") }
         
         let name = "reduceBins"
         
         guard
             let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,
             descriptor.state != nil,
-            let cmdBuffer = CommandQ.makeCommandBuffer(),
-            let computeEncoder = cmdBuffer.makeComputeCommandEncoder(),
+            let computeEncoder = commandBuffer.makeComputeCommandEncoder(),
             let sharedMemSize = descriptor.tgSize
             else {fatalError()}
         
