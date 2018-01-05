@@ -240,7 +240,7 @@ class ResponseEstimationTests: XCTestCase {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
         
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
-        let ResponseFunciton:[float3] = metaComp.estimateCameraResponse()
+        let ResponseFunciton:[float3] = metaComp.estimateCameraResponse(iterations: 10)
         
         print(ResponseFunciton.description)
         

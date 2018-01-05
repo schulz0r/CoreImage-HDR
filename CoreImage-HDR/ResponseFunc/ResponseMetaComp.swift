@@ -46,7 +46,7 @@ public final class ResponseEstimator : MTKPDeviceUser {
         var initialWeightFunc:[float3] = (0...255).map{ float3( exp(-TrainingWeight * pow( (Float($0)-127.5)/127.5, 2)) ) }
         
         guard
-            let MTLCardinalities = device!.makeBuffer(length: MemoryLayout<uint>.size * 256 * 3, options: .cpuCacheModeWriteCombined),
+            let MTLCardinalities = device!.makeBuffer(length: MemoryLayout<uint>.size * 256 * 3, options: .storageModePrivate),
             let MTLCameraShifts = device!.makeBuffer(bytes: CameraShifts, length: MemoryLayout<uint2>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
             let MTLExposureTimes = device!.makeBuffer(bytes: ExposureTimes, length: MemoryLayout<Float>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
             let buffer = device!.makeBuffer(length: bufferLen * MemoryLayout<float3>.size/2, options: .storageModePrivate),  // float3 / 2 = half3
@@ -67,7 +67,7 @@ public final class ResponseEstimator : MTKPDeviceUser {
         computer = ResponseCurveComputer(assets: assets)
     }
     
-    public func estimateCameraResponse() -> [float3] {
+    public func estimateCameraResponse(iterations: Int) -> [float3] {
         var Cardinality = [float3](repeating: float3(0), count: 256)
         guard
             let summationShader = computer.assets["writeMeasureToBins"],
@@ -79,7 +79,7 @@ public final class ResponseEstimator : MTKPDeviceUser {
         
         computer.executeCardinalityShader()
         
-        (0...5).forEach({ _ in
+        (0...iterations).forEach({ _ in
             computer.executeResponseSummationShader()
             computer.executeBufferReductionShader()
             computer.flush(buffer: buffer)
@@ -90,6 +90,6 @@ public final class ResponseEstimator : MTKPDeviceUser {
         
         memcpy(&Cardinality, MTLCardinality.contents(), MTLCardinality.length)
         
-        return Cardinality
+        return Cardinality.map{$0 / Cardinality.last!}
     }
 }
