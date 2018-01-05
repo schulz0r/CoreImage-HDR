@@ -30,6 +30,7 @@
 		17E948421FFEDECF007E0476 /* colourHistogram.h in Headers */ = {isa = PBXBuildFile; fileRef = 17E9483B1FFEDECF007E0476 /* colourHistogram.h */; };
 		17E948431FFEDECF007E0476 /* binReduction.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17E9483C1FFEDECF007E0476 /* binReduction.metal */; };
 		17E948481FFEDF2A007E0476 /* makeHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17E948471FFEDF2A007E0476 /* makeHDR.metal */; };
+		17E9484A1FFFF484007E0476 /* PerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948491FFFF484007E0476 /* PerformanceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,7 @@
 		17E9483B1FFEDECF007E0476 /* colourHistogram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = colourHistogram.h; sourceTree = "<group>"; };
 		17E9483C1FFEDECF007E0476 /* binReduction.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = binReduction.metal; sourceTree = "<group>"; };
 		17E948471FFEDF2A007E0476 /* makeHDR.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = makeHDR.metal; sourceTree = "<group>"; };
+		17E948491FFFF484007E0476 /* PerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,6 +149,7 @@
 			children = (
 				17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */,
 				17E948051FFBE1AD007E0476 /* ResponseEstimationTests.swift */,
+				17E948491FFFF484007E0476 /* PerformanceTests.swift */,
 				17832D031FB49C1500E19938 /* Info.plist */,
 				17215BFC1FDF321F00912238 /* ShaderTests */,
 				17A323F91FEAF0CC00CFDAA8 /* extensions.swift */,
@@ -335,6 +338,7 @@
 				17832D021FB49C1500E19938 /* CoreImage_HDRTests.swift in Sources */,
 				17215BFF1FDF43B700912238 /* TestSortNCount.metal in Sources */,
 				17A323FA1FEAF0CC00CFDAA8 /* extensions.swift in Sources */,
+				17E9484A1FFFF484007E0476 /* PerformanceTests.swift in Sources */,
 				17E948061FFBE1AD007E0476 /* ResponseEstimationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

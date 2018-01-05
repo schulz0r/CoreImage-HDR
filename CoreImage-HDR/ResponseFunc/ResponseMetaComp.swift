@@ -77,6 +77,8 @@ public final class ResponseEstimator : MTKPDeviceUser {
             fatalError()
         }
         
+        computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
+        
         computer.executeCardinalityShader()
         
         (0...iterations).forEach({ _ in
