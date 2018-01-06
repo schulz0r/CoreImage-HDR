@@ -9,7 +9,7 @@
 import MetalKit
 import MetalKitPlus
 
-final class bufferReductionShaderIO: MTKPIOProvider, MTKPDeviceUser {
+final class bufferReductionShaderIO: MTKPIOProvider {
     
     private var BinBuffer:MTLBuffer! = nil
     private var cameraResponse:MTLBuffer! = nil
@@ -17,13 +17,10 @@ final class bufferReductionShaderIO: MTKPIOProvider, MTKPDeviceUser {
     private var Cardinality:MTLBuffer! = nil
     
     init(BinBuffer: MTLBuffer, bufferlength: Int, cameraResponse: MTLBuffer, Cardinality: MTLBuffer){
-        guard self.device != nil else {
-                fatalError()
-        }
         var bufflen = uint(bufferlength)
         
         self.BinBuffer = BinBuffer
-        self.bufferSize = self.device!.makeBuffer(bytes: &bufflen, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)!
+        self.bufferSize = MTKPDevice.device.makeBuffer(bytes: &bufflen, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)!
         self.cameraResponse = cameraResponse
         self.Cardinality = Cardinality
     }

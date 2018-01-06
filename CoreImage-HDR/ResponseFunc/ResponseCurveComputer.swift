@@ -8,15 +8,15 @@
 
 import MetalKitPlus
 
-final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
-    var assets: MTKPAssets
-    internal var commandQueue: MTLCommandQueue!
+final class ResponseCurveComputer : MTKPComputer {
+    var assets:MTKPAssets
+    var commandQueue:MTLCommandQueue
     public var commandBuffer: MTLCommandBuffer!
     
     init(assets: MTKPAssets) {
         self.assets = assets
-        self.commandQueue = self.commandQueue ?? device!.makeCommandQueue()
-        self.commandBuffer = self.commandQueue.makeCommandBuffer()
+        self.commandQueue = MTKPDevice.commandQueue
+        self.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
     }
     
     // shader execution functions
@@ -29,9 +29,6 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
             let firstTexture = textures.first
             else {fatalError()}
         
-        guard descriptor.tgSize != nil else {
-            fatalError("execute func")
-        }
         
         computeEncoder.setComputePipelineState(descriptor.state!)
         computeEncoder.setTextures(textures, range: 0..<textures.count)
@@ -45,15 +42,12 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
     }
     
     public func executeCardinalityShader() {
-        guard self.device != nil else {
-            fatalError("Device was not initialized.")
-        }
         
         let name = "getCardinality"
         
         let streamingMultiprocessorsPerBlock = 4    // TODO: get actual number of the device, then ommit barriers in shader.
         let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
-        let replicationFactor_R = max(self.device!.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
+        let replicationFactor_R = max(MTKPDevice.device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
         
         guard
             let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,
@@ -62,10 +56,6 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
             let textures = descriptor.textures,
             let firstTexture = textures.first
             else {fatalError()}
-        
-        guard descriptor.tgSize != nil else {
-            fatalError("execute func")
-        }
         
         guard let histogramBuffer = descriptor.buffers?[2] else { fatalError("Cardinality Buffer does not exist.") }
         guard let ImageCount = descriptor.textures?.count else { fatalError("NumberOfTextures is Unknown.") }
@@ -118,9 +108,6 @@ final class ResponseCurveComputer : MTKPComputer, MTKPCommandQueueUser {
     }
     
     public func executeBufferReductionShader() {
-        guard self.device != nil else {
-            fatalError("Device was not initialized.")
-        }
         
         let name = "reduceBins"
         

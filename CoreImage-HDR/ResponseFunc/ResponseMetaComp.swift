@@ -8,21 +8,20 @@
 import MetalKit
 import MetalKitPlus
 
-public final class ResponseEstimator : MTKPDeviceUser {
+/* A Metacomputer ensures that the computer executes/encodes the shader in the correct order
+ and returns the result of the computation. */
+protocol MetaComputer {
+    var computer : ResponseCurveComputer {get}
+}
+
+public final class ResponseEstimator: MetaComputer {
+    var computer : ResponseCurveComputer
     
-    internal var assets = MTKPAssets(ResponseEstimator.self)
-    internal var computer : ResponseCurveComputer! = nil
     private var textureLoader: MTKTextureLoader! = nil
     private var textures: [MTLTexture]! = nil
     
     init(ImageBracket: [CIImage], CameraShifts: [int2], context: CIContext? = nil) {
-        guard self.device != nil else {
-            fatalError("Device is not initialized.")
-        }
-        guard
-            ImageBracket.count > 1,
-            ImageBracket.count <= 5
-        else {
+        guard ImageBracket.count > 1, ImageBracket.count <= 5 else {
             fatalError("Image bracket length must be at least 2 and 5 at maximum.")
         }
         
@@ -33,8 +32,8 @@ public final class ResponseEstimator : MTKPDeviceUser {
             return metaData["ExposureTime"] as! Float
         }
         
-        textureLoader = MTKTextureLoader(device: self.device!)
-        textures = ImageBracket.map{textureLoader.newTexture(CIImage: $0, context: context ?? CIContext(mtlDevice: self.device!))}
+        textureLoader = MTKTextureLoader(device: MTKPDevice.device)
+        textures = ImageBracket.map{textureLoader.newTexture(CIImage: $0, context: context ?? CIContext(mtlDevice: MTKPDevice.device))}
         
         // create shared ressources
         let TrainingWeight:Float = 4    // TODO: let user decide about this weight
@@ -46,23 +45,34 @@ public final class ResponseEstimator : MTKPDeviceUser {
         var initialWeightFunc:[float3] = (0...255).map{ float3( exp(-TrainingWeight * pow( (Float($0)-127.5)/127.5, 2)) ) }
         
         guard
-            let MTLCardinalities = device!.makeBuffer(length: MemoryLayout<uint>.size * 256 * 3, options: .storageModePrivate),
-            let MTLCameraShifts = device!.makeBuffer(bytes: CameraShifts, length: MemoryLayout<uint2>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
-            let MTLExposureTimes = device!.makeBuffer(bytes: ExposureTimes, length: MemoryLayout<Float>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
-            let buffer = device!.makeBuffer(length: bufferLen * MemoryLayout<float3>.size/2, options: .storageModePrivate),  // float3 / 2 = half3
-            let MTLWeightFunc = device!.makeBuffer(bytes: &initialWeightFunc, length: initialWeightFunc.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
-            let MTLResponseFunc = device!.makeBuffer(bytes: &initialCamResponse, length: initialCamResponse.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
+            let MTLCardinalities = MTKPDevice.device.makeBuffer(length: MemoryLayout<uint>.size * 256 * 3, options: .storageModePrivate),
+            let MTLCameraShifts = MTKPDevice.device.makeBuffer(bytes: CameraShifts, length: MemoryLayout<uint2>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
+            let MTLExposureTimes = MTKPDevice.device.makeBuffer(bytes: ExposureTimes, length: MemoryLayout<Float>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
+            let buffer = MTKPDevice.device.makeBuffer(length: bufferLen * MemoryLayout<float3>.size/2, options: .storageModePrivate),  // float3 / 2 = half3
+            let MTLWeightFunc = MTKPDevice.device.makeBuffer(bytes: &initialWeightFunc, length: initialWeightFunc.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
+            let MTLResponseFunc = MTKPDevice.device.makeBuffer(bytes: &initialCamResponse, length: initialCamResponse.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
         else {
                 fatalError("Could not initialize Buffers")
         }
         
-        let CardinalityShaderAssets = CardinalityShaderIO(inputTextures: textures, cardinalityBuffer: MTLCardinalities)
+        var imageDim = uint2(uint(textures[0].width), uint(textures[0].height))
+        let streamingMultiprocessorsPerBlock = 4
+        let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
+        var replicationFactor_R = max(MTKPDevice.device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
+        
+        let CardinalityShaderAssets = CardinalityShaderIO(inputTextures: textures, cardinalityBuffer: MTLCardinalities, ReplicationFactor: replicationFactor_R)
         let ResponseSummationAssets = ResponseSummationShaderIO(inputTextures: textures, BinBuffer: buffer, exposureTimes: MTLExposureTimes, cameraShifts: MTLCameraShifts, cameraResponse: MTLResponseFunc, weights: MTLWeightFunc)
         let bufferReductionAssets = bufferReductionShaderIO(BinBuffer: buffer, bufferlength: bufferLen, cameraResponse: MTLResponseFunc, Cardinality: MTLCardinalities)
         
-        assets.add(shader: MTKPShader(name: "getCardinality", io: CardinalityShaderAssets, tgSize: (0,0,0)))
-        assets.add(shader: MTKPShader(name: "writeMeasureToBins", io: ResponseSummationAssets, tgSize: TGSizeOfSummationShader))
-        assets.add(shader: MTKPShader(name: "reduceBins", io: bufferReductionAssets, tgSize: (256,1,1)))
+        
+        // configure threadgroups for each shader
+        let CardinalityThreadgroup = MTKPThreadgroupConfig(tgSize: (1,1,1), tgMemLength: [replicationFactor_R * (MTLCardinalities.length + MemoryLayout<uint>.size * 3)])
+        let ResponseSummationThreadgroup = MTKPThreadgroupConfig(tgSize: TGSizeOfSummationShader, tgMemLength: [4 * TGSizeOfSummationShader.0 * TGSizeOfSummationShader.1])
+        let bufferReductionThreadgroup = MTKPThreadgroupConfig(tgSize: (256,1,1))
+        
+        assets.add(shader: MTKPShader(name: "getCardinality", io: CardinalityShaderAssets, tgConfig: CardinalityThreadgroup))
+        assets.add(shader: MTKPShader(name: "writeMeasureToBins", io: ResponseSummationAssets, tgConfig: ResponseSummationThreadgroup))
+        assets.add(shader: MTKPShader(name: "reduceBins", io: bufferReductionAssets, tgConfig: bufferReductionThreadgroup))
         
         computer = ResponseCurveComputer(assets: assets)
     }

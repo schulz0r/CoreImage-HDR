@@ -9,7 +9,7 @@
 import MetalKit
 import MetalKitPlus
 
-final class ResponseSummationShaderIO: MTKPIOProvider, MTKPDeviceUser {
+final class ResponseSummationShaderIO: MTKPIOProvider {
     
     private var inputImages:[MTLTexture]! = nil
     private var imageCount:MTLBuffer! = nil
@@ -20,16 +20,14 @@ final class ResponseSummationShaderIO: MTKPIOProvider, MTKPDeviceUser {
     private var weights:MTLBuffer! = nil
     
     init(inputTextures: [MTLTexture], BinBuffer: MTLBuffer, exposureTimes: MTLBuffer, cameraShifts: MTLBuffer, cameraResponse: MTLBuffer, weights: MTLBuffer){
-        guard self.device != nil,
-            inputTextures.count > 0
-        else {
+        guard inputTextures.count > 0 else {
             fatalError()
         }
         self.inputImages = inputTextures
         var imageCount = uint(self.inputImages.count)
         self.BinBuffer = BinBuffer
         
-        self.imageCount = self.device!.makeBuffer(bytes: &imageCount, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)!
+        self.imageCount = MTKPDevice.device.makeBuffer(bytes: &imageCount, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)!
         self.exposureTimes = exposureTimes
         self.cameraShifts = cameraShifts
         self.weights = weights
