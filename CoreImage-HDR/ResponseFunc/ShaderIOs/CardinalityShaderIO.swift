@@ -20,7 +20,7 @@ final class CardinalityShaderIO: MTKPIOProvider {
         self.inputImages = inputTextures
         self.cardinalityBuffer = cardinalityBuffer
         var imageDim = uint2(uint(inputTextures[0].width), uint(inputTextures[0].height))
-        var RFactor:uint = ReplicationFactor
+        var RFactor:uint = uint(ReplicationFactor)
         
         self.imageDimensions = MTKPDevice.device.makeBuffer(bytes: &imageDim, length: MemoryLayout<uint2>.size, options: .cpuCacheModeWriteCombined)!
         self.R = MTKPDevice.device.makeBuffer(bytes: &RFactor, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)!

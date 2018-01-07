@@ -37,7 +37,7 @@ final class ResponseCurveComputer : MTKPComputer {
         }
         
         let threads = MTLSizeMake(firstTexture.width, firstTexture.height, 1)
-        computeEncoder.dispatchThreads(threads, threadsPerThreadgroup: MTLSizeMake(descriptor.tgSize!.0, descriptor.tgSize!.1, descriptor.tgSize!.2))
+        computeEncoder.dispatchThreads(threads, threadsPerThreadgroup: descriptor.tgConfig.tgSize)
         computeEncoder.endEncoding()
     }
     
@@ -75,9 +75,6 @@ final class ResponseCurveComputer : MTKPComputer {
     }
     
     public func executeResponseSummationShader() {
-        guard self.device != nil else {
-            fatalError("Device was not initialized.")
-        }
         
         let name = "writeMeasureToBins"
         
@@ -86,13 +83,9 @@ final class ResponseCurveComputer : MTKPComputer {
             descriptor.state != nil,
             let computeEncoder = commandBuffer.makeComputeCommandEncoder(),
             let textures = descriptor.textures,
-            let firstTexture = textures.first,
-            let sharedMemSize = descriptor.tgSize
+            let firstTexture = textures.first
             else {fatalError()}
         
-        guard descriptor.tgSize != nil else {
-            fatalError("execute func")
-        }
         
         computeEncoder.setComputePipelineState(descriptor.state!)
         computeEncoder.setTextures(textures, range: 0..<textures.count)
@@ -102,8 +95,8 @@ final class ResponseCurveComputer : MTKPComputer {
         }
         
         let threads = MTLSizeMake(firstTexture.width, firstTexture.height, 1)
-        computeEncoder.setThreadgroupMemoryLength(4 * sharedMemSize.0 * sharedMemSize.1, index: 0)
-        computeEncoder.dispatchThreads(threads, threadsPerThreadgroup: MTLSizeMake(sharedMemSize.0, sharedMemSize.1, sharedMemSize.2))
+        computeEncoder.setThreadgroupMemoryLength(4 * descriptor.tgConfig.tgSize.width * descriptor.tgConfig.tgSize.height, index: 0)
+        computeEncoder.dispatchThreads(threads, threadsPerThreadgroup: descriptor.tgConfig.tgSize)
         computeEncoder.endEncoding()
     }
     
@@ -114,13 +107,9 @@ final class ResponseCurveComputer : MTKPComputer {
         guard
             let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,
             descriptor.state != nil,
-            let computeEncoder = commandBuffer.makeComputeCommandEncoder(),
-            let sharedMemSize = descriptor.tgSize
+            let computeEncoder = commandBuffer.makeComputeCommandEncoder()
             else {fatalError()}
         
-        guard descriptor.tgSize != nil else {
-            fatalError("execute func")
-        }
         
         computeEncoder.setComputePipelineState(descriptor.state!)
         
@@ -129,9 +118,13 @@ final class ResponseCurveComputer : MTKPComputer {
         }
         
         computeEncoder.setBuffers(descriptor.buffers!, offsets: [Int](repeating: 0, count: descriptor.buffers!.count), range: 0..<descriptor.buffers!.count)
+        if let TGMemSize = descriptor.tgConfig.tgMemLength {
+            TGMemSize.enumerated().forEach({
+                computeEncoder.setThreadgroupMemoryLength($0.element, index: $0.offset)
+            })
+        }
         
-        computeEncoder.setThreadgroupMemoryLength(4 * sharedMemSize.0 * sharedMemSize.1, index: 0)
-        computeEncoder.dispatchThreadgroups(MTLSizeMake(1, 1, 1), threadsPerThreadgroup: MTLSizeMake(sharedMemSize.0, sharedMemSize.1, sharedMemSize.2))
+        computeEncoder.dispatchThreadgroups(MTLSizeMake(1, 1, 1), threadsPerThreadgroup: descriptor.tgConfig.tgSize)
         computeEncoder.endEncoding()
     }
     

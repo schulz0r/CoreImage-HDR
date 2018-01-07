@@ -17,7 +17,6 @@ protocol MetaComputer {
 public final class ResponseEstimator: MetaComputer {
     var computer : ResponseCurveComputer
     
-    private var textureLoader: MTKTextureLoader! = nil
     private var textures: [MTLTexture]! = nil
     
     init(ImageBracket: [CIImage], CameraShifts: [int2], context: CIContext? = nil) {
@@ -32,7 +31,8 @@ public final class ResponseEstimator: MetaComputer {
             return metaData["ExposureTime"] as! Float
         }
         
-        textureLoader = MTKTextureLoader(device: MTKPDevice.device)
+        var assets = MTKPAssets()
+        let textureLoader = MTKTextureLoader(device: MTKPDevice.device)
         textures = ImageBracket.map{textureLoader.newTexture(CIImage: $0, context: context ?? CIContext(mtlDevice: MTKPDevice.device))}
         
         // create shared ressources
@@ -58,7 +58,7 @@ public final class ResponseEstimator: MetaComputer {
         var imageDim = uint2(uint(textures[0].width), uint(textures[0].height))
         let streamingMultiprocessorsPerBlock = 4
         let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
-        var replicationFactor_R = max(MTKPDevice.device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
+        let replicationFactor_R = max(MTKPDevice.device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
         
         let CardinalityShaderAssets = CardinalityShaderIO(inputTextures: textures, cardinalityBuffer: MTLCardinalities, ReplicationFactor: replicationFactor_R)
         let ResponseSummationAssets = ResponseSummationShaderIO(inputTextures: textures, BinBuffer: buffer, exposureTimes: MTLExposureTimes, cameraShifts: MTLCameraShifts, cameraResponse: MTLResponseFunc, weights: MTLWeightFunc)
@@ -69,6 +69,7 @@ public final class ResponseEstimator: MetaComputer {
         let CardinalityThreadgroup = MTKPThreadgroupConfig(tgSize: (1,1,1), tgMemLength: [replicationFactor_R * (MTLCardinalities.length + MemoryLayout<uint>.size * 3)])
         let ResponseSummationThreadgroup = MTKPThreadgroupConfig(tgSize: TGSizeOfSummationShader, tgMemLength: [4 * TGSizeOfSummationShader.0 * TGSizeOfSummationShader.1])
         let bufferReductionThreadgroup = MTKPThreadgroupConfig(tgSize: (256,1,1))
+        
         
         assets.add(shader: MTKPShader(name: "getCardinality", io: CardinalityShaderAssets, tgConfig: CardinalityThreadgroup))
         assets.add(shader: MTKPShader(name: "writeMeasureToBins", io: ResponseSummationAssets, tgConfig: ResponseSummationThreadgroup))
