@@ -83,7 +83,7 @@ public final class ResponseEstimator: MetaComputer {
             let summationShader = computer.assets["writeMeasureToBins"],
             let buffer = summationShader.buffers?[0],
             let MTLCardinality = summationShader.buffers?[4],
-            let threadsForBinReductionShader = computer.assets["writeMeasureToBins"]?.tgConfig.tgSize
+            let threadsForBinReductionShader = computer.assets["reduceBins"]?.tgConfig.tgSize
         else {
             fatalError()
         }
