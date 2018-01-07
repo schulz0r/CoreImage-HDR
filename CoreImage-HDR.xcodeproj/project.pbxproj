@@ -30,7 +30,6 @@
 		17E948431FFEDECF007E0476 /* binReduction.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17E9483C1FFEDECF007E0476 /* binReduction.metal */; };
 		17E948481FFEDF2A007E0476 /* makeHDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17E948471FFEDF2A007E0476 /* makeHDR.metal */; };
 		17E9484A1FFFF484007E0476 /* PerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948491FFFF484007E0476 /* PerformanceTests.swift */; };
-		17E9484D200068AA007E0476 /* colourHistogram.h in Sources */ = {isa = PBXBuildFile; fileRef = 17E9483B1FFEDECF007E0476 /* colourHistogram.h */; };
 		17E948552002801E007E0476 /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17E948542002801E007E0476 /* MetalKitPlus.framework */; };
 /* End PBXBuildFile section */
 
@@ -317,7 +316,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				17E9484D200068AA007E0476 /* colourHistogram.h in Sources */,
 				17E948481FFEDF2A007E0476 /* makeHDR.metal in Sources */,
 				17E948431FFEDECF007E0476 /* binReduction.metal in Sources */,
 				17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */,
