@@ -8,7 +8,7 @@
 
 #include <metal_stdlib>
 using namespace metal;
-#include "colourHistogram.metal"
+#include "colourHistogram.h"
 
 #define MAX_IMAGE_COUNT 5
 #define BIN_COUNT 256
@@ -59,7 +59,6 @@ kernel void getCardinality(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> 
     if(interleavedReadAccessOffset < imageDimensions.x){ // grid size may be unequal to image size...
         const uchar3 pixel = (uchar3) ( images[imageSlice].read(uint2(interleavedReadAccessOffset, gid.y)).rgb * (BIN_COUNT - 1) );
         // (2) add pixel to shared memory
-        threadHistogram.vote(pixel);
         atomic_fetch_add_explicit(&threadHistogram.red[pixel.r], 1, memory_order::memory_order_relaxed);
         atomic_fetch_add_explicit(&threadHistogram.green[pixel.g], 1, memory_order::memory_order_relaxed);
         atomic_fetch_add_explicit(&threadHistogram.blue[pixel.b], 1, memory_order::memory_order_relaxed);

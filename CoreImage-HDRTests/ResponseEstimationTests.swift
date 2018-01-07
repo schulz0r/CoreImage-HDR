@@ -69,6 +69,9 @@ class ResponseEstimationTests: XCTestCase {
     // test cardinality (histogram) shader for correct functionality
     func testHistogramShader() {
         let ColourHistogramSize = 256 * 3
+        let streamingMultiprocessorsPerBlock = 4
+        let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
+        let replicationFactor_R = max(MTKPDevice.device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
         
         // input images as textures
         let context = CIContext(mtlDevice: self.device)
@@ -78,8 +81,10 @@ class ResponseEstimationTests: XCTestCase {
         let MTLCardinalities = self.device.makeBuffer(length: MemoryLayout<uint>.size * ColourHistogramSize, options: .storageModeShared)!
         
         var assets = MTKPAssets(ResponseCurveComputer.self)
-        let CardinalityShaderRessources = CardinalityShaderIO(inputTextures: Textures, cardinalityBuffer: MTLCardinalities)
-        let CardinalityShader = MTKPShader(name: "getCardinality", io: CardinalityShaderRessources, tgSize: (0,0,0))
+        let CardinalityShaderRessources = CardinalityShaderIO(inputTextures: Textures, cardinalityBuffer: MTLCardinalities, ReplicationFactor: replicationFactor_R)
+        let CardinalityShader = MTKPShader(name: "getCardinality",
+                                           io: CardinalityShaderRessources,
+                                           tgConfig: MTKPThreadgroupConfig(tgSize: (1,1,1), tgMemLength: [replicationFactor_R * (MTLCardinalities.length + MemoryLayout<uint>.size * 3)]))
         
         assets.add(shader: CardinalityShader)
         
@@ -99,7 +104,7 @@ class ResponseEstimationTests: XCTestCase {
     func testBinningShader(){
         var cameraShifts = int2(0,0)
         var exposureTime:Float = 1
-        
+        let TGSizeOfSummationShader = (16,16,1)
         let lengthOfBuffer = 512;
         guard let commandQ = device.makeCommandQueue() else {fatalError()}
         var TextureFill = [float3](repeating: float3(1.0), count: lengthOfBuffer)
@@ -147,10 +152,10 @@ class ResponseEstimationTests: XCTestCase {
                                                            cameraResponse: MTLFunctionDummyBuffer,
                                                            weights: MTLFunctionDummyBuffer)
         
-        let function = MTKPShader(name: "writeMeasureToBins_float32", io: reponseSumShaderIO, tgSize: (16,16,1))
+        let function = MTKPShader(name: "writeMeasureToBins_float32", io: reponseSumShaderIO, tgConfig: MTKPThreadgroupConfig(tgSize: TGSizeOfSummationShader, tgMemLength: [4 * TGSizeOfSummationShader.0 * TGSizeOfSummationShader.1]))
         assets.add(shader: function)
         let computer = ResponseCurveComputer(assets: assets)
-        computer.executeResponseSummationShader()
+        computer.encode("writeMeasureToBins_float32")
         computer.commandBuffer.commit()
         computer.commandBuffer.waitUntilCompleted()
         
@@ -218,11 +223,11 @@ class ResponseEstimationTests: XCTestCase {
         
         var assets = MTKPAssets(ResponseCurveComputer.self)
         let ShaderIO = bufferReductionShaderIO(BinBuffer: MTLbuffer, bufferlength: buffer.count, cameraResponse: MTLResponseFunc, Cardinality: MTLCardinalities)
-        let Shader = MTKPShader(name: "reduceBins_float", io: ShaderIO, tgSize: (256,1,1))
+        let Shader = MTKPShader(name: "reduceBins_float", io: ShaderIO, tgConfig: MTKPThreadgroupConfig(tgSize: (256,1,1)))
         assets.add(shader: Shader)
         
         let computer = ResponseCurveComputer(assets: assets)
-        computer.executeBufferReductionShader()
+        computer.encode("reduceBins_float", threads: MTLSizeMake(256, 1, 1))
         computer.commandBuffer.commit()
         computer.commandBuffer.waitUntilCompleted()
         

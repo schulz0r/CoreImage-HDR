@@ -31,7 +31,7 @@ public final class ResponseEstimator: MetaComputer {
             return metaData["ExposureTime"] as! Float
         }
         
-        var assets = MTKPAssets()
+        var assets = MTKPAssets(ResponseEstimator.self)
         let textureLoader = MTKTextureLoader(device: MTKPDevice.device)
         textures = ImageBracket.map{textureLoader.newTexture(CIImage: $0, context: context ?? CIContext(mtlDevice: MTKPDevice.device))}
         
@@ -55,7 +55,6 @@ public final class ResponseEstimator: MetaComputer {
                 fatalError("Could not initialize Buffers")
         }
         
-        var imageDim = uint2(uint(textures[0].width), uint(textures[0].height))
         let streamingMultiprocessorsPerBlock = 4
         let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
         let replicationFactor_R = max(MTKPDevice.device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
@@ -83,7 +82,8 @@ public final class ResponseEstimator: MetaComputer {
         guard
             let summationShader = computer.assets["writeMeasureToBins"],
             let buffer = summationShader.buffers?[0],
-            let MTLCardinality = summationShader.buffers?[4]
+            let MTLCardinality = summationShader.buffers?[4],
+            let threadsForBinReductionShader = computer.assets["writeMeasureToBins"]?.tgConfig.tgSize
         else {
             fatalError()
         }
@@ -93,8 +93,8 @@ public final class ResponseEstimator: MetaComputer {
         computer.executeCardinalityShader()
         
         (0...iterations).forEach({ _ in
-            computer.executeResponseSummationShader()
-            computer.executeBufferReductionShader()
+            computer.encode("writeMeasureToBins")
+            computer.encode("reduceBins", threads: threadsForBinReductionShader)
             computer.flush(buffer: buffer)
         })
         
