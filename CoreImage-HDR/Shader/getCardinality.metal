@@ -22,6 +22,11 @@ using namespace metal;
     Gómez-Luna, Juan, et al. "An optimized approach to histogram computation on GPU." Machine Vision and Applications 24.5 (2013): 899-908.
  
  */
+
+inline uchar3 toUChar(const thread half3 & pixel){
+    return uchar3(pixel * 255);
+}
+
 kernel void getCardinality(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> images [[texture(0)]],
                            constant uint2 & imageDimensions [[buffer(0)]],
                            constant uint & ReplicationFactor [[buffer(1)]],
@@ -57,7 +62,8 @@ kernel void getCardinality(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> 
     const uint interleavedReadAccessOffset = (gridSize.x / warpsPerThreadgroup) * warpID + warpSize * threadgroupID.x + laneID;
     
     if(interleavedReadAccessOffset < imageDimensions.x){ // grid size may be unequal to image size...
-        const uchar3 pixel = (uchar3) ( images[imageSlice].read(uint2(interleavedReadAccessOffset, gid.y)).rgb * (BIN_COUNT - 1) );
+        const uchar3 pixel = toUChar(images[imageSlice].read(uint2(interleavedReadAccessOffset, gid.y)).rgb);
+        
         // (2) add pixel to shared memory
         atomic_fetch_add_explicit(&threadHistogram.red[pixel.r], 1, memory_order::memory_order_relaxed);
         atomic_fetch_add_explicit(&threadHistogram.green[pixel.g], 1, memory_order::memory_order_relaxed);

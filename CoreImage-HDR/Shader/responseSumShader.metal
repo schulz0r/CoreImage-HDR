@@ -25,6 +25,11 @@ using namespace metal;
  
  Shams, Ramtin, et al. "Parallel computation of mutual information on the GPU with application to real-time registration of 3D medical images." Computer methods and programs in biomedicine 99.2 (2010): 133-146.
  */
+
+inline uchar3 toUChar(const thread half3 & pixel){
+    return uchar3(pixel * 255);
+}
+
 kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>, MAX_IMAGE_COUNT> inputArray [[texture(0)]],
                                device metal::array<half3, 256> * outputbuffer [[buffer(0)]],
                                constant uint & NumberOfinputImages [[buffer(1)]],
@@ -43,13 +48,13 @@ kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>,
     const uint threadgroupIndex = threadgroupID.x + numberOfThreadgroups.x * threadgroupID.y;
     device metal::array<half3, 256> & outputBufferSegment = outputbuffer[threadgroupIndex];
     
-    metal::array<ushort3, MAX_IMAGE_COUNT> PixelIndices;
+    metal::array<uchar3, MAX_IMAGE_COUNT> PixelIndices;
     metal::array<half3, MAX_IMAGE_COUNT> linearizedPixels;
     
     // linearize pixel
     for(uint i = 0; i < NumberOfinputImages; i++) {
         const half3 pixel = inputArray[i].read(uint2(int2(gid) + cameraShifts[i])).rgb;
-        PixelIndices[i] = ushort3(pixel * 255);
+        PixelIndices[i] = toUChar(pixel);
         linearizedPixels[i] = half3(cameraResponse[PixelIndices[i].x].x, cameraResponse[PixelIndices[i].y].y, cameraResponse[PixelIndices[i].z].z);
     }
     
