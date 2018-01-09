@@ -169,27 +169,28 @@ class ResponseEstimationTests: XCTestCase {
     }
     
     func testSortAlgorithm() {
-        guard
-            let commandQ = device.makeCommandQueue(),
-            let commandBuffer = commandQ.makeCommandBuffer()
-            else {fatalError()}
+        guard let commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer() else {fatalError()}
         
         let threadgroupSize = MTLSizeMake(256, 1, 1)
         
         do {
-            let library = try device.makeDefaultLibrary(bundle: Bundle(for: CoreImage_HDRTests.self))
+            let library = try MTKPDevice.device.makeDefaultLibrary(bundle: Bundle(for: CoreImage_HDRTests.self))
+            var unsorted:[Float] = (1...16).map{ _ in Float(arc4random() % 10)}
             
             guard
-                let TestBuffer = device.makeBuffer(length: MemoryLayout<Float>.size * 4, options: .storageModeShared),
+                let TestSortNCountBuffer = MTKPDevice.device.makeBuffer(length: MemoryLayout<Float>.size * 4, options: .storageModeShared),
+                let TestSortBuffer = MTKPDevice.device.makeBuffer(bytes: &unsorted, length: MemoryLayout<Float>.size * unsorted.count, options: .storageModeShared),
                 let testShader = library.makeFunction(name: "testSortAlgorithm"),
                 let encoder = commandBuffer.makeComputeCommandEncoder()
                 else { fatalError() }
             
-            let testState = try device.makeComputePipelineState(function: testShader)
+            let testState = try MTKPDevice.device.makeComputePipelineState(function: testShader)
             
             encoder.setComputePipelineState(testState)
-            encoder.setBuffer(TestBuffer, offset: 0, index: 0)
+            encoder.setBuffer(TestSortNCountBuffer, offset: 0, index: 0)
+            encoder.setBuffer(TestSortBuffer, offset: 0, index: 1)
             encoder.setThreadgroupMemoryLength(4 * threadgroupSize.width, index: 0)
+            encoder.setThreadgroupMemoryLength(MemoryLayout<Float>.size * unsorted.count, index: 1)
             encoder.dispatchThreads(threadgroupSize, threadsPerThreadgroup: threadgroupSize)
             encoder.endEncoding()
             
@@ -197,7 +198,9 @@ class ResponseEstimationTests: XCTestCase {
             commandBuffer.waitUntilCompleted()
             
             var counts = [Float](repeating: 0.0, count: 4)
-            memcpy(&counts, TestBuffer.contents(), TestBuffer.length)
+            var sorted = [Float](repeating: 0.0, count: unsorted.count)
+            memcpy(&counts, TestSortNCountBuffer.contents(), TestSortNCountBuffer.length)
+            memcpy(&sorted, TestSortBuffer.contents(), TestSortBuffer.length)
             
             XCTAssert(counts.count == 4)
         } catch let Errors {
@@ -245,7 +248,7 @@ class ResponseEstimationTests: XCTestCase {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
         
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
-        let ResponseFunciton:[float3] = metaComp.estimateCameraResponse(iterations: 5)
+        let ResponseFunciton:[float3] = metaComp.estimateCameraResponse(iterations: 10)
         
         print(ResponseFunciton.description)
         

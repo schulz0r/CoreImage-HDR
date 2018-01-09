@@ -16,7 +16,9 @@ using namespace metal;
 
 // thus include a copy of the shader
 kernel void testSortAlgorithm(device float * output [[buffer(0)]],
+                              device float * unsorted [[buffer(1)]],
                               threadgroup SortAndCountElement<ushort, half> * Buffer [[threadgroup(0)]],
+                              threadgroup float * sortBuffer [[threadgroup(1)]],
                               uint threadID [[thread_position_in_threadgroup]],
                               uint threadCount [[threads_per_threadgroup]],
                               uint simdGroup [[simdgroup_index_in_threadgroup]]){
@@ -28,5 +30,11 @@ kernel void testSortAlgorithm(device float * output [[buffer(0)]],
     
     if(Buffer[threadID].counter > 0) {
         output[Buffer[threadID].element] = Buffer[threadID].counter;
+    }
+    
+    if(threadID < 16) {
+        sortBuffer[threadID] = unsorted[threadID];
+        bitonicSort(threadID, 16 / 2, sortBuffer);
+        unsorted[Buffer[threadID].element] = sortBuffer[threadID];
     }
 }
