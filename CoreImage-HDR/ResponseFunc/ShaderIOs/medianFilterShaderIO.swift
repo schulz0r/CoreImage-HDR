@@ -6,4 +6,23 @@
 //  Copyright © 2018 Philipp Waxweiler. All rights reserved.
 //
 
-import Foundation
+import MetalKit
+import MetalKitPlus
+
+final class medianFilterShaderIO: MTKPIOProvider {
+    
+    private let cameraResponse: MTLBuffer
+    
+    init(cameraResponse: MTLBuffer) {
+        self.cameraResponse = cameraResponse
+    }
+    
+    func fetchTextures() -> [MTLTexture]? {
+        return nil
+    }
+    
+    func fetchBuffers() -> [MTLBuffer]? {
+        
+        return [cameraResponse]
+    }
+}

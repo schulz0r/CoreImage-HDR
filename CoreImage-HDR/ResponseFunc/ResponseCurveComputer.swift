@@ -49,6 +49,32 @@ final class ResponseCurveComputer : MTKPComputer {
         computeEncoder.endEncoding()
     }
     
+    // if number of threadgroups are to be set
+    public func encode(_ name:String, threadgroups: MTLSize) {
+        guard
+            let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,
+            descriptor.state != nil,
+            let computeEncoder = commandBuffer.makeComputeCommandEncoder()
+            else {
+                fatalError()
+        }
+        
+        computeEncoder.setComputePipelineState(descriptor.state!)
+        if let textures = descriptor.textures {
+            computeEncoder.setTextures(textures, range: 0..<textures.count)
+        }
+        if let buffers = descriptor.buffers {
+            computeEncoder.setBuffers(buffers, offsets: [Int](repeating: 0, count: buffers.count), range: 0..<buffers.count)
+        }
+        if let TGMemSize = descriptor.tgConfig.tgMemLength {
+            TGMemSize.enumerated().forEach({
+                computeEncoder.setThreadgroupMemoryLength($0.element, index: $0.offset)
+            })
+        }
+        computeEncoder.dispatchThreadgroups(threadgroups, threadsPerThreadgroup: descriptor.tgConfig.tgSize)
+        computeEncoder.endEncoding()
+    }
+    
     public func executeCardinalityShader() {
         
         let name = "getCardinality"

@@ -62,21 +62,25 @@ public final class ResponseEstimator: MetaComputer {
         let replicationFactor_R = max(MTKPDevice.device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
         
         let numberOfControlPoints = 16
+        let medianFilterWindowSize = 7
         
         let CardinalityShaderAssets = CardinalityShaderIO(inputTextures: textures, cardinalityBuffer: MTLCardinalities, ReplicationFactor: replicationFactor_R)
         let ResponseSummationAssets = ResponseSummationShaderIO(inputTextures: textures, BinBuffer: buffer, exposureTimes: MTLExposureTimes, cameraShifts: MTLCameraShifts, cameraResponse: MTLResponseFunc, weights: MTLWeightFunc)
         let bufferReductionAssets = bufferReductionShaderIO(BinBuffer: buffer, bufferlength: bufferLen, cameraResponse: MTLResponseFunc, Cardinality: MTLCardinalities)
+        let medianFilterAssets = medianFilterShaderIO(cameraResponse: MTLResponseFunc)
         let smoothResponseAssets = smoothResponseShaderIO(cameraResponse: MTLResponseFunc, weightFunction: MTLWeightFunc, controlPointCount: numberOfControlPoints)
         
         // configure threadgroups for each shader
         let CardinalityThreadgroup = MTKPThreadgroupConfig(tgSize: (1,1,1), tgMemLength: [replicationFactor_R * (MTLCardinalities.length + MemoryLayout<uint>.size * 3)])
         let ResponseSummationThreadgroup = MTKPThreadgroupConfig(tgSize: TGSizeOfSummationShader, tgMemLength: [4 * TGSizeOfSummationShader.0 * TGSizeOfSummationShader.1])
         let bufferReductionThreadgroup = MTKPThreadgroupConfig(tgSize: (256,1,1))
+        let medianFilterThreadgroup = MTKPThreadgroupConfig(tgSize: (medianFilterWindowSize + 1, 1, 1))
         let smoothResponseThreadgroup = MTKPThreadgroupConfig(tgSize: (256 / numberOfControlPoints, 1, 1))
         
         assets.add(shader: MTKPShader(name: "getCardinality", io: CardinalityShaderAssets, tgConfig: CardinalityThreadgroup))
         assets.add(shader: MTKPShader(name: "writeMeasureToBins", io: ResponseSummationAssets, tgConfig: ResponseSummationThreadgroup))
         assets.add(shader: MTKPShader(name: "reduceBins", io: bufferReductionAssets, tgConfig: bufferReductionThreadgroup))
+        assets.add(shader: MTKPShader(name: "medianFilter", io: medianFilterAssets, tgConfig: medianFilterThreadgroup))
         assets.add(shader: MTKPShader(name: "smoothResponse", io: smoothResponseAssets, tgConfig: smoothResponseThreadgroup))
         
         computer = ResponseCurveComputer(assets: assets)
@@ -99,6 +103,7 @@ public final class ResponseEstimator: MetaComputer {
         (0...iterations).forEach({ _ in
             computer.encode("writeMeasureToBins")
             computer.encode("reduceBins", threads: threadsForBinReductionShader)
+            computer.encode("medianFilter", threadgroups: MTLSizeMake(256, 1, 3))
             computer.flush(buffer: buffer)
         })
         
