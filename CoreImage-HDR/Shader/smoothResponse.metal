@@ -16,7 +16,7 @@ inline void derivativeOfInverseOfFunction(device float3 * invertedFunc, device f
  Cubic Spline Interpolation and final weight function
  ---------------------------------------------------*/
 
-kernel void weightfunction(device float3 *inverseResponse [[buffer(0)]],
+kernel void smoothResponse(device float3 *inverseResponse [[buffer(0)]],
                            device float3 *WeightFunction [[ buffer(1) ]],
                            constant uint *ControlPoints [[ buffer(2) ]],
                            constant float4x4 *cubicMatrix [[ buffer(3) ]],

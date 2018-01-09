@@ -7,11 +7,11 @@ import Foundation
 import MetalKit
 import MetalKitPlus
 
-final class calculateWeightIO: MTKShaderIO{
+final class smoothResponseShaderIO: MTKPIOProvider {
     
     private let controlPointCount:Int
     private let cameraResponse: MTLBuffer
-    private weightFunction: MTLBuffer
+    private let weightFunction: MTLBuffer
     
     init(cameraResponse: MTLBuffer, weightFunction: MTLBuffer, controlPointCount: Int) {
         self.controlPointCount = controlPointCount
@@ -33,8 +33,8 @@ final class calculateWeightIO: MTKShaderIO{
         controlPoints.append(255)
         
         var matrix:[float4] = [float4(-1.0/6.0,0.5,-0.5,1.0/6.0), float4(0.5,-1,0,2.0/3.0), float4(-0.5,0.5,0.5,1.0/6.0), float4(1.0/6.0,0,0,0)]    // = float4x4
-        let cubicMatrix = device.makeBuffer(bytes: &matrix, length: MemoryLayout<float4>.size * 4, options: .cpuCacheModeWriteCombined)
-        let controlPointBuffer = device.makeBuffer(bytes: &controlPoints, length: MemoryLayout<Int32>.size * controlPoints.count, options: .cpuCacheModeWriteCombined)
+        let cubicMatrix = MTKPDevice.device.makeBuffer(bytes: &matrix, length: MemoryLayout<float4>.size * 4, options: .cpuCacheModeWriteCombined)!
+        let controlPointBuffer = MTKPDevice.device.makeBuffer(bytes: &controlPoints, length: MemoryLayout<Int32>.size * controlPoints.count, options: .cpuCacheModeWriteCombined)!
         
         return [cameraResponse, weightFunction, controlPointBuffer, cubicMatrix]
     }
