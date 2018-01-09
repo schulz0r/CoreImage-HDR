@@ -81,4 +81,26 @@ class CoreImage_HDRTests: XCTestCase {
         
         XCTAssertTrue(true)
     }
+    
+    func testWithResponse() {
+        let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
+        
+        let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
+        let ResponseFunction = metaComp.estimateCameraResponse(iterations: 10)
+        
+        
+        var HDR:CIImage = CIImage()
+        do{
+            HDR = try HDRProcessor.apply(withExtent: Testimages[0].extent,
+                                         inputs: Testimages,
+                                         arguments: ["ExposureTimes" : self.ExposureTimes,
+                                                     "CameraResponse" : ResponseFunction])
+        } catch let Errors {
+            XCTFail(Errors.localizedDescription)
+        }
+        
+        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/noobs.png"))
+        
+        XCTAssertTrue(true)
+    }
 }
