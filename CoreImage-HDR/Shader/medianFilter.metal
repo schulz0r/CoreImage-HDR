@@ -14,18 +14,18 @@ kernel void medianFilter(device float3 * data [[buffer(0)]],
                          threadgroup float * window [[threadgroup(0)]],
                          uint windowIndex [[thread_index_in_threadgroup]],
                          uint2 pixelIndex [[threadgroup_position_in_grid]],
-                         uint windowSize [[threads_per_threadgroup]]){    // is expected to be even!
+                         uint2 windowSize [[threads_per_threadgroup]]){    // is expected to be even!
     
     const int colorChannel = pixelIndex.y;
-    const int offsetSize = (windowSize / 2) - 1;
+    const int offsetSize = (windowSize.x / 2) - 1;
     const int relIndexOffset = windowIndex - offsetSize;
-    const int lastIndexInWindow = windowSize - 1;
+    const int globaldReadIndex = int(pixelIndex.x) + relIndexOffset;
     
-    window[windowIndex] = (windowIndex == lastIndexInWindow) ? 0 : signbit(pixelIndex + relIndexOffset) ? 0 : data[pixelIndex + relIndexOffset][colorChannel];
+    window[windowIndex] = (int(windowIndex) == 0) || (globaldReadIndex < 0) || (globaldReadIndex > 255) ? 0 : data[globaldReadIndex][colorChannel];
     
-    bitonicSort(windowIndex, windowSize / 2, window);
+    bitonicSort(windowIndex, windowSize.x / 2, window);
     
     if(windowIndex == 0){
-        data[pixelIndex][colorChannel] = window[windowSize / 2];
+        data[pixelIndex.x][colorChannel] = window[(windowSize.x / 2) + 1];
     }
 }

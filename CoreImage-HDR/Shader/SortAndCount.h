@@ -71,11 +71,11 @@ void bitonicSort(const uint tid, const uint half_of_dataLength, threadgroup T * 
             uint i2 = i1 + j;
             
             if((b_id & 1) == 0) {  // is odd?
-                if(data[i1].element > data[i2].element) {
+                if(data[i1] > data[i2]) {
                     swap(data[i1], data[i2]);
                 }
             } else { // if odd
-                if(data[i1].element < data[i2].element) {
+                if(data[i1] < data[i2]) {
                     swap(data[i1], data[i2]);
                 }
             }

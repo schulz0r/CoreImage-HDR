@@ -74,7 +74,7 @@ public final class ResponseEstimator: MetaComputer {
         let CardinalityThreadgroup = MTKPThreadgroupConfig(tgSize: (1,1,1), tgMemLength: [replicationFactor_R * (MTLCardinalities.length + MemoryLayout<uint>.size * 3)])
         let ResponseSummationThreadgroup = MTKPThreadgroupConfig(tgSize: TGSizeOfSummationShader, tgMemLength: [4 * TGSizeOfSummationShader.0 * TGSizeOfSummationShader.1])
         let bufferReductionThreadgroup = MTKPThreadgroupConfig(tgSize: (256,1,1))
-        let medianFilterThreadgroup = MTKPThreadgroupConfig(tgSize: (medianFilterWindowSize + 1, 1, 1))
+        let medianFilterThreadgroup = MTKPThreadgroupConfig(tgSize: (medianFilterWindowSize + 1, 1, 1), tgMemLength: [(medianFilterWindowSize + 1) * MemoryLayout<Float>.size])
         let smoothResponseThreadgroup = MTKPThreadgroupConfig(tgSize: (256 / numberOfControlPoints, 1, 1))
         
         assets.add(shader: MTKPShader(name: "getCardinality", io: CardinalityShaderAssets, tgConfig: CardinalityThreadgroup))
@@ -103,7 +103,7 @@ public final class ResponseEstimator: MetaComputer {
         (0...iterations).forEach({ _ in
             computer.encode("writeMeasureToBins")
             computer.encode("reduceBins", threads: threadsForBinReductionShader)
-            computer.encode("medianFilter", threadgroups: MTLSizeMake(256, 1, 3))
+            computer.encode("medianFilter", threadgroups: MTLSizeMake(256, 3, 1))
             computer.flush(buffer: buffer)
         })
         
