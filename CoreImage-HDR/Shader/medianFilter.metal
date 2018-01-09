@@ -17,10 +17,15 @@ kernel void medianFilter(device float3 * data [[buffer(0)]],
                          uint windowSize [[threads_per_threadgroup]]){    // is expected to be even!
     
     const int colorChannel = pixelIndex.y;
-    const int offsetWithinWindow = (windowSize / 2) - 1;
-    const int dataIndex = windowIndex - offsetWithinWindow;
+    const int offsetSize = (windowSize / 2) - 1;
+    const int relIndexOffset = windowIndex - offsetSize;
+    const int lastIndexInWindow = windowSize - 1;
     
-    window[windowIndex] = signbit(dataIndex)? 0 : data[dataIndex][colorChannel];
+    window[windowIndex] = (windowIndex == lastIndexInWindow) ? 0 : signbit(pixelIndex + relIndexOffset) ? 0 : data[pixelIndex + relIndexOffset][colorChannel];
     
+    bitonicSort(windowIndex, windowSize / 2, window);
     
+    if(windowIndex == 0){
+        data[pixelIndex][colorChannel] = window[windowSize / 2];
+    }
 }
