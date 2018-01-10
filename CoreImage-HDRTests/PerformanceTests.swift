@@ -32,7 +32,7 @@ class PerformanceTests: XCTestCase {
             fatalError(Errors.localizedDescription)
         }
         
-        let imageNames = ["dark", "medium", "bright"]
+        let imageNames = ["01-qianyuan-1:250", "02-qianyuan-1:125", "03-qianyuan-1:60", "04-qianyuan-1:30", "05-qianyuan-1:15"]
         
         /* Why does the Bundle Assets never contain images? Probably a XCode bug.
          Add an Asset catalogue to this test bundle and try to load any image. */
@@ -40,7 +40,7 @@ class PerformanceTests: XCTestCase {
         //let imagePath = AppBundle.path(forResource: "myImage", ofType: "jpg")
         
         // WORKAROUND: load images from disk
-        URLs = imageNames.map{FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents/Codes/Testpics/" + $0 + ".jpg")}
+        URLs = imageNames.map{FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents/Codes/Testpics/QianYuan/" + $0 + ".jpg")}
         
         Testimages = URLs.map{
             guard let image = CIImage(contentsOf: $0) else {
@@ -74,6 +74,36 @@ class PerformanceTests: XCTestCase {
             let ResponseFunciton:[float3] = metaComp.estimateCameraResponse(iterations: 5)
         }
     }
-    
+    func testHistogramSpeed() {
+        let ColourHistogramSize = 256 * 3
+        let streamingMultiprocessorsPerBlock = 4
+        let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
+        let replicationFactor_R = max(MTKPDevice.device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
+        
+        // input images as textures
+        let context = CIContext(mtlDevice: self.device)
+        let Textures = Testimages.map{textureLoader.newTexture(CIImage: $0, context: context)}
+        
+        // cardinality of pixel values
+        let MTLCardinalities = self.device.makeBuffer(length: MemoryLayout<uint>.size * ColourHistogramSize, options: .storageModeShared)!
+        
+        var assets = MTKPAssets(ResponseCurveComputer.self)
+        let CardinalityShaderRessources = CardinalityShaderIO(inputTextures: Textures, cardinalityBuffer: MTLCardinalities, ReplicationFactor: replicationFactor_R)
+        let CardinalityShader = MTKPShader(name: "getCardinality",
+                                           io: CardinalityShaderRessources,
+                                           tgConfig: MTKPThreadgroupConfig(tgSize: (1,1,1), tgMemLength: [replicationFactor_R * (MTLCardinalities.length + MemoryLayout<uint>.size * 3)]))
+        
+        assets.add(shader: CardinalityShader)
+        
+        let MTLComputer = ResponseCurveComputer(assets: assets)
+        
+        
+        self.measure {
+            MTLComputer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
+            MTLComputer.executeCardinalityShader()
+            MTLComputer.commandBuffer.commit()
+            MTLComputer.commandBuffer.waitUntilCompleted()
+        }
+    }
     
 }
