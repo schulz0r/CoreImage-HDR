@@ -9,9 +9,13 @@
 import CoreImage
 import AppKit
 
-extension Array where Element: Equatable{
+extension Array where Element: Comparable {
     func allIs(value: Element) -> Bool {
         return self.reduce(true){$0 && ($1 == value)}
+    }
+    
+    func isAscendinglySorted() -> Bool {
+        return self.elementsEqual(self.sorted())
     }
 }
 

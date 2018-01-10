@@ -172,27 +172,38 @@ class ResponseEstimationTests: XCTestCase {
         guard let commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer() else {fatalError()}
         
         let threadgroupSize = MTLSizeMake(256, 1, 1)
+        let threadgroupSizeSortShader = MTLSizeMake(16, 1, 1)
         
         do {
             let library = try MTKPDevice.device.makeDefaultLibrary(bundle: Bundle(for: CoreImage_HDRTests.self))
-            var unsorted:[Float] = (1...16).map{ _ in Float(arc4random() % 10)}
+            var unsorted:[Float] = (1...16).map{ _ in Float(arc4random() % 5) }
             
             guard
                 let TestSortNCountBuffer = MTKPDevice.device.makeBuffer(length: MemoryLayout<Float>.size * 4, options: .storageModeShared),
                 let TestSortBuffer = MTKPDevice.device.makeBuffer(bytes: &unsorted, length: MemoryLayout<Float>.size * unsorted.count, options: .storageModeShared),
                 let testShader = library.makeFunction(name: "testSortAlgorithm"),
+                let sortShader = library.makeFunction(name: "testSortAlgorithmNoCount"),
                 let encoder = commandBuffer.makeComputeCommandEncoder()
                 else { fatalError() }
             
             let testState = try MTKPDevice.device.makeComputePipelineState(function: testShader)
+            let testSortState = try MTKPDevice.device.makeComputePipelineState(function: sortShader)
             
             encoder.setComputePipelineState(testState)
             encoder.setBuffer(TestSortNCountBuffer, offset: 0, index: 0)
-            encoder.setBuffer(TestSortBuffer, offset: 0, index: 1)
             encoder.setThreadgroupMemoryLength(4 * threadgroupSize.width, index: 0)
-            encoder.setThreadgroupMemoryLength(MemoryLayout<Float>.size * unsorted.count, index: 1)
             encoder.dispatchThreads(threadgroupSize, threadsPerThreadgroup: threadgroupSize)
             encoder.endEncoding()
+            
+            guard let sortEncoder = commandBuffer.makeComputeCommandEncoder() else {
+                fatalError()
+            }
+            
+            sortEncoder.setComputePipelineState(testSortState)
+            sortEncoder.setBuffer(TestSortBuffer, offset: 0, index: 0)
+            sortEncoder.setThreadgroupMemoryLength(MemoryLayout<Float>.size * unsorted.count, index: 0)
+            sortEncoder.dispatchThreads(threadgroupSizeSortShader, threadsPerThreadgroup: threadgroupSizeSortShader)
+            sortEncoder.endEncoding()
             
             commandBuffer.commit()
             commandBuffer.waitUntilCompleted()
@@ -202,7 +213,10 @@ class ResponseEstimationTests: XCTestCase {
             memcpy(&counts, TestSortNCountBuffer.contents(), TestSortNCountBuffer.length)
             memcpy(&sorted, TestSortBuffer.contents(), TestSortBuffer.length)
             
+            print("\(unsorted) -> \(sorted)")
+            
             XCTAssert(counts.count == 4)
+            XCTAssertTrue(sorted.isAscendinglySorted(), "Unsorted element could not be sorted on GPU.")
         } catch let Errors {
             fatalError(Errors.localizedDescription)
         }

@@ -107,7 +107,7 @@ public final class ResponseEstimator: MetaComputer {
             computer.flush(buffer: buffer)
         })
         
-        computer.encode("smoothResponse", threads: MTLSizeMake(256, 1, 1))
+        //computer.encode("smoothResponse", threads: MTLSizeMake(256, 1, 1))
         
         computer.commandBuffer.commit()
         computer.commandBuffer.waitUntilCompleted()

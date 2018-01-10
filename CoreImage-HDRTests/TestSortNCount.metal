@@ -16,12 +16,9 @@ using namespace metal;
 
 // thus include a copy of the shader
 kernel void testSortAlgorithm(device float * output [[buffer(0)]],
-                              device float * unsorted [[buffer(1)]],
                               threadgroup SortAndCountElement<ushort, half> * Buffer [[threadgroup(0)]],
-                              threadgroup float * sortBuffer [[threadgroup(1)]],
                               uint threadID [[thread_position_in_threadgroup]],
-                              uint threadCount [[threads_per_threadgroup]],
-                              uint simdGroup [[simdgroup_index_in_threadgroup]]){
+                              uint threadCount [[threads_per_threadgroup]]){
     
     Buffer[threadID].element = threadID % 4;    // arbitrary number for element
     Buffer[threadID].counter = 1.0;
@@ -31,10 +28,17 @@ kernel void testSortAlgorithm(device float * output [[buffer(0)]],
     if(Buffer[threadID].counter > 0) {
         output[Buffer[threadID].element] = Buffer[threadID].counter;
     }
+}
+
+// thus include a copy of the shader
+kernel void testSortAlgorithmNoCount(device float * unsorted [[buffer(0)]],
+                              threadgroup float * sortBuffer [[threadgroup(0)]],
+                              uint threadID [[thread_position_in_threadgroup]],
+                              uint threadCount [[threads_per_threadgroup]]){
     
-    if(threadID < 16) {
-        sortBuffer[threadID] = unsorted[threadID];
-        bitonicSort(threadID, 16 / 2, sortBuffer);
-        unsorted[Buffer[threadID].element] = sortBuffer[threadID];
-    }
+    sortBuffer[threadID] = unsorted[threadID];
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+    
+    bitonicSort(threadID, threadCount / 2, sortBuffer);
+    unsorted[threadID] = sortBuffer[threadID];
 }
