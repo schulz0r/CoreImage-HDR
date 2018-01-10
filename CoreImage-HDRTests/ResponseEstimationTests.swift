@@ -172,11 +172,15 @@ class ResponseEstimationTests: XCTestCase {
         guard let commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer() else {fatalError()}
         
         let threadgroupSize = MTLSizeMake(256, 1, 1)
-        let threadgroupSizeSortShader = MTLSizeMake(16, 1, 1)
         
         do {
             let library = try MTKPDevice.device.makeDefaultLibrary(bundle: Bundle(for: CoreImage_HDRTests.self))
-            var unsorted:[Float] = (1...16).map{ _ in Float(arc4random() % 5) }
+            var unsorted:[Float] = (1...4).map{ _ in Float((arc4random() % 9) + 1) }
+            let threadgroupSizeSortShader = MTLSizeMake(unsorted.count, 1, 1)
+            
+            guard unsorted.count.isPowerOfTwo() else {
+                fatalError("Length of median filter must be a power of two.")
+            }
             
             guard
                 let TestSortNCountBuffer = MTKPDevice.device.makeBuffer(length: MemoryLayout<Float>.size * 4, options: .storageModeShared),
@@ -262,7 +266,7 @@ class ResponseEstimationTests: XCTestCase {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
         
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
-        let ResponseFunciton:[float3] = metaComp.estimateCameraResponse(iterations: 10)
+        let ResponseFunciton:[float3] = metaComp.estimateCameraResponse(iterations: 20)
         
         print(ResponseFunciton.description)
         

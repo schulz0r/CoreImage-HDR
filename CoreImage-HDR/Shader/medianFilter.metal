@@ -12,8 +12,8 @@ using namespace metal;
 
 kernel void medianFilter(device float3 * data [[buffer(0)]],
                          threadgroup float * window [[threadgroup(0)]],
-                         uint windowIndex [[thread_index_in_threadgroup]],
                          uint2 pixelIndex [[threadgroup_position_in_grid]],
+                         uint windowIndex [[thread_index_in_threadgroup]],
                          uint2 windowSize [[threads_per_threadgroup]]){    // is expected to be even!
     
     const int colorChannel = pixelIndex.y;

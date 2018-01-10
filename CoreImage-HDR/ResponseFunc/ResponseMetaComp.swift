@@ -62,7 +62,11 @@ public final class ResponseEstimator: MetaComputer {
         let replicationFactor_R = max(MTKPDevice.device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
         
         let numberOfControlPoints = 16
-        let medianFilterWindowSize = 7
+        let medianFilterWindowSize = 3
+        
+        guard (medianFilterWindowSize + 1).isPowerOfTwo() else {
+            fatalError("Length of median filter must be a power of two.")
+        }
         
         let CardinalityShaderAssets = CardinalityShaderIO(inputTextures: textures, cardinalityBuffer: MTLCardinalities, ReplicationFactor: replicationFactor_R)
         let ResponseSummationAssets = ResponseSummationShaderIO(inputTextures: textures, BinBuffer: buffer, exposureTimes: MTLExposureTimes, cameraShifts: MTLCameraShifts, cameraResponse: MTLResponseFunc, weights: MTLWeightFunc)
@@ -103,10 +107,10 @@ public final class ResponseEstimator: MetaComputer {
         (0...iterations).forEach({ _ in
             computer.encode("writeMeasureToBins")
             computer.encode("reduceBins", threads: threadsForBinReductionShader)
-            computer.encode("medianFilter", threadgroups: MTLSizeMake(256, 3, 1))
             computer.flush(buffer: buffer)
         })
         
+        computer.encode("medianFilter", threadgroups: MTLSizeMake(256, 3, 1))
         //computer.encode("smoothResponse", threads: MTLSizeMake(256, 1, 1))
         
         computer.commandBuffer.commit()

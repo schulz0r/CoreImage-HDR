@@ -9,6 +9,12 @@
 import CoreImage
 import AppKit
 
+extension Int {
+    func isPowerOfTwo() -> Bool {
+        return (self & (self - 1)) == 0
+    }
+}
+
 extension Array where Element: Comparable {
     func allIs(value: Element) -> Bool {
         return self.reduce(true){$0 && ($1 == value)}
