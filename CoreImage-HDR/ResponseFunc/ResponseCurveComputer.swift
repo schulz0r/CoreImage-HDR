@@ -103,7 +103,7 @@ final class ResponseCurveComputer : MTKPComputer {
         let streamingMultiprocessorsPerBlock = 4
         let blocksize = descriptor.state!.threadExecutionWidth * streamingMultiprocessorsPerBlock
         let remainder = firstTexture.width % blocksize
-        let threads = MTLSizeMake(firstTexture.width + remainder, firstTexture.height, ImageCount)
+        let threads = MTLSizeMake(firstTexture.width + (blocksize - remainder), firstTexture.height, ImageCount)
         
         computeEncoder.dispatchThreads(threads, threadsPerThreadgroup: MTLSizeMake(blocksize, 1, 1))
         computeEncoder.endEncoding()

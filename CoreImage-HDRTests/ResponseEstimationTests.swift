@@ -33,7 +33,7 @@ class ResponseEstimationTests: XCTestCase {
             fatalError(Errors.localizedDescription)
         }
         
-        let imageNames = ["dark", "medium", "bright"]
+        let imageNames = ["01-qianyuan-1:250", "02-qianyuan-1:125", "03-qianyuan-1:60", "04-qianyuan-1:30", "05-qianyuan-1:15"]
         
         /* Why does the Bundle Assets never contain images? Probably a XCode bug.
          Add an Asset catalogue to this test bundle and try to load any image. */
@@ -41,7 +41,7 @@ class ResponseEstimationTests: XCTestCase {
         //let imagePath = AppBundle.path(forResource: "myImage", ofType: "jpg")
         
         // WORKAROUND: load images from disk
-        URLs = imageNames.map{FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents/Codes/Testpics/" + $0 + ".jpg")}
+        URLs = imageNames.map{FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents/Codes/Testpics/QianYuan/" + $0 + ".jpg")}
         
         Testimages = URLs.map{
             guard let image = CIImage(contentsOf: $0) else {
@@ -96,9 +96,10 @@ class ResponseEstimationTests: XCTestCase {
         var Cardinality_Host = [uint](repeating: 0, count: ColourHistogramSize)
         memcpy(&Cardinality_Host, MTLCardinalities.contents(), MTLCardinalities.length)
         
-        let allPixelCount = Testimages.reduce(0){$0 + 3 * Int($1.extent.size.height * $1.extent.size.width)}
+        let truePixelCount = Testimages.reduce(0){$0 + 3 * Int($1.extent.size.height * $1.extent.size.width)}
+        let countedPixel = Int(Cardinality_Host.reduce(0, +))
         
-        XCTAssert(Int(Cardinality_Host.reduce(0, +)) == allPixelCount )
+        XCTAssertEqual(countedPixel, truePixelCount)
     }
     
     func testBinningShader(){
@@ -266,7 +267,7 @@ class ResponseEstimationTests: XCTestCase {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
         
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
-        let ResponseFunciton:[float3] = metaComp.estimateCameraResponse(iterations: 20)
+        let ResponseFunciton:[float3] = metaComp.estimateCameraResponse(iterations: 5)
         
         print(ResponseFunciton.description)
         
