@@ -23,6 +23,90 @@ class PerformanceTests: XCTestCase {
     var library:MTLLibrary?
     var textureLoader:MTKTextureLoader!
     
+    /* Performance optimizations can be tested here */
+    
+    func testResponseEstimation() {
+        let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
+        let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
+        // This is an example of a performance test case.
+        self.measure {
+            let ResponseFunciton:[float3] = metaComp.estimateCameraResponse(iterations: 5)
+        }
+    }
+    
+    func testHistogramSpeedWith4streamingProcessors() {
+        let ColourHistogramSize = 256 * 3
+        let streamingMultiprocessorsPerBlock = 4
+        let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
+        let replicationFactor_R = max(MTKPDevice.device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
+        
+        // input images as textures
+        let context = CIContext(mtlDevice: self.device)
+        let Textures = Testimages.map{textureLoader.newTexture(CIImage: $0, context: context)}
+        
+        // cardinality of pixel values
+        let MTLCardinalities = self.device.makeBuffer(length: MemoryLayout<uint>.size * ColourHistogramSize, options: .storageModeShared)!
+        
+        var assets = MTKPAssets(ResponseCurveComputer.self)
+        let CardinalityShaderRessources = CardinalityShaderIO(inputTextures: Textures, cardinalityBuffer: MTLCardinalities, ReplicationFactor: replicationFactor_R)
+        let CardinalityShader = MTKPShader(name: "getCardinality",
+                                           io: CardinalityShaderRessources,
+                                           tgConfig: MTKPThreadgroupConfig(tgSize: (1,1,1), tgMemLength: [replicationFactor_R * (MTLCardinalities.length + MemoryLayout<uint>.size * 3)]))
+        
+        assets.add(shader: CardinalityShader)
+        
+        let MTLComputer = ResponseCurveComputer(assets: assets)
+        
+        
+        self.measure {
+            MTLComputer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
+            MTLComputer.executeCardinalityShader(streamingMultiprocessorsPerBlock: streamingMultiprocessorsPerBlock)
+            MTLComputer.commandBuffer.commit()
+            MTLComputer.commandBuffer.waitUntilCompleted()
+        }
+    }
+    
+    func testHistogramSpeedWith2streamingProcessors() {
+        let ColourHistogramSize = 256 * 3
+        let streamingMultiprocessorsPerBlock = 2    // <- NOW THERE IS A TWO
+        let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
+        let replicationFactor_R = max(MTKPDevice.device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
+        
+        // input images as textures
+        let context = CIContext(mtlDevice: self.device)
+        let Textures = Testimages.map{textureLoader.newTexture(CIImage: $0, context: context)}
+        
+        // cardinality of pixel values
+        let MTLCardinalities = self.device.makeBuffer(length: MemoryLayout<uint>.size * ColourHistogramSize, options: .storageModeShared)!
+        
+        var assets = MTKPAssets(ResponseCurveComputer.self)
+        let CardinalityShaderRessources = CardinalityShaderIO(inputTextures: Textures, cardinalityBuffer: MTLCardinalities, ReplicationFactor: replicationFactor_R)
+        let CardinalityShader = MTKPShader(name: "getCardinality",
+                                           io: CardinalityShaderRessources,
+                                           tgConfig: MTKPThreadgroupConfig(tgSize: (1,1,1), tgMemLength: [replicationFactor_R * (MTLCardinalities.length + MemoryLayout<uint>.size * 3)]))
+        
+        assets.add(shader: CardinalityShader)
+        
+        let MTLComputer = ResponseCurveComputer(assets: assets)
+        
+        
+        self.measure {
+            MTLComputer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
+            MTLComputer.executeCardinalityShader(streamingMultiprocessorsPerBlock: streamingMultiprocessorsPerBlock)
+            MTLComputer.commandBuffer.commit()
+            MTLComputer.commandBuffer.waitUntilCompleted()
+        }
+    }
+    
+    func testBinningShaderPerformance() {
+        
+    }
+    
+    func testResponseSummationPerformance() {
+        
+    }
+    
+    /* setup and tear down functions...... */
     override func setUp() {
         super.setUp()
         
@@ -64,46 +148,4 @@ class PerformanceTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-    
-    
-    func testPerformanceExample() {
-        let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
-        let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
-        // This is an example of a performance test case.
-        self.measure {
-            let ResponseFunciton:[float3] = metaComp.estimateCameraResponse(iterations: 5)
-        }
-    }
-    func testHistogramSpeed() {
-        let ColourHistogramSize = 256 * 3
-        let streamingMultiprocessorsPerBlock = 4
-        let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
-        let replicationFactor_R = max(MTKPDevice.device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
-        
-        // input images as textures
-        let context = CIContext(mtlDevice: self.device)
-        let Textures = Testimages.map{textureLoader.newTexture(CIImage: $0, context: context)}
-        
-        // cardinality of pixel values
-        let MTLCardinalities = self.device.makeBuffer(length: MemoryLayout<uint>.size * ColourHistogramSize, options: .storageModeShared)!
-        
-        var assets = MTKPAssets(ResponseCurveComputer.self)
-        let CardinalityShaderRessources = CardinalityShaderIO(inputTextures: Textures, cardinalityBuffer: MTLCardinalities, ReplicationFactor: replicationFactor_R)
-        let CardinalityShader = MTKPShader(name: "getCardinality",
-                                           io: CardinalityShaderRessources,
-                                           tgConfig: MTKPThreadgroupConfig(tgSize: (1,1,1), tgMemLength: [replicationFactor_R * (MTLCardinalities.length + MemoryLayout<uint>.size * 3)]))
-        
-        assets.add(shader: CardinalityShader)
-        
-        let MTLComputer = ResponseCurveComputer(assets: assets)
-        
-        
-        self.measure {
-            MTLComputer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
-            MTLComputer.executeCardinalityShader()
-            MTLComputer.commandBuffer.commit()
-            MTLComputer.commandBuffer.waitUntilCompleted()
-        }
-    }
-    
 }

@@ -75,7 +75,7 @@ final class ResponseCurveComputer : MTKPComputer {
         computeEncoder.endEncoding()
     }
     
-    public func executeCardinalityShader() {
+    public func executeCardinalityShader(streamingMultiprocessorsPerBlock:Int = 4) {
         
         let name = "getCardinality"
         
@@ -100,7 +100,6 @@ final class ResponseCurveComputer : MTKPComputer {
             })
         }
         
-        let streamingMultiprocessorsPerBlock = 4
         let blocksize = descriptor.state!.threadExecutionWidth * streamingMultiprocessorsPerBlock
         let remainder = firstTexture.width % blocksize
         let threads = MTLSizeMake(firstTexture.width + (blocksize - remainder), firstTexture.height, ImageCount)

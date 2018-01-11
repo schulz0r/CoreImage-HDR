@@ -272,15 +272,6 @@ class ResponseEstimationTests: XCTestCase {
         print(ResponseFunciton.description)
         
         XCTAssert(ResponseFunciton.reduce(true){$0 && ($1.x > 0) && ($1.y > 0) && ($1.z > 0)})
-    }
-    
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-    
-    
+    } 
 }
 
