@@ -23,6 +23,8 @@ class PerformanceTests: XCTestCase {
     var library:MTLLibrary?
     var textureLoader:MTKTextureLoader!
     
+    var computer:ResponseCurveComputer!
+    
     /* Performance optimizations can be tested here */
     
     func testResponseEstimation() {
@@ -30,39 +32,16 @@ class PerformanceTests: XCTestCase {
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
         // This is an example of a performance test case.
         self.measure {
-            let ResponseFunciton:[float3] = metaComp.estimateCameraResponse(iterations: 5)
+            metaComp.estimateCameraResponse(iterations: 5)
         }
     }
     
     func testHistogramSpeedWith4streamingProcessors() {
-        let ColourHistogramSize = 256 * 3
-        let streamingMultiprocessorsPerBlock = 4
-        let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
-        let replicationFactor_R = max(MTKPDevice.device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
-        
-        // input images as textures
-        let context = CIContext(mtlDevice: self.device)
-        let Textures = Testimages.map{textureLoader.newTexture(CIImage: $0, context: context)}
-        
-        // cardinality of pixel values
-        let MTLCardinalities = self.device.makeBuffer(length: MemoryLayout<uint>.size * ColourHistogramSize, options: .storageModeShared)!
-        
-        var assets = MTKPAssets(ResponseCurveComputer.self)
-        let CardinalityShaderRessources = CardinalityShaderIO(inputTextures: Textures, cardinalityBuffer: MTLCardinalities, ReplicationFactor: replicationFactor_R)
-        let CardinalityShader = MTKPShader(name: "getCardinality",
-                                           io: CardinalityShaderRessources,
-                                           tgConfig: MTKPThreadgroupConfig(tgSize: (1,1,1), tgMemLength: [replicationFactor_R * (MTLCardinalities.length + MemoryLayout<uint>.size * 3)]))
-        
-        assets.add(shader: CardinalityShader)
-        
-        let MTLComputer = ResponseCurveComputer(assets: assets)
-        
-        
         self.measure {
-            MTLComputer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
-            MTLComputer.executeCardinalityShader(streamingMultiprocessorsPerBlock: streamingMultiprocessorsPerBlock)
-            MTLComputer.commandBuffer.commit()
-            MTLComputer.commandBuffer.waitUntilCompleted()
+            computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
+            computer.executeCardinalityShader(streamingMultiprocessorsPerBlock: 4)
+            computer.commandBuffer.commit()
+            computer.commandBuffer.waitUntilCompleted()
         }
     }
     
@@ -89,7 +68,6 @@ class PerformanceTests: XCTestCase {
         
         let MTLComputer = ResponseCurveComputer(assets: assets)
         
-        
         self.measure {
             MTLComputer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
             MTLComputer.executeCardinalityShader(streamingMultiprocessorsPerBlock: streamingMultiprocessorsPerBlock)
@@ -99,11 +77,22 @@ class PerformanceTests: XCTestCase {
     }
     
     func testBinningShaderPerformance() {
-        
+        let threadsForBinReductionShader = computer.assets["reduceBins"]?.tgConfig.tgSize
+        self.measure {
+            computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
+            computer.encode("reduceBins", threads: threadsForBinReductionShader)
+            computer.commandBuffer.commit()
+            computer.commandBuffer.waitUntilCompleted()
+        }
     }
     
     func testResponseSummationPerformance() {
-        
+        self.measure {
+            computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
+            computer.encode("writeMeasureToBins")
+            computer.commandBuffer.commit()
+            computer.commandBuffer.waitUntilCompleted()
+        }
     }
     
     /* setup and tear down functions...... */
@@ -141,6 +130,9 @@ class PerformanceTests: XCTestCase {
             return metaData["ExposureTime"] as! Float
         }
         
+        let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
+        self.computer = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts).computer
+            
         textureLoader = MTKTextureLoader(device: self.device)
     }
     
