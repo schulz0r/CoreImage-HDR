@@ -68,23 +68,23 @@ kernel void getCardinality(const metal::array<texture2d<half>, MAX_IMAGE_COUNT> 
         atomic_fetch_add_explicit(&threadHistogram.red[pixel.r], 1, memory_order::memory_order_relaxed);
         atomic_fetch_add_explicit(&threadHistogram.green[pixel.g], 1, memory_order::memory_order_relaxed);
         atomic_fetch_add_explicit(&threadHistogram.blue[pixel.b], 1, memory_order::memory_order_relaxed);
-        
-        threadgroup_barrier(mem_flags::mem_threadgroup);
-        
-        // (3) accumulate results over all replicated histograms
-        uint3 sum = 0;
-        for(uint pos = threadID; pos < BIN_COUNT; pos += blockSize.x, sum = uint3(0)) {
-            for(uint replHistIndex = 0; replHistIndex < ReplicationFactor; replHistIndex++) {
-                // atomicity is not needed here because there won't be any further writes.
-                sum.r += (threadgroup uint &)sharedHistograms[replHistIndex].red[pos];
-                sum.g += (threadgroup uint &)sharedHistograms[replHistIndex].green[pos];
-                sum.b += (threadgroup uint &)sharedHistograms[replHistIndex].blue[pos];
-            }
-            
-            // (4) write final result to global memory
-            atomic_fetch_add_explicit(&Cardinality.red[pos], sum.r, memory_order::memory_order_relaxed);
-            atomic_fetch_add_explicit(&Cardinality.green[pos], sum.g, memory_order::memory_order_relaxed);
-            atomic_fetch_add_explicit(&Cardinality.blue[pos], sum.b, memory_order::memory_order_relaxed);
+    }
+    
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+    
+    // (3) accumulate results over all replicated histograms
+    uint3 sum = 0;
+    for(uint pos = threadID; pos < BIN_COUNT; pos += blockSize.x, sum = uint3(0)) {
+        for(uint replHistIndex = 0; replHistIndex < ReplicationFactor; replHistIndex++) {
+            // atomicity is not needed here because there won't be any further writes.
+            sum.r += (threadgroup uint &)sharedHistograms[replHistIndex].red[pos];
+            sum.g += (threadgroup uint &)sharedHistograms[replHistIndex].green[pos];
+            sum.b += (threadgroup uint &)sharedHistograms[replHistIndex].blue[pos];
         }
+        
+        // (4) write final result to global memory
+        atomic_fetch_add_explicit(&Cardinality.red[pos], sum.r, memory_order::memory_order_relaxed);
+        atomic_fetch_add_explicit(&Cardinality.green[pos], sum.g, memory_order::memory_order_relaxed);
+        atomic_fetch_add_explicit(&Cardinality.blue[pos], sum.b, memory_order::memory_order_relaxed);
     }
 }
