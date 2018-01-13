@@ -70,7 +70,7 @@ public final class ResponseEstimator: MetaComputer {
         
         memcpy(MTLResponseFunc.contents(), &initialCamResponse, 256 * MemoryLayout<float3>.size)
         
-        let numberOfControlPoints = 32
+        let numberOfControlPoints = 16
         
         let ResponseSummationAssets = ResponseSummationShaderIO(inputTextures: textures, BinBuffer: buffer, exposureTimes: MTLExposureTimes, cameraShifts: MTLCameraShifts, cameraResponse: MTLResponseFunc, weights: MTLWeightFunc)
         let bufferReductionAssets = bufferReductionShaderIO(BinBuffer: buffer, bufferlength: bufferLen, cameraResponse: MTLResponseFunc, Cardinality: MTLCardinalities)
@@ -108,7 +108,7 @@ public final class ResponseEstimator: MetaComputer {
                                histogramOffset: 0)
         })
         
-        (0...iterations).forEach({ _ in
+        (0..<iterations).forEach({ _ in
             computer.encode("writeMeasureToBins")
             computer.encode("reduceBins", threads: threadsForBinReductionShader)
             computer.flush(buffer: buffer)
@@ -121,6 +121,6 @@ public final class ResponseEstimator: MetaComputer {
         
         let ResponseFunc = Array(UnsafeMutableBufferPointer(start: MTLResponseFunc.contents().assumingMemoryBound(to: float3.self), count: 256))
         
-        return ResponseFunc.map{$0 / ResponseFunc.last!}
+        return ResponseFunc.map{$0 / ResponseFunc[127]}
     }
 }
