@@ -234,7 +234,7 @@ class ResponseEstimationTests: XCTestCase {
         
         print(ResponseFunciton.description)
         
-        XCTAssert(ResponseFunciton.reduce(true){$0 && ($1.x > 0) && ($1.y > 0) && ($1.z > 0)})
+        XCTAssert(ResponseFunciton[1..<ResponseFunciton.endIndex].reduce(true){$0 && ($1.x.isNormal) && ($1.y.isNormal) && ($1.z.isNormal)})
     } 
 }
 
