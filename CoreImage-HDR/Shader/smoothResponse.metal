@@ -16,10 +16,10 @@ inline void derivativeOfInverseOfFunction(device float3 * invertedFunc, device f
  Cubic Spline Interpolation and final weight function
  ---------------------------------------------------*/
 
-kernel void smoothResponse(device float3 *inverseResponse [[buffer(0)]],
-                           device float3 *WeightFunction [[ buffer(1) ]],
-                           constant uint *ControlPoints [[ buffer(2) ]],
-                           constant float4x4 *cubicMatrix [[ buffer(3) ]],
+kernel void smoothResponse(device float3 * inverseResponse [[buffer(0)]],
+                           device float3 * WeightFunction [[ buffer(1) ]],
+                           constant uint * ControlPoints [[ buffer(2) ]],
+                           constant float4x4 & cubicMatrix [[ buffer(3) ]],
                            uint tid [[thread_index_in_threadgroup]],
                            uint i [[threadgroup_position_in_grid]],
                            uint gid [[thread_position_in_grid]],
@@ -28,7 +28,7 @@ kernel void smoothResponse(device float3 *inverseResponse [[buffer(0)]],
     
     /* Smooth Inverse Response */
     float t = float(tid)/tgSize;
-    interpolatedApproximation(cubicMatrix[0], t, i, inverseResponse, ControlPoints, gid);
+    interpolatedApproximation(cubicMatrix, t, i, inverseResponse, ControlPoints, gid);
     
     /* Approximate derivation of non-inverse Response - in logarithmic domain */
     derivativeOfInverseOfFunction(WeightFunction, inverseResponse, gid);    // derivative of inverse function
@@ -38,7 +38,7 @@ kernel void smoothResponse(device float3 *inverseResponse [[buffer(0)]],
     WeightFunction[255] = 0;
     
     if( (i == 0) || (i == lastThreadgroup-1) ){
-        interpolatedApproximation(cubicMatrix[0], t, i, WeightFunction, ControlPoints, gid);
+        interpolatedApproximation(cubicMatrix, t, i, WeightFunction, ControlPoints, gid);
     }
     
     WeightFunction[0] = 0;
