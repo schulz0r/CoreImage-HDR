@@ -8,7 +8,7 @@
 
 import XCTest
 import CoreImage
-import ImageIO
+import MetalPerformanceShaders
 import MetalKit
 import MetalKitPlus
 @testable import CoreImage_HDR
@@ -66,38 +66,43 @@ class ResponseEstimationTests: XCTestCase {
         super.tearDown()
     }
     
-    // test cardinality (histogram) shader for correct functionality
-    func testHistogramShader() {
-        let ColourHistogramSize = 256 * 3
-        let streamingMultiprocessorsPerBlock = 4
-        let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
-        let replicationFactor_R = max(MTKPDevice.device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
-        
-        // input images as textures
+    func testHistogramShader_MPS() {
         let context = CIContext(mtlDevice: self.device)
         let Textures = Testimages.map{textureLoader.newTexture(CIImage: $0, context: context)}
         
-        // cardinality of pixel values
-        let MTLCardinalities = self.device.makeBuffer(length: MemoryLayout<uint>.size * ColourHistogramSize, options: .storageModeShared)!
+        var histogramInfo = MPSImageHistogramInfo(
+            numberOfHistogramEntries: 256, histogramForAlpha: false,
+            minPixelValue: vector_float4(0,0,0,0),
+            maxPixelValue: vector_float4(1,1,1,1))
         
-        var assets = MTKPAssets(ResponseCurveComputer.self)
-        let CardinalityShaderRessources = CardinalityShaderIO(inputTextures: Textures, cardinalityBuffer: MTLCardinalities, ReplicationFactor: replicationFactor_R)
-        let CardinalityShader = MTKPShader(name: "getCardinality",
-                                           io: CardinalityShaderRessources,
-                                           tgConfig: MTKPThreadgroupConfig(tgSize: (1,1,1), tgMemLength: [replicationFactor_R * (MTLCardinalities.length + MemoryLayout<uint>.size * 3)]))
+        let calculation = MPSImageHistogram(device: device, histogramInfo: &histogramInfo)
+        calculation.zeroHistogram = false
         
-        assets.add(shader: CardinalityShader)
+        let bufferLength = calculation.histogramSize(forSourceFormat: Textures[0].pixelFormat)
+        let histogramInfoBuffer = MTKPDevice.device.makeBuffer(length: bufferLength, options: .storageModeShared)!
         
-        let MTLComputer = ResponseCurveComputer(assets: assets)
-        MTLComputer.executeCardinalityShader()
-        MTLComputer.commandBuffer.commit()
-        MTLComputer.commandBuffer.waitUntilCompleted()
+        let assets = MTKPAssets(ResponseCurveComputer.self)
+        let computer = ResponseCurveComputer(assets: assets)
         
-        var Cardinality_Host = [uint](repeating: 0, count: ColourHistogramSize)
-        memcpy(&Cardinality_Host, MTLCardinalities.contents(), MTLCardinalities.length)
+        self.measure {
+            computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
+            Textures.forEach({
+                calculation.encode(to: computer.commandBuffer,
+                                   sourceTexture: $0,
+                                   histogram: histogramInfoBuffer,
+                                   histogramOffset: 0)
+            })
+            computer.commandBuffer.commit()
+            computer.commandBuffer.waitUntilCompleted()
+        }
         
-        let truePixelCount = Testimages.reduce(0){$0 + 3 * Int($1.extent.size.height * $1.extent.size.width)}
+        var Cardinality_Host = [uint](repeating: 0, count: 768)
+        memcpy(&Cardinality_Host, histogramInfoBuffer.contents(), histogramInfoBuffer.length)
+        
+        let truePixelCount = Textures.count * Textures[0].width * Textures[0].height * 3
         let countedPixel = Int(Cardinality_Host.reduce(0, +))
+        
+        Textures.forEach({print("\($0.width) \($0.height)")})
         
         XCTAssertEqual(countedPixel, truePixelCount)
     }
@@ -228,8 +233,7 @@ class ResponseEstimationTests: XCTestCase {
     }
     
     func testBufferReductionShader() {
-        
-        var lengthOfBuffer:uint = 512;
+        let lengthOfBuffer:uint = 512;
         var buffer = [float3](repeating: float3(1.0), count: Int(lengthOfBuffer))
         var cardinalities = [uint](repeating: 1, count: 256 * 3)
         

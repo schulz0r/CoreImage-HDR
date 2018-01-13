@@ -8,9 +8,9 @@
 
 import XCTest
 import CoreImage
-import ImageIO
 import MetalKit
 import MetalKitPlus
+import MetalPerformanceShaders
 @testable import CoreImage_HDR
 
 class PerformanceTests: XCTestCase {
@@ -36,46 +36,6 @@ class PerformanceTests: XCTestCase {
         }
     }
     
-    func testHistogramSpeedWith4streamingProcessors() {
-        self.measure {
-            computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
-            computer.executeCardinalityShader(streamingMultiprocessorsPerBlock: 4)
-            computer.commandBuffer.commit()
-            computer.commandBuffer.waitUntilCompleted()
-        }
-    }
-    
-    func testHistogramSpeedWith2streamingProcessors() {
-        let ColourHistogramSize = 256 * 3
-        let streamingMultiprocessorsPerBlock = 2    // <- NOW THERE IS A TWO
-        let sharedColourHistogramSize = MemoryLayout<uint>.size * 257 * 3
-        let replicationFactor_R = max(MTKPDevice.device.maxThreadgroupMemoryLength / (streamingMultiprocessorsPerBlock * sharedColourHistogramSize), 1)
-        
-        // input images as textures
-        let context = CIContext(mtlDevice: self.device)
-        let Textures = Testimages.map{textureLoader.newTexture(CIImage: $0, context: context)}
-        
-        // cardinality of pixel values
-        let MTLCardinalities = self.device.makeBuffer(length: MemoryLayout<uint>.size * ColourHistogramSize, options: .storageModeShared)!
-        
-        var assets = MTKPAssets(ResponseCurveComputer.self)
-        let CardinalityShaderRessources = CardinalityShaderIO(inputTextures: Textures, cardinalityBuffer: MTLCardinalities, ReplicationFactor: replicationFactor_R)
-        let CardinalityShader = MTKPShader(name: "getCardinality",
-                                           io: CardinalityShaderRessources,
-                                           tgConfig: MTKPThreadgroupConfig(tgSize: (1,1,1), tgMemLength: [replicationFactor_R * (MTLCardinalities.length + MemoryLayout<uint>.size * 3)]))
-        
-        assets.add(shader: CardinalityShader)
-        
-        let MTLComputer = ResponseCurveComputer(assets: assets)
-        
-        self.measure {
-            MTLComputer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
-            MTLComputer.executeCardinalityShader(streamingMultiprocessorsPerBlock: streamingMultiprocessorsPerBlock)
-            MTLComputer.commandBuffer.commit()
-            MTLComputer.commandBuffer.waitUntilCompleted()
-        }
-    }
-    
     func testBinningShaderPerformance() {
         let threadsForBinReductionShader = computer.assets["reduceBins"]?.tgConfig.tgSize
         self.measure {
@@ -93,6 +53,36 @@ class PerformanceTests: XCTestCase {
             computer.commandBuffer.commit()
             computer.commandBuffer.waitUntilCompleted()
         }
+    }
+    
+    func testMPS() {
+        guard let textures = computer.assets["writeMeasureToBins"]?.textures else {
+            fatalError()
+        }
+        
+        var histogramInfo = MPSImageHistogramInfo(
+            numberOfHistogramEntries: 256, histogramForAlpha: false,
+            minPixelValue: vector_float4(0,0,0,0),
+            maxPixelValue: vector_float4(1,1,1,1))
+        
+        let calculation = MPSImageHistogram(device: device, histogramInfo: &histogramInfo)
+        let bufferLength = calculation.histogramSize(forSourceFormat: textures[0].pixelFormat)
+        let histogramInfoBuffer = MTKPDevice.device.makeBuffer(length: bufferLength, options: .storageModeShared)!
+        
+        self.measure {
+            computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
+            textures.forEach({ texture in
+                calculation.encode(to: computer.commandBuffer,
+                                   sourceTexture: texture,
+                                   histogram: histogramInfoBuffer,
+                                   histogramOffset: 0)
+            })
+            computer.commandBuffer.commit()
+            computer.commandBuffer.waitUntilCompleted()
+        }
+        
+        var histogram = [uint](repeating: 0, count: 768)
+        memcpy(&histogram, histogramInfoBuffer.contents(), bufferLength)
     }
     
     /* setup and tear down functions...... */

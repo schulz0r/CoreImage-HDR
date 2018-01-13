@@ -58,7 +58,6 @@ final class ResponseCurveComputer : MTKPComputer {
             else {
                 fatalError()
         }
-        
         computeEncoder.setComputePipelineState(descriptor.state!)
         if let textures = descriptor.textures {
             computeEncoder.setTextures(textures, range: 0..<textures.count)
@@ -72,39 +71,6 @@ final class ResponseCurveComputer : MTKPComputer {
             })
         }
         computeEncoder.dispatchThreadgroups(threadgroups, threadsPerThreadgroup: descriptor.tgConfig.tgSize)
-        computeEncoder.endEncoding()
-    }
-    
-    public func executeCardinalityShader(streamingMultiprocessorsPerBlock:Int = 4) {
-        
-        let name = "getCardinality"
-        
-        guard
-            let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,
-            descriptor.state != nil,
-            let computeEncoder = commandBuffer.makeComputeCommandEncoder(),
-            let textures = descriptor.textures,
-            let firstTexture = textures.first
-            else {fatalError()}
-        
-        guard let ImageCount = descriptor.textures?.count else { fatalError("NumberOfTextures is Unknown.") }
-        
-        computeEncoder.setComputePipelineState(descriptor.state!)
-        computeEncoder.setTextures(textures, range: 0..<textures.count)
-        if let buffers = descriptor.buffers {
-            computeEncoder.setBuffers(buffers, offsets: [Int](repeating: 0, count: buffers.count), range: 0..<buffers.count)
-        }
-        if let TGMemSize = descriptor.tgConfig.tgMemLength {
-            TGMemSize.enumerated().forEach({
-                computeEncoder.setThreadgroupMemoryLength($0.element, index: $0.offset)
-            })
-        }
-        
-        let blocksize = descriptor.state!.threadExecutionWidth * streamingMultiprocessorsPerBlock
-        let remainder = firstTexture.width % blocksize
-        let threads = MTLSizeMake(firstTexture.width + (blocksize - remainder), firstTexture.height, ImageCount)
-        
-        computeEncoder.dispatchThreads(threads, threadsPerThreadgroup: MTLSizeMake(blocksize, 1, 1))
         computeEncoder.endEncoding()
     }
     
