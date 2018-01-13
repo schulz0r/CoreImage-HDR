@@ -55,36 +55,6 @@ class PerformanceTests: XCTestCase {
         }
     }
     
-    func testMPS() {
-        guard let textures = computer.assets["writeMeasureToBins"]?.textures else {
-            fatalError()
-        }
-        
-        var histogramInfo = MPSImageHistogramInfo(
-            numberOfHistogramEntries: 256, histogramForAlpha: false,
-            minPixelValue: vector_float4(0,0,0,0),
-            maxPixelValue: vector_float4(1,1,1,1))
-        
-        let calculation = MPSImageHistogram(device: device, histogramInfo: &histogramInfo)
-        let bufferLength = calculation.histogramSize(forSourceFormat: textures[0].pixelFormat)
-        let histogramInfoBuffer = MTKPDevice.device.makeBuffer(length: bufferLength, options: .storageModeShared)!
-        
-        self.measure {
-            computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
-            textures.forEach({ texture in
-                calculation.encode(to: computer.commandBuffer,
-                                   sourceTexture: texture,
-                                   histogram: histogramInfoBuffer,
-                                   histogramOffset: 0)
-            })
-            computer.commandBuffer.commit()
-            computer.commandBuffer.waitUntilCompleted()
-        }
-        
-        var histogram = [uint](repeating: 0, count: 768)
-        memcpy(&histogram, histogramInfoBuffer.contents(), bufferLength)
-    }
-    
     /* setup and tear down functions...... */
     override func setUp() {
         super.setUp()

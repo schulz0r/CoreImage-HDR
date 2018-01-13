@@ -66,47 +66,6 @@ class ResponseEstimationTests: XCTestCase {
         super.tearDown()
     }
     
-    func testHistogramShader_MPS() {
-        let context = CIContext(mtlDevice: self.device)
-        let Textures = Testimages.map{textureLoader.newTexture(CIImage: $0, context: context)}
-        
-        var histogramInfo = MPSImageHistogramInfo(
-            numberOfHistogramEntries: 256, histogramForAlpha: false,
-            minPixelValue: vector_float4(0,0,0,0),
-            maxPixelValue: vector_float4(1,1,1,1))
-        
-        let calculation = MPSImageHistogram(device: device, histogramInfo: &histogramInfo)
-        calculation.zeroHistogram = false
-        
-        let bufferLength = calculation.histogramSize(forSourceFormat: Textures[0].pixelFormat)
-        let histogramInfoBuffer = MTKPDevice.device.makeBuffer(length: bufferLength, options: .storageModeShared)!
-        
-        let assets = MTKPAssets(ResponseCurveComputer.self)
-        let computer = ResponseCurveComputer(assets: assets)
-        
-        self.measure {
-            computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
-            Textures.forEach({
-                calculation.encode(to: computer.commandBuffer,
-                                   sourceTexture: $0,
-                                   histogram: histogramInfoBuffer,
-                                   histogramOffset: 0)
-            })
-            computer.commandBuffer.commit()
-            computer.commandBuffer.waitUntilCompleted()
-        }
-        
-        var Cardinality_Host = [uint](repeating: 0, count: 768)
-        memcpy(&Cardinality_Host, histogramInfoBuffer.contents(), histogramInfoBuffer.length)
-        
-        let truePixelCount = Textures.count * Textures[0].width * Textures[0].height * 3
-        let countedPixel = Int(Cardinality_Host.reduce(0, +))
-        
-        Textures.forEach({print("\($0.width) \($0.height)")})
-        
-        XCTAssertEqual(countedPixel, truePixelCount)
-    }
-    
     func testBinningShader(){
         var cameraShifts = int2(0,0)
         var exposureTime:Float = 1
