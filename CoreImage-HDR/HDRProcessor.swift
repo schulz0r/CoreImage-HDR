@@ -38,6 +38,14 @@ final class HDRProcessor: CIImageProcessorKernel {
             fatalError("Length of Camera Response is not a power of two.")
         }
        
+        var library:MTLLibrary
+        
+        do{
+            library = try device.makeDefaultLibrary(bundle: Bundle(for: HDRProcessor.self))
+        } catch let error {
+            fatalError(error.localizedDescription)
+        }
+        
         let descriptor = MTLTextureDescriptor()
         descriptor.textureType = .type1D
         descriptor.pixelFormat = .rgba32Float
@@ -58,22 +66,20 @@ final class HDRProcessor: CIImageProcessorKernel {
             let MTLCameraShifts = device.makeBuffer(bytes: &cameraShifts, length: MemoryLayout<uint2>.size * inputImages.count, options: .cpuCacheModeWriteCombined),
             let MTLExposureTimes = device.makeBuffer(bytes: exposureTimes, length: MemoryLayout<Float>.size * inputImages.count, options: .cpuCacheModeWriteCombined),
             let MTLWeightFunc = device.makeBuffer(bytes: &weightFunction, length: weightFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
-            let MTLResponseFunc = device.makeBuffer(bytes: &cameraResponse, length: cameraResponse.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
-            let MTLMinMax = device.makeBuffer(length: MemoryLayout<float3>.size * 2, options: .storageModeShared)
+            let MTLResponseFunc = device.makeBuffer(bytes: &cameraResponse, length: cameraResponse.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
         else {
             fatalError()
         }
         
         
-        guard
-            let encoder = commandBuffer.makeComputeCommandEncoder()
-        else {
+        guard let encoder = commandBuffer.makeComputeCommandEncoder() else {
             fatalError("Failed to create command encoder.")
         }
         
         do{
-            let library = try device.makeDefaultLibrary(bundle: Bundle(for: HDRProcessor.self))
-            guard let HDRFunc = library.makeFunction(name: "makeHDR") else { fatalError() }
+            guard
+                let HDRFunc = library.makeFunction(name: "makeHDR")
+            else { fatalError() }
             let HDRState = try device.makeComputePipelineState(function: HDRFunc)
             encoder.setComputePipelineState(HDRState)
         } catch let Errors {
@@ -92,5 +98,22 @@ final class HDRProcessor: CIImageProcessorKernel {
         MPSMinMax.encode(commandBuffer: commandBuffer,
                          sourceTexture: HDRTexture,
                          destinationTexture: MinMaxMTLTexture)
+        
+        do {
+            guard
+                let scaleFunc = library.makeFunction(name: "scaleHDR"),
+                let ScaleEncoder = commandBuffer.makeComputeCommandEncoder() else {
+                    fatalError("Failed to create command encoder.")
+            }
+            
+            let HDRScaleState = try device.makeComputePipelineState(function: scaleFunc)
+            ScaleEncoder.setComputePipelineState(HDRScaleState)
+            ScaleEncoder.setTexture(HDRTexture, index: 0)
+            ScaleEncoder.setTexture(MinMaxMTLTexture, index: 1)
+            ScaleEncoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: MTLSizeMake(8, 8, 1))
+            ScaleEncoder.endEncoding()
+        } catch let error {
+            fatalError(error.localizedDescription)
+        }
     }
 }

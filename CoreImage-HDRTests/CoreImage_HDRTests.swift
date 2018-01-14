@@ -99,7 +99,7 @@ class CoreImage_HDRTests: XCTestCase {
             XCTFail(Errors.localizedDescription)
         }
         
-        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/noobs.png"))
+        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/result.png"))
         
         XCTAssertTrue(true)
     }
