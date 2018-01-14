@@ -9,6 +9,7 @@
 import Foundation
 import CoreImage
 import MetalKit
+import MetalPerformanceShaders
 
 final class HDRProcessor: CIImageProcessorKernel {
     
@@ -36,18 +37,33 @@ final class HDRProcessor: CIImageProcessorKernel {
         guard cameraResponse.count.isPowerOfTwo() else {
             fatalError("Length of Camera Response is not a power of two.")
         }
-            
+       
+        let descriptor = MTLTextureDescriptor()
+        descriptor.textureType = .type1D
+        descriptor.pixelFormat = .rgba32Float
+        descriptor.width = 2
+        
+        let MPSMinMax = MPSImageStatisticsMinAndMax(device: device)
+        MPSMinMax.clipRectSource = MTLRegionMake2D(0, 0, HDRTexture.width, HDRTexture.height)
+        
         let imageDimensions = MTLSizeMake(inputImages[0]!.width, inputImages[0]!.height, 1)
         
         var numberOfInputImages = uint(inputImages.count)
         var cameraShifts = arguments?["CameraShifts"] ?? [int2](repeating: int2(0,0), count: inputImages.count)
         var weightFunction = zip([float3(0)] + cameraResponse, cameraResponse).map{$0.1 - $0.0}
         
-        let MTLNumberOfImages = device.makeBuffer(bytes: &numberOfInputImages, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)
-        let MTLCameraShifts = device.makeBuffer(bytes: &cameraShifts, length: MemoryLayout<uint2>.size * inputImages.count, options: .cpuCacheModeWriteCombined)
-        let MTLExposureTimes = device.makeBuffer(bytes: exposureTimes, length: MemoryLayout<Float>.size * inputImages.count, options: .cpuCacheModeWriteCombined)
-        let MTLWeightFunc = device.makeBuffer(bytes: &weightFunction, length: weightFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
-        let MTLResponseFunc = device.makeBuffer(bytes: &cameraResponse, length: cameraResponse.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
+        guard
+            let MinMaxMTLTexture = device.makeTexture(descriptor: descriptor),
+            let MTLNumberOfImages = device.makeBuffer(bytes: &numberOfInputImages, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined),
+            let MTLCameraShifts = device.makeBuffer(bytes: &cameraShifts, length: MemoryLayout<uint2>.size * inputImages.count, options: .cpuCacheModeWriteCombined),
+            let MTLExposureTimes = device.makeBuffer(bytes: exposureTimes, length: MemoryLayout<Float>.size * inputImages.count, options: .cpuCacheModeWriteCombined),
+            let MTLWeightFunc = device.makeBuffer(bytes: &weightFunction, length: weightFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
+            let MTLResponseFunc = device.makeBuffer(bytes: &cameraResponse, length: cameraResponse.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
+            let MTLMinMax = device.makeBuffer(length: MemoryLayout<float3>.size * 2, options: .storageModeShared)
+        else {
+            fatalError()
+        }
+        
         
         guard
             let encoder = commandBuffer.makeComputeCommandEncoder()
@@ -72,5 +88,9 @@ final class HDRProcessor: CIImageProcessorKernel {
         encoder.setBuffers([MTLResponseFunc, MTLWeightFunc], offsets: [0,0], range: Range<Int>(3...4))
         encoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: MTLSizeMake(8, 8, 1))
         encoder.endEncoding()
+        
+        MPSMinMax.encode(commandBuffer: commandBuffer,
+                         sourceTexture: HDRTexture,
+                         destinationTexture: MinMaxMTLTexture)
     }
 }
