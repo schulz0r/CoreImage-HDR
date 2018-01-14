@@ -9,7 +9,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
-kernel void scaleHDR(texture2d<half::read_write> HDRImage,
+kernel void scaleHDR(texture2d<half, access::read_write> HDRImage,
                      texture1d<half, access::read> MinMax,
                      uint2 gid [[thread_position_in_grid]]) {
     
