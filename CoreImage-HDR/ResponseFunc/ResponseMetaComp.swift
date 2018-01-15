@@ -53,22 +53,17 @@ public final class ResponseEstimator: MetaComputer {
         let TGSizeOfSummationShader = (16, 16, 1)
         let totalBlocksCount = (textures.first!.height / TGSizeOfSummationShader.1) * (textures.first!.width / TGSizeOfSummationShader.0)
         let bufferLen = totalBlocksCount * 256
-        // define intial functions which are to estimate
-        var initialWeightFunc:[float3] = (0...255).map{ float3( exp(-TrainingWeight * pow( (Float($0)-127.5)/127.5, 2)) ) }
-        var initialCamResponse:[float3] = Array<Float>(stride(from: 0.0, to: 2.0, by: 2.0/256.0)).map{float3($0)}
         
         guard
             let MTLCardinalities = MTKPDevice.device.makeBuffer(length: calculation.histogramSize(forSourceFormat: textures[0].pixelFormat), options: .storageModePrivate),
             let MTLCameraShifts = MTKPDevice.device.makeBuffer(bytes: CameraShifts, length: MemoryLayout<uint2>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
             let MTLExposureTimes = MTKPDevice.device.makeBuffer(bytes: ExposureTimes, length: MemoryLayout<Float>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
             let buffer = MTKPDevice.device.makeBuffer(length: bufferLen * MemoryLayout<float3>.size/2, options: .storageModePrivate),  // float3 / 2 = half3
-            let MTLWeightFunc = MTKPDevice.device.makeBuffer(bytes: &initialWeightFunc, length: initialWeightFunc.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
+            let MTLWeightFunc = MTKPDevice.device.makeBuffer(length: 256 * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
             let MTLResponseFunc = MTKPDevice.device.makeBuffer(length: 256 * MemoryLayout<float3>.size, options: .storageModeShared)
         else {
                 fatalError("Could not initialize Buffers")
         }
-        
-        memcpy(MTLResponseFunc.contents(), &initialCamResponse, 256 * MemoryLayout<float3>.size)
         
         let numberOfControlPoints = 16
         
@@ -88,8 +83,10 @@ public final class ResponseEstimator: MetaComputer {
         computer = ResponseCurveComputer(assets: assets)
     }
     
-    public func estimateCameraResponse(iterations: Int) -> [float3] {
+    public func estimate(cameraParameters: inout CameraParameter, iterations: Int) {
         guard
+            let MTLResponse = computer.assets["writeMeasureToBins"]?.buffers?[4],
+            let MTLWeights = computer.assets["writeMeasureToBins"]?.buffers?[5],
             let summationShader = computer.assets["writeMeasureToBins"],
             let buffer = summationShader.buffers?[0],
             let MTLResponseFunc = summationShader.buffers?[4],
@@ -98,6 +95,9 @@ public final class ResponseEstimator: MetaComputer {
         else {
             fatalError()
         }
+        
+        memcpy(MTLResponse.contents(), cameraParameters.responseFunction, cameraParameters.responseFunction.count * MemoryLayout<float3>.size)
+        memcpy(MTLWeights.contents(), cameraParameters.weightFunction, cameraParameters.weightFunction.count * MemoryLayout<float3>.size)
         
         computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
         
@@ -119,8 +119,8 @@ public final class ResponseEstimator: MetaComputer {
         computer.commandBuffer.commit()
         computer.commandBuffer.waitUntilCompleted()
         
-        let ResponseFunc = Array(UnsafeMutableBufferPointer(start: MTLResponseFunc.contents().assumingMemoryBound(to: float3.self), count: 256))
-        
-        return ResponseFunc.map{$0 / ResponseFunc[127]}
+        cameraParameters.responseFunction = Array(UnsafeMutableBufferPointer(start: MTLResponseFunc.contents().assumingMemoryBound(to: float3.self), count: 256))
+        cameraParameters.responseFunction = cameraParameters.responseFunction.map{$0 / cameraParameters.responseFunction[127]}
+        cameraParameters.weightFunction = Array(UnsafeMutableBufferPointer(start: MTLWeights.contents().assumingMemoryBound(to: float3.self), count: 256))
     }
 }

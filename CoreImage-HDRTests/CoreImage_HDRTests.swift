@@ -84,9 +84,10 @@ class CoreImage_HDRTests: XCTestCase {
     
     func testWithResponse() {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
+        var camParams = CameraParameter(withTrainingWeight: 4)
         
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
-        let ResponseFunction = metaComp.estimateCameraResponse(iterations: 10)
+        let ResponseFunction = metaComp.estimate(cameraParameters: &camParams, iterations: 10)
         
         
         var HDR:CIImage = CIImage()

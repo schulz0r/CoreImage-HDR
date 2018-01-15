@@ -228,13 +228,14 @@ class ResponseEstimationTests: XCTestCase {
     
     func testResponseFunctionEstimation() {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
+        var camParams = CameraParameter(withTrainingWeight: 4)
         
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
-        let ResponseFunciton:[float3] = metaComp.estimateCameraResponse(iterations: 10)
+        metaComp.estimate(cameraParameters: &camParams, iterations: 10)
         
-        print(ResponseFunciton.description)
+        print("Response: \(camParams.responseFunction.description)\nWeights: \(camParams.weightFunction.description)")
         
-        XCTAssert(ResponseFunciton[1..<ResponseFunciton.endIndex].reduce(true){$0 && ($1.x.isNormal) && ($1.y.isNormal) && ($1.z.isNormal)})
+        XCTAssert(camParams.responseFunction[1..<255].reduce(true){$0 && ($1.x.isNormal) && ($1.y.isNormal) && ($1.z.isNormal)})
     } 
 }
 
