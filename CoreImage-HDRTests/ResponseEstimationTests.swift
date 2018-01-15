@@ -223,7 +223,7 @@ class ResponseEstimationTests: XCTestCase {
         let resultX = result.map{$0.x}
         let expectedSum = lengthOfBuffer / 256
         
-        XCTAssert( resultX.allIs(value: Float(expectedSum)) )
+        XCTAssert( resultX.allNonSaturatedEqual(value: Float(expectedSum)) )
     }
     
     func testResponseFunctionEstimation() {

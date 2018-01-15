@@ -16,8 +16,8 @@ extension Int {
 }
 
 extension Array where Element: Comparable {
-    func allIs(value: Element) -> Bool {
-        return self.reduce(true){$0 && ($1 == value)}
+    func allNonSaturatedEqual(value: Element) -> Bool {
+        return self[1..<self.endIndex-1].reduce(true){$0 && ($1 == value)}
     }
     
     func isAscendinglySorted() -> Bool {
