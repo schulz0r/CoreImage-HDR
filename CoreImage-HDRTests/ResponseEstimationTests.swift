@@ -72,7 +72,7 @@ class ResponseEstimationTests: XCTestCase {
         let TGSizeOfSummationShader = (16,16,1)
         let lengthOfBuffer = 512;
         guard let commandQ = device.makeCommandQueue() else {fatalError()}
-        var TextureFill = [float3](repeating: float3(1.0), count: lengthOfBuffer)
+        var TextureFill = [float3](repeating: float3(0.5), count: lengthOfBuffer)
         var FunctionDummy = [float3](repeating: float3(1.0), count: lengthOfBuffer)
         
         // allocate half size buffer

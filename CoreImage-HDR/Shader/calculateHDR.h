@@ -16,7 +16,7 @@ inline half3 HDRValue(array_ref<half3> linearPixelArray, array_ref<uchar3> indic
     if(all(indices[0].rgb != 255)){ // if darkest pixel is saturated...
         // read out array and calculate HDR value
         for(uint i = 0; i < linearPixelArray.size(); i++){ // iterate through all images at position gid
-            weight.rgb = half3( W[indices[i].r].r, W[int(indices[i].g)].g, W[int(indices[i].b)].b );
+            weight.rgb = half3( W[indices[i].r].r, W[indices[i].g].g, W[indices[i].b].b );
             zaehler += weight.rgb * t[i] * linearPixelArray[i].rgb;
             nenner += weight.rgb * (t[i] * t[i]);
         }
