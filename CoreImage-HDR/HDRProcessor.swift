@@ -109,7 +109,8 @@ final class HDRProcessor: CIImageProcessorKernel {
             let HDRScaleState = try device.makeComputePipelineState(function: scaleFunc)
             ScaleEncoder.setComputePipelineState(HDRScaleState)
             ScaleEncoder.setTexture(HDRTexture, index: 0)
-            ScaleEncoder.setTexture(MinMaxMTLTexture, index: 1)
+            ScaleEncoder.setTexture(HDRTexture, index: 1)
+            ScaleEncoder.setTexture(MinMaxMTLTexture, index: 2)
             ScaleEncoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: MTLSizeMake(8, 8, 1))
             ScaleEncoder.endEncoding()
         } catch let error {

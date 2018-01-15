@@ -9,7 +9,8 @@
 #include <metal_stdlib>
 using namespace metal;
 
-kernel void scaleHDR(texture2d<half, access::read_write> HDRImage,
+kernel void scaleHDR(texture2d<half, access::read> HDRImage,
+                     texture2d<half, access::write> scaledHDRImage,
                      texture1d<half, access::read> MinMax,
                      uint2 gid [[thread_position_in_grid]]) {
     
@@ -18,5 +19,5 @@ kernel void scaleHDR(texture2d<half, access::read_write> HDRImage,
     const half3 Range = Maximum - Minimum;
     
     const half3 pixel = HDRImage.read(gid).rgb;
-    HDRImage.write(half4((pixel - Minimum) / Range, 1), gid);
+    scaledHDRImage.write(half4((pixel - Minimum) / Range, 1), gid);
 }
