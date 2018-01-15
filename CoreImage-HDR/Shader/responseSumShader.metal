@@ -59,7 +59,7 @@ kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>,
     }
     
     // calculate HDR Value
-    const half3 HDRPixel = HDRValue(linearizedPixels, exposureTimes, weights);
+    const half3 HDRPixel = HDRValue(linearizedPixels, PixelIndices, exposureTimes, weights);
     
     for(uint imageIndex = 0; imageIndex < NumberOfinputImages; imageIndex++) {
         const half3 µ = HDRPixel * exposureTimes[imageIndex];   // X * t_i is the mean value according to the model
@@ -94,18 +94,18 @@ kernel void writeMeasureToBins_float32(const metal::array<texture2d<float, acces
     const uint threadgroupIndex = threadgroupID.x + numberOfThreadgroups.x * threadgroupID.y;
     device metal::array<float3, 256> & outputBufferSegment = outputbuffer[threadgroupIndex];
     
-    metal::array<ushort3, MAX_IMAGE_COUNT> PixelIndices;
+    metal::array<uchar3, MAX_IMAGE_COUNT> PixelIndices;
     metal::array<half3, MAX_IMAGE_COUNT> linearizedPixels;
     
     // linearize pixel
     for(uint i = 0; i < NumberOfinputImages; i++) {
         const float3 pixel = inputArray[i].read(uint2(int2(gid) + cameraShifts[i])).rgb;
-        PixelIndices[i] = ushort3(pixel * 255);
+        PixelIndices[i] = uchar3(pixel * 255);
         linearizedPixels[i] = half3(cameraResponse[PixelIndices[i].x].x, cameraResponse[PixelIndices[i].y].y, cameraResponse[PixelIndices[i].z].z);
     }
     
     // calculate HDR Value
-    const half3 HDRPixel = HDRValue(linearizedPixels, exposureTimes, weights);
+    const half3 HDRPixel = HDRValue(linearizedPixels, PixelIndices, exposureTimes, weights);
     
     for(uint imageIndex = 0; imageIndex < NumberOfinputImages; imageIndex++) {
         const half3 µ = HDRPixel * exposureTimes[imageIndex];   // X * t_i is the mean value according to the model

@@ -24,20 +24,21 @@ kernel void makeHDR(const metal::array<texture2d<half, access::read>, MAX_IMAGE_
                     uint2 gid [[thread_position_in_grid]]){
     
     half3 linearData[MAX_IMAGE_COUNT];
+    array<uchar3,MAX_IMAGE_COUNT> indices;
     const array_ref<half3> PixelArray = make_array_ref(linearData, NumberOfinputImages);
     
     // linearize pixel
     for(uint i = 0; i < NumberOfinputImages; i++) {
         const half3 pixel = inputArray[i].read(uint2(int2(gid) + cameraShifts[i])).rgb;
-        const ushort3 indices = ushort3(pixel * 255);
-        linearData[i] = half3(response[indices.x].x, response[indices.y].y, response[indices.z].z);
+        indices[i] = uchar3(pixel * 255);
+        linearData[i] = half3(response[indices[i].x].x, response[indices[i].y].y, response[indices[i].z].z);
     }
     
     // calculate moving average to reduce noise
     movingAverage(linearData, exposureTimes, NumberOfinputImages);
     
     // calculate HDR Value
-    const half3 enhancedPixel = HDRValue(PixelArray, exposureTimes, weights);
+    const half3 enhancedPixel = HDRValue(PixelArray, indices, exposureTimes, weights);
     HDRImage.write(half4(enhancedPixel, 1), gid);
 }
 

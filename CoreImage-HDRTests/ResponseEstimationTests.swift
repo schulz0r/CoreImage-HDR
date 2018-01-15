@@ -128,7 +128,7 @@ class ResponseEstimationTests: XCTestCase {
         memcpy(&FunctionDummy, buffer.contents(), buffer.length)
         let SummedElements = FunctionDummy.map{$0.x}.filter{$0 != 0}
         
-        XCTAssertFalse(SummedElements.isEmpty)
+        XCTAssert(SummedElements.count > 0)
         XCTAssert(SummedElements[0] == 256.0)
         XCTAssert(SummedElements[1] == 256.0)
     }
