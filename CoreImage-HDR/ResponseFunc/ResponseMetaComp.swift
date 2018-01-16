@@ -49,7 +49,6 @@ public final class ResponseEstimator: MetaComputer {
         self.calculation.zeroHistogram = false
         
         // create shared ressources
-        let TrainingWeight:Float = 4    // TODO: let user decide about this weight
         let TGSizeOfSummationShader = (16, 16, 1)
         let totalBlocksCount = (textures.first!.height / TGSizeOfSummationShader.1) * (textures.first!.width / TGSizeOfSummationShader.0)
         let bufferLen = totalBlocksCount * 256
@@ -85,8 +84,8 @@ public final class ResponseEstimator: MetaComputer {
     
     public func estimate(cameraParameters: inout CameraParameter, iterations: Int) {
         guard
-            let MTLResponse = computer.assets["writeMeasureToBins"]?.buffers?[4],
-            let MTLWeights = computer.assets["writeMeasureToBins"]?.buffers?[5],
+            let MTLResponse = computer.assets["smoothResponse"]?.buffers?[0],
+            let MTLWeights = computer.assets["smoothResponse"]?.buffers?[1],
             let summationShader = computer.assets["writeMeasureToBins"],
             let buffer = summationShader.buffers?[0],
             let MTLResponseFunc = summationShader.buffers?[4],

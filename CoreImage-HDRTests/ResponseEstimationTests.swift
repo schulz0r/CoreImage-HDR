@@ -231,7 +231,7 @@ class ResponseEstimationTests: XCTestCase {
         var camParams = CameraParameter(withTrainingWeight: 4)
         
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
-        metaComp.estimate(cameraParameters: &camParams, iterations: 10)
+        metaComp.estimate(cameraParameters: &camParams, iterations: 5)
         
         print("Response: \(camParams.responseFunction.description)\n\nWeights: \(camParams.weightFunction.description)")
         
