@@ -22,7 +22,7 @@ final class HDRProcessor: CIImageProcessorKernel {
             let inputImages = inputs?.map({$0.metalTexture}),
             let HDRTexture = output.metalTexture,
             let exposureTimes = arguments?["ExposureTimes"] as? [Float],
-            var cameraResponse = arguments?["CameraResponse"] as? [float3]
+            var cameraParameters = arguments?["CameraParameter"] as? CameraParameter
         else  {
                 return
         }
@@ -34,7 +34,7 @@ final class HDRProcessor: CIImageProcessorKernel {
         guard exposureTimes.count == inputImages.count else {
             fatalError("Each of the \(inputImages.count) input images require an exposure time. Only \(exposureTimes.count) could be found.")
         }
-        guard cameraResponse.count.isPowerOfTwo() else {
+        guard cameraParameters.responseFunction.count.isPowerOfTwo() else {
             fatalError("Length of Camera Response is not a power of two.")
         }
        
@@ -58,15 +58,14 @@ final class HDRProcessor: CIImageProcessorKernel {
         
         var numberOfInputImages = uint(inputImages.count)
         var cameraShifts = arguments?["CameraShifts"] ?? [int2](repeating: int2(0,0), count: inputImages.count)
-        var weightFunction = zip([float3(0)] + cameraResponse, cameraResponse).map{$0.1 - $0.0}
         
         guard
             let MinMaxMTLTexture = device.makeTexture(descriptor: descriptor),
             let MTLNumberOfImages = device.makeBuffer(bytes: &numberOfInputImages, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined),
             let MTLCameraShifts = device.makeBuffer(bytes: &cameraShifts, length: MemoryLayout<uint2>.size * inputImages.count, options: .cpuCacheModeWriteCombined),
             let MTLExposureTimes = device.makeBuffer(bytes: exposureTimes, length: MemoryLayout<Float>.size * inputImages.count, options: .cpuCacheModeWriteCombined),
-            let MTLWeightFunc = device.makeBuffer(bytes: &weightFunction, length: weightFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
-            let MTLResponseFunc = device.makeBuffer(bytes: &cameraResponse, length: cameraResponse.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
+            let MTLWeightFunc = device.makeBuffer(bytes: &cameraParameters.weightFunction, length: cameraParameters.weightFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
+            let MTLResponseFunc = device.makeBuffer(bytes: &cameraParameters.responseFunction, length: cameraParameters.responseFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
         else {
             fatalError()
         }
