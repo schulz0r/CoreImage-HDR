@@ -32,8 +32,11 @@ final class smoothResponseShaderIO: MTKPIOProvider {
         controlPoints.append(255)
         controlPoints.append(255)
         
-        var matrix:[float4] = [float4(-1.0/6.0,0.5,-0.5,1.0/6.0), float4(0.5,-1,0,2.0/3.0), float4(-0.5,0.5,0.5,1.0/6.0), float4(1.0/6.0,0,0,0)]    // = float4x4
-        let cubicMatrix = MTKPDevice.device.makeBuffer(bytes: &matrix, length: MemoryLayout<float4>.size * 4, options: .cpuCacheModeWriteCombined)!
+        var matrix:[float4] = [float4(-1.0/6.0,0.5,-0.5,1.0/6.0),
+                               float4(0.5,-1,0,2.0/3.0),
+                               float4(-0.5,0.5,0.5,1.0/6.0),
+                               float4(1.0/6.0,0,0,0)]    // = float4x4
+        let cubicMatrix = MTKPDevice.device.makeBuffer(bytes: &matrix, length: MemoryLayout<float4>.size, options: .cpuCacheModeWriteCombined)!
         let controlPointBuffer = MTKPDevice.device.makeBuffer(bytes: &controlPoints, length: MemoryLayout<Int32>.size * controlPoints.count, options: .cpuCacheModeWriteCombined)!
         
         return [cameraResponse, weightFunction, controlPointBuffer, cubicMatrix]

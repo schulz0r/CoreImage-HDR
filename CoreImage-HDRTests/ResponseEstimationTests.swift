@@ -233,7 +233,7 @@ class ResponseEstimationTests: XCTestCase {
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
         metaComp.estimate(cameraParameters: &camParams, iterations: 10)
         
-        print("Response: \(camParams.responseFunction.description)\nWeights: \(camParams.weightFunction.description)")
+        print("Response: \(camParams.responseFunction.description)\n\nWeights: \(camParams.weightFunction.description)")
         
         XCTAssert(camParams.responseFunction[1..<255].reduce(true){$0 && ($1.x.isNormal) && ($1.y.isNormal) && ($1.z.isNormal)})
     } 
