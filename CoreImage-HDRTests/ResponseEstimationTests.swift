@@ -228,10 +228,10 @@ class ResponseEstimationTests: XCTestCase {
     
     func testResponseFunctionEstimation() {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
-        var camParams = CameraParameter(withTrainingWeight: 4)
+        var camParams = CameraParameter(withTrainingWeight: 8)
         
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
-        metaComp.estimate(cameraParameters: &camParams, iterations: 5)
+        metaComp.estimate(cameraParameters: &camParams, iterations: 10)
         
         print("Response: \(camParams.responseFunction.description)\n\nWeights: \(camParams.weightFunction.description)")
         
