@@ -49,9 +49,13 @@ kernel void scaleHDR(texture2d<half, access::read> HDRImage,
     
     const half3 Minimum = MinMax.read(uint(0)).rgb;
     const half3 Maximum = MinMax.read(uint(1)).rgb;
-    const half3 Range = Maximum - Minimum;
+    
+    const half3 absoluteMaximum = metal::fmax(Maximum.r, metal::fmax(Maximum.g, Maximum.b));
+    const half3 absoluteMinimum = metal::fmin(Minimum.r, metal::fmin(Minimum.g, Minimum.b));
+    
+    const half3 Range = absoluteMaximum - absoluteMinimum;
     
     const half3 pixel = HDRImage.read(gid).rgb;
-    scaledHDRImage.write(half4((pixel - Minimum) / Range, 1), gid);
+    scaledHDRImage.write(half4((pixel - absoluteMinimum) / Range, 1), gid);
 }
 
