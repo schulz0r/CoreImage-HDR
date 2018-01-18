@@ -42,3 +42,16 @@ kernel void makeHDR(const metal::array<texture2d<half, access::read>, MAX_IMAGE_
     HDRImage.write(half4(enhancedPixel, 1), gid);
 }
 
+kernel void scaleHDR(texture2d<half, access::read> HDRImage,
+                     texture2d<half, access::write> scaledHDRImage,
+                     texture1d<half, access::read> MinMax,
+                     uint2 gid [[thread_position_in_grid]]) {
+    
+    const half3 Minimum = MinMax.read(uint(0)).rgb;
+    const half3 Maximum = MinMax.read(uint(1)).rgb;
+    const half3 Range = Maximum - Minimum;
+    
+    const half3 pixel = HDRImage.read(gid).rgb;
+    scaledHDRImage.write(half4((pixel - Minimum) / Range, 1), gid);
+}
+

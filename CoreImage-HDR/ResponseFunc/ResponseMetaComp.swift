@@ -120,7 +120,7 @@ public final class ResponseEstimator: MetaComputer {
         computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
         computer.encode("smoothResponse", threads: MTLSizeMake(256, 1, 1))
         computer.commandBuffer.commit()
-        computer.commandBuffer.waitUntilCompleted()R
+        computer.commandBuffer.waitUntilCompleted()
         
         cameraParameters.responseFunction = Array(UnsafeMutableBufferPointer(start: MTLResponse.contents().assumingMemoryBound(to: float3.self), count: 256))
         cameraParameters.responseFunction = cameraParameters.responseFunction.map{$0 / cameraParameters.responseFunction[127]}

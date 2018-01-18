@@ -10,6 +10,7 @@
 using namespace metal;
 #include "SortAndCount.h"
 #include "calculateHDR.h"
+#include "colourHistogram.h"
 
 #define MAX_IMAGE_COUNT 5
 #define BINS 256
@@ -120,4 +121,106 @@ kernel void writeMeasureToBins_float32(const metal::array<texture2d<float, acces
             }
         }
     }
+}
+
+#define BIN_COUNT 256
+
+bool isSaturated(uint pixel) {
+    return all(uint2(pixel) != uint2(0, 255));
+}
+
+kernel void reduceBins(device half3 * buffer [[buffer(0)]],
+                       constant uint & bufferSize [[buffer(1)]],
+                       device float3 * cameraResponse [[buffer(2)]],
+                       constant colourHistogram<BIN_COUNT> & Cardinality [[buffer(3)]],
+                       uint threadID [[thread_index_in_threadgroup]],
+                       uint warpSize [[threads_per_threadgroup]]) {
+    
+    half3 localSum = 0;
+    
+    // collect all results
+    for(uint globalPosition = threadID; globalPosition < bufferSize; globalPosition += warpSize) {
+        localSum += buffer[globalPosition];
+    }
+    
+    if(isSaturated(threadID)){
+        cameraResponse[threadID].rgb = float3(localSum / half3(Cardinality.red[threadID], Cardinality.green[threadID], Cardinality.blue[threadID]));
+    }
+}
+
+kernel void reduceBins_float(device float3 * buffer [[buffer(0)]],
+                             constant uint & bufferSize [[buffer(1)]],
+                             device float3 * cameraResponse [[buffer(2)]],
+                             constant colourHistogram<BIN_COUNT> & Cardinality [[buffer(3)]],
+                             uint threadID [[thread_index_in_threadgroup]],
+                             uint warpSize [[threads_per_threadgroup]]) {
+    
+    float3 localSum = 0;
+    
+    // collect all results
+    for(uint globalPosition = threadID; globalPosition < bufferSize; globalPosition += warpSize) {
+        localSum += buffer[globalPosition];
+    }
+    
+    if(isSaturated(threadID)){
+        cameraResponse[threadID].rgb = localSum / float3(Cardinality.red[threadID], Cardinality.green[threadID], Cardinality.blue[threadID]);
+    }
+}
+
+template<typename T> inline void interpolatedApproximation(constant float4x4 & matrix, float t, int i, T function, constant uint * ControlPoints, uint id);
+inline void derivativeOfInverseOfFunction(device float3 * invertedFunc, device float3 * function, uint id);
+
+/*---------------------------------------------------
+ Cubic Spline Interpolation and final weight function
+ ---------------------------------------------------*/
+
+kernel void smoothResponse(device float3 * inverseResponse [[buffer(0)]],
+                           device float3 * WeightFunction [[ buffer(1) ]],
+                           constant uint * ControlPoints [[ buffer(2) ]],
+                           constant float4x4 & cubicMatrix [[ buffer(3) ]],
+                           uint tid [[thread_index_in_threadgroup]],
+                           uint i [[threadgroup_position_in_grid]],
+                           uint gid [[thread_position_in_grid]],
+                           uint tgSize [[threads_per_threadgroup]],
+                           uint lastThreadgroup [[threadgroups_per_grid]]){
+    
+    /* Smooth Inverse Response */
+    float t = float(tid) / tgSize;
+    interpolatedApproximation(cubicMatrix, t, i, inverseResponse, ControlPoints, gid);
+    
+    /* Approximate derivation of non-inverse Response - in logarithmic domain */
+    derivativeOfInverseOfFunction(WeightFunction, inverseResponse, gid);    // derivative of inverse function
+    
+    /* The spline must be zero at both ends */
+    WeightFunction[0] = 0;
+    WeightFunction[255] = 0;
+    
+    if( (i == 0) || (i == lastThreadgroup-1) ){
+        interpolatedApproximation(cubicMatrix, t, i, WeightFunction, ControlPoints, gid);
+    }
+    
+    WeightFunction[0] = 0;
+    WeightFunction[255] = 0;
+}
+
+inline void derivativeOfInverseOfFunction(device float3 * invertedFunc, device float3 * function, uint id){
+    // f'(x) = 1 / f'^-1(x)
+    // the derivative of the root of a function is inverse proportional to the derivative of the function
+    // weights = (I(x)')^-1
+    float3 f_0 = log(float3(function[id].r, function[id].g, function[id].b));
+    float3 f_1 = log(float3(function[id + 1].r, function[id + 1].g, function[id + 1].b));
+    invertedFunc[id] = 1 / (f_1 - f_0);
+}
+
+template<typename T>
+inline void interpolatedApproximation(constant float4x4 & matrix, float t, int i, T function, constant uint * ControlPoints, uint id){
+    
+    float4x3 P;   // relevant control points come here
+    float4 leftOperator = (float4(pow(t,3.0),pow(t,2.0),t, 1)) * matrix;
+    P = float4x3(function[ControlPoints[i]],
+                 function[ControlPoints[i+1]],
+                 function[ControlPoints[i+2]],
+                 function[ControlPoints[i+3]]
+                 );
+    function[id] = leftOperator * transpose(P);
 }
