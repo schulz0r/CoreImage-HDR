@@ -97,7 +97,7 @@ public final class ResponseEstimator: MetaComputer {
         memcpy(MTLResponse.contents(), cameraParameters.responseFunction, cameraParameters.responseFunction.count * MemoryLayout<float3>.size)
         memcpy(MTLWeights.contents(), cameraParameters.weightFunction, cameraParameters.weightFunction.count * MemoryLayout<float3>.size)
         
-        computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
+        computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
         
         textures.forEach({ texture in
             calculation.encode(to: computer.commandBuffer,
@@ -106,14 +106,19 @@ public final class ResponseEstimator: MetaComputer {
                                histogramOffset: 0)
         })
         
-        (0..<iterations).forEach({ _ in
+        (0..<iterations).forEach({ iterationIdx in
             computer.encode("writeMeasureToBins")
             computer.encode("reduceBins", threads: threadsForBinReductionShader)
             computer.flush(buffer: buffer)
         })
         
-        computer.encode("smoothResponse", threads: MTLSizeMake(256, 1, 1))
+        // if command buffer is not committed here, the smooth shader will not be
+        // loaded for unknown reasons. This could be a metal bug.
+        computer.commandBuffer.commit()
+        computer.commandBuffer.waitUntilCompleted() // must wait or smooth response won't be executed
         
+        computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
+        computer.encode("smoothResponse", threads: MTLSizeMake(256, 1, 1))
         computer.commandBuffer.commit()
         computer.commandBuffer.waitUntilCompleted()
         

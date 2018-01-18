@@ -40,7 +40,7 @@ class PerformanceTests: XCTestCase {
     func testBinningShaderPerformance() {
         let threadsForBinReductionShader = computer.assets["reduceBins"]?.tgConfig.tgSize
         self.measure {
-            computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
+            computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
             computer.encode("reduceBins", threads: threadsForBinReductionShader)
             computer.commandBuffer.commit()
             computer.commandBuffer.waitUntilCompleted()
@@ -49,7 +49,7 @@ class PerformanceTests: XCTestCase {
     
     func testResponseSummationPerformance() {
         self.measure {
-            computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
+            computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
             computer.encode("writeMeasureToBins")
             computer.commandBuffer.commit()
             computer.commandBuffer.waitUntilCompleted()
