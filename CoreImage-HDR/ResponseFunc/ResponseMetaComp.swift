@@ -125,5 +125,9 @@ public final class ResponseEstimator: MetaComputer {
         cameraParameters.responseFunction = Array(UnsafeMutableBufferPointer(start: MTLResponse.contents().assumingMemoryBound(to: float3.self), count: 256))
         cameraParameters.responseFunction = cameraParameters.responseFunction.map{$0 / cameraParameters.responseFunction[127]}
         cameraParameters.weightFunction = Array(UnsafeMutableBufferPointer(start: MTLWeights.contents().assumingMemoryBound(to: float3.self), count: 256))
+        let Max = float3(cameraParameters.weightFunction.map{$0.x}.max()!,
+                         cameraParameters.weightFunction.map{$0.y}.max()!,
+                         cameraParameters.weightFunction.map{$0.z}.max()!)
+        cameraParameters.weightFunction = cameraParameters.weightFunction.map{$0 / Max}
     }
 }
