@@ -64,7 +64,7 @@ public final class ResponseEstimator: MetaComputer {
                 fatalError("Could not initialize Buffers")
         }
         
-        let numberOfControlPoints = 16
+        let numberOfControlPoints = 32
         
         let ResponseSummationAssets = ResponseSummationShaderIO(inputTextures: textures, BinBuffer: buffer, exposureTimes: MTLExposureTimes, cameraShifts: MTLCameraShifts, cameraResponse: MTLResponseFunc, weights: MTLWeightFunc)
         let bufferReductionAssets = bufferReductionShaderIO(BinBuffer: buffer, bufferlength: bufferLen, cameraResponse: MTLResponseFunc, Cardinality: MTLCardinalities)

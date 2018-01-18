@@ -125,10 +125,6 @@ kernel void writeMeasureToBins_float32(const metal::array<texture2d<float, acces
 
 #define BIN_COUNT 256
 
-bool isSaturated(uint pixel) {
-    return all(uint2(pixel) != uint2(0, 255));
-}
-
 kernel void reduceBins(device half3 * buffer [[buffer(0)]],
                        constant uint & bufferSize [[buffer(1)]],
                        device float3 * cameraResponse [[buffer(2)]],
@@ -143,9 +139,7 @@ kernel void reduceBins(device half3 * buffer [[buffer(0)]],
         localSum += buffer[globalPosition];
     }
     
-    if(isSaturated(threadID)){
-        cameraResponse[threadID].rgb = float3(localSum / half3(Cardinality.red[threadID], Cardinality.green[threadID], Cardinality.blue[threadID]));
-    }
+    cameraResponse[threadID].rgb = float3(localSum / half3(Cardinality.red[threadID], Cardinality.green[threadID], Cardinality.blue[threadID]));
 }
 
 kernel void reduceBins_float(device float3 * buffer [[buffer(0)]],
@@ -162,9 +156,7 @@ kernel void reduceBins_float(device float3 * buffer [[buffer(0)]],
         localSum += buffer[globalPosition];
     }
     
-    if(isSaturated(threadID)){
-        cameraResponse[threadID].rgb = localSum / float3(Cardinality.red[threadID], Cardinality.green[threadID], Cardinality.blue[threadID]);
-    }
+    cameraResponse[threadID].rgb = localSum / float3(Cardinality.red[threadID], Cardinality.green[threadID], Cardinality.blue[threadID]);
 }
 
 template<typename T> inline void interpolatedApproximation(constant float4x4 & matrix, float t, int i, T function, constant uint * ControlPoints, uint id);
