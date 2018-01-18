@@ -88,7 +88,6 @@ public final class ResponseEstimator: MetaComputer {
             let MTLWeights = computer.assets["smoothResponse"]?.buffers?[1],
             let summationShader = computer.assets["writeMeasureToBins"],
             let buffer = summationShader.buffers?[0],
-            let MTLResponseFunc = summationShader.buffers?[4],
             let threadsForBinReductionShader = computer.assets["reduceBins"]?.tgConfig.tgSize,
             let MTLCardinalityBuffer = computer.assets["reduceBins"]?.buffers?[3]
         else {
@@ -118,7 +117,7 @@ public final class ResponseEstimator: MetaComputer {
         computer.commandBuffer.commit()
         computer.commandBuffer.waitUntilCompleted()
         
-        cameraParameters.responseFunction = Array(UnsafeMutableBufferPointer(start: MTLResponseFunc.contents().assumingMemoryBound(to: float3.self), count: 256))
+        cameraParameters.responseFunction = Array(UnsafeMutableBufferPointer(start: MTLResponse.contents().assumingMemoryBound(to: float3.self), count: 256))
         cameraParameters.responseFunction = cameraParameters.responseFunction.map{$0 / cameraParameters.responseFunction[127]}
         cameraParameters.weightFunction = Array(UnsafeMutableBufferPointer(start: MTLWeights.contents().assumingMemoryBound(to: float3.self), count: 256))
     }
