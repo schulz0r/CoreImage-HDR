@@ -117,7 +117,7 @@ public final class ResponseEstimator: MetaComputer {
         computer.encode("smoothResponse", threads: MTLSizeMake(256, 1, 1))
         
         computer.commandBuffer.commit()
-        computer.commandBuffer.waitUntilCompleted()
+        computer.commandBuffer.waitUntilCompleted()R
         
         let ResponseFunc = Array(UnsafeMutableBufferPointer(start: MTLResponseFunc.contents().assumingMemoryBound(to: float3.self), count: 256))
         
