@@ -10,12 +10,10 @@ import MetalKitPlus
 
 final class ResponseCurveComputer : MTKPComputer {
     var assets:MTKPAssets
-    var commandQueue:MTLCommandQueue
     public var commandBuffer: MTLCommandBuffer!
     
     init(assets: MTKPAssets) {
         self.assets = assets
-        self.commandQueue = MTKPDevice.commandQueue
         self.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
     }
     

@@ -9,7 +9,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
-template<typename T> inline void interpolatedApproximation(float4x4 matrix, float t, int i, T function, constant uint * ControlPoints, uint id);
+template<typename T> inline void interpolatedApproximation(constant float4x4 & matrix, float t, int i, T function, constant uint * ControlPoints, uint id);
 inline void derivativeOfInverseOfFunction(device float3 * invertedFunc, device float3 * function, uint id);
 
 /*---------------------------------------------------
@@ -27,7 +27,7 @@ kernel void smoothResponse(device float3 * inverseResponse [[buffer(0)]],
                            uint lastThreadgroup [[threadgroups_per_grid]]){
     
     /* Smooth Inverse Response */
-    float t = float(tid)/tgSize;
+    float t = float(tid) / tgSize;
     interpolatedApproximation(cubicMatrix, t, i, inverseResponse, ControlPoints, gid);
     
     /* Approximate derivation of non-inverse Response - in logarithmic domain */
@@ -46,13 +46,16 @@ kernel void smoothResponse(device float3 * inverseResponse [[buffer(0)]],
 }
 
 inline void derivativeOfInverseOfFunction(device float3 * invertedFunc, device float3 * function, uint id){
+    // f'(x) = 1 / f'^-1(x)
+    // the derivative of the root of a function is inverse proportional to the derivative of the function
+    // weights = (I(x)')^-1
     float3 f_0 = log(float3(function[id].r, function[id].g, function[id].b));
     float3 f_1 = log(float3(function[id + 1].r, function[id + 1].g, function[id + 1].b));
     invertedFunc[id] = 1 / (f_1 - f_0);
 }
 
 template<typename T>
-inline void interpolatedApproximation(float4x4 matrix, float t, int i, T function, constant uint * ControlPoints, uint id){
+inline void interpolatedApproximation(constant float4x4 & matrix, float t, int i, T function, constant uint * ControlPoints, uint id){
     
     float4x3 P;   // relevant control points come here
     float4 leftOperator = (float4(pow(t,3.0),pow(t,2.0),t, 1)) * matrix;

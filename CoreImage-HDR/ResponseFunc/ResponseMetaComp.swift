@@ -49,26 +49,20 @@ public final class ResponseEstimator: MetaComputer {
         self.calculation.zeroHistogram = false
         
         // create shared ressources
-        let TrainingWeight:Float = 4    // TODO: let user decide about this weight
         let TGSizeOfSummationShader = (16, 16, 1)
         let totalBlocksCount = (textures.first!.height / TGSizeOfSummationShader.1) * (textures.first!.width / TGSizeOfSummationShader.0)
         let bufferLen = totalBlocksCount * 256
-        // define intial functions which are to estimate
-        var initialWeightFunc:[float3] = (0...255).map{ float3( exp(-TrainingWeight * pow( (Float($0)-127.5)/127.5, 2)) ) }
-        var initialCamResponse:[float3] = Array<Float>(stride(from: 0.0, to: 2.0, by: 2.0/256.0)).map{float3($0)}
         
         guard
             let MTLCardinalities = MTKPDevice.device.makeBuffer(length: calculation.histogramSize(forSourceFormat: textures[0].pixelFormat), options: .storageModePrivate),
             let MTLCameraShifts = MTKPDevice.device.makeBuffer(bytes: CameraShifts, length: MemoryLayout<uint2>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
             let MTLExposureTimes = MTKPDevice.device.makeBuffer(bytes: ExposureTimes, length: MemoryLayout<Float>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
             let buffer = MTKPDevice.device.makeBuffer(length: bufferLen * MemoryLayout<float3>.size/2, options: .storageModePrivate),  // float3 / 2 = half3
-            let MTLWeightFunc = MTKPDevice.device.makeBuffer(bytes: &initialWeightFunc, length: initialWeightFunc.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
+            let MTLWeightFunc = MTKPDevice.device.makeBuffer(length: 256 * MemoryLayout<float3>.size, options: .storageModeShared),
             let MTLResponseFunc = MTKPDevice.device.makeBuffer(length: 256 * MemoryLayout<float3>.size, options: .storageModeShared)
         else {
                 fatalError("Could not initialize Buffers")
         }
-        
-        memcpy(MTLResponseFunc.contents(), &initialCamResponse, 256 * MemoryLayout<float3>.size)
         
         let numberOfControlPoints = 16
         
@@ -88,18 +82,22 @@ public final class ResponseEstimator: MetaComputer {
         computer = ResponseCurveComputer(assets: assets)
     }
     
-    public func estimateCameraResponse(iterations: Int) -> [float3] {
+    public func estimate(cameraParameters: inout CameraParameter, iterations: Int) {
         guard
+            let MTLResponse = computer.assets["smoothResponse"]?.buffers?[0],
+            let MTLWeights = computer.assets["smoothResponse"]?.buffers?[1],
             let summationShader = computer.assets["writeMeasureToBins"],
             let buffer = summationShader.buffers?[0],
-            let MTLResponseFunc = summationShader.buffers?[4],
             let threadsForBinReductionShader = computer.assets["reduceBins"]?.tgConfig.tgSize,
             let MTLCardinalityBuffer = computer.assets["reduceBins"]?.buffers?[3]
         else {
             fatalError()
         }
         
-        computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
+        memcpy(MTLResponse.contents(), cameraParameters.responseFunction, cameraParameters.responseFunction.count * MemoryLayout<float3>.size)
+        memcpy(MTLWeights.contents(), cameraParameters.weightFunction, cameraParameters.weightFunction.count * MemoryLayout<float3>.size)
+        
+        computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
         
         textures.forEach({ texture in
             calculation.encode(to: computer.commandBuffer,
@@ -108,19 +106,24 @@ public final class ResponseEstimator: MetaComputer {
                                histogramOffset: 0)
         })
         
-        (0..<iterations).forEach({ _ in
+        (0..<iterations).forEach({ iterationIdx in
             computer.encode("writeMeasureToBins")
             computer.encode("reduceBins", threads: threadsForBinReductionShader)
             computer.flush(buffer: buffer)
         })
         
-        computer.encode("smoothResponse", threads: MTLSizeMake(256, 1, 1))
+        // if command buffer is not committed here, the smooth shader will not be
+        // loaded for unknown reasons. This could be a metal bug.
+        computer.commandBuffer.commit()
+        computer.commandBuffer.waitUntilCompleted() // must wait or smooth response won't be executed
         
+        computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
+        computer.encode("smoothResponse", threads: MTLSizeMake(256, 1, 1))
         computer.commandBuffer.commit()
         computer.commandBuffer.waitUntilCompleted()R
         
-        let ResponseFunc = Array(UnsafeMutableBufferPointer(start: MTLResponseFunc.contents().assumingMemoryBound(to: float3.self), count: 256))
-        
-        return ResponseFunc.map{$0 / ResponseFunc[127]}
+        cameraParameters.responseFunction = Array(UnsafeMutableBufferPointer(start: MTLResponse.contents().assumingMemoryBound(to: float3.self), count: 256))
+        cameraParameters.responseFunction = cameraParameters.responseFunction.map{$0 / cameraParameters.responseFunction[127]}
+        cameraParameters.weightFunction = Array(UnsafeMutableBufferPointer(start: MTLWeights.contents().assumingMemoryBound(to: float3.self), count: 256))
     }
 }

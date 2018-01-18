@@ -29,17 +29,18 @@ class PerformanceTests: XCTestCase {
     
     func testResponseEstimation() {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
+        var camParams = CameraParameter(withTrainingWeight: 5.1)
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
         // This is an example of a performance test case.
         self.measure {
-            metaComp.estimateCameraResponse(iterations: 5)
+            metaComp.estimate(cameraParameters: &camParams, iterations: 5)
         }
     }
     
     func testBinningShaderPerformance() {
         let threadsForBinReductionShader = computer.assets["reduceBins"]?.tgConfig.tgSize
         self.measure {
-            computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
+            computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
             computer.encode("reduceBins", threads: threadsForBinReductionShader)
             computer.commandBuffer.commit()
             computer.commandBuffer.waitUntilCompleted()
@@ -48,7 +49,7 @@ class PerformanceTests: XCTestCase {
     
     func testResponseSummationPerformance() {
         self.measure {
-            computer.commandBuffer = computer.commandQueue.makeCommandBuffer()
+            computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
             computer.encode("writeMeasureToBins")
             computer.commandBuffer.commit()
             computer.commandBuffer.waitUntilCompleted()

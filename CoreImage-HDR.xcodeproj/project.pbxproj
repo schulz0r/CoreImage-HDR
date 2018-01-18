@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		17202960200BD2410018989E /* scaleHDRImage.metal in Sources */ = {isa = PBXBuildFile; fileRef = 1720295F200BD2410018989E /* scaleHDRImage.metal */; };
+		17202962200D3B240018989E /* CameraParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17202961200D3B240018989E /* CameraParameter.swift */; };
 		17215BFF1FDF43B700912238 /* TestSortNCount.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17215BFA1FDF321800912238 /* TestSortNCount.metal */; };
 		17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */; };
 		17832D021FB49C1500E19938 /* CoreImage_HDRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */; };
@@ -46,6 +47,7 @@
 
 /* Begin PBXFileReference section */
 		1720295F200BD2410018989E /* scaleHDRImage.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = scaleHDRImage.metal; sourceTree = "<group>"; };
+		17202961200D3B240018989E /* CameraParameter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraParameter.swift; sourceTree = "<group>"; };
 		17215BFA1FDF321800912238 /* TestSortNCount.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = TestSortNCount.metal; sourceTree = "<group>"; };
 		17215C031FDF460400912238 /* SortAndCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
 		17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreImage_HDR.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -142,6 +144,7 @@
 				17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */,
 				175005351FBA608D005F6856 /* Framework */,
 				17832D0D1FB49C4500E19938 /* HDRProcessor.swift */,
+				17202961200D3B240018989E /* CameraParameter.swift */,
 			);
 			path = "CoreImage-HDR";
 			sourceTree = "<group>";
@@ -327,6 +330,7 @@
 				17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */,
 				17B45F471FF557DC009BE0BF /* ResponseCurveComputer.swift in Sources */,
 				17E9483D1FFEDECF007E0476 /* responseSumShader.metal in Sources */,
+				17202962200D3B240018989E /* CameraParameter.swift in Sources */,
 				17E948081FFC1E01007E0476 /* bufferReductionIO.swift in Sources */,
 				17202960200BD2410018989E /* scaleHDRImage.metal in Sources */,
 				17AD883F2004533E007BBF6C /* smoothResponse.metal in Sources */,
