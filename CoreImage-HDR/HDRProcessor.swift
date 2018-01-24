@@ -54,7 +54,7 @@ final class HDRProcessor: CIImageProcessorKernel {
         let MPSMinMax = MPSImageStatisticsMinAndMax(device: device)
         MPSMinMax.clipRectSource = MTLRegionMake2D(0, 0, HDRTexture.width, HDRTexture.height)
         
-        let imageDimensions = MTLSizeMake(inputImages[0]!.width, inputImages[0]!.height, 1)
+        let imageDimensions = MTLSizeMake(HDRTexture.width, HDRTexture.height, 1)
         
         var numberOfInputImages = uint(inputImages.count)
         var cameraShifts = arguments?["CameraShifts"] ?? [int2](repeating: int2(0,0), count: inputImages.count)

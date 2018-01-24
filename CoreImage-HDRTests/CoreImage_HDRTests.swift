@@ -68,9 +68,11 @@ class CoreImage_HDRTests: XCTestCase {
     
     func testHDR() {
         let camParams = CameraParameter(withTrainingWeight: 4)
+        let imageExtent = Testimages.first!.extent
+        
         var HDR:CIImage = CIImage()
         do{
-            HDR = try HDRProcessor.apply(withExtent: Testimages[0].extent,
+            HDR = try HDRProcessor.apply(withExtent: imageExtent,
                                          inputs: Testimages,
                                          arguments: ["ExposureTimes" : self.ExposureTimes,
                                                      "CameraParameter" : camParams])
@@ -85,7 +87,8 @@ class CoreImage_HDRTests: XCTestCase {
     
     func testWithResponse() {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
-        var camParams = CameraParameter(withTrainingWeight: 8)
+        var camParams = CameraParameter(withTrainingWeight: 12)
+        let imageExtent = Testimages.first!.extent
         
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
         metaComp.estimate(cameraParameters: &camParams, iterations: 10)
@@ -93,7 +96,7 @@ class CoreImage_HDRTests: XCTestCase {
         
         var HDR:CIImage = CIImage()
         do{
-            HDR = try HDRProcessor.apply(withExtent: Testimages[0].extent,
+            HDR = try HDRProcessor.apply(withExtent: imageExtent,
                                          inputs: Testimages,
                                          arguments: ["ExposureTimes" : self.ExposureTimes,
                                                      "CameraParameter" : camParams])
