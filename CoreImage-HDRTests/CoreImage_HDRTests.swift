@@ -32,7 +32,7 @@ class CoreImage_HDRTests: XCTestCase {
             fatalError(Errors.localizedDescription)
         }
     
-        let imageNames = ["dark", "medium", "bright"]
+        let imageNames = ["pic2", "pic3", "pic4", "pic5", "pic6"]
         
         /* Why does the Bundle Assets never contain images? Probably a XCode bug.
         Add an Asset catalogue to this test bundle and try to load any image. */
@@ -110,12 +110,12 @@ class CoreImage_HDRTests: XCTestCase {
     
     func testMTKPHDRWithResponse() {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
-        var camParams = CameraParameter(withTrainingWeight: 12)
+        var camParams = CameraParameter(withTrainingWeight: 1)
         
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
         metaComp.estimate(cameraParameters: &camParams, iterations: 10)
         
-        let HDR = MTKPHDR.makeHDR(ImageBracket: self.Testimages, exposureTimes: self.ExposureTimes, cameraParameters: camParams)
+        let HDR = MTKPHDR.makeHDR(ImageBracket: Array(self.Testimages[2...4]), exposureTimes: Array(self.ExposureTimes[2...4]), cameraParameters: camParams)
         
         HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/result.png"))
         
