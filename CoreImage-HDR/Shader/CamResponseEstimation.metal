@@ -50,7 +50,9 @@ kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>,
     device metal::array<half3, 256> & outputBufferSegment = outputbuffer[threadgroupIndex];
     
     metal::array<uchar3, MAX_IMAGE_COUNT> PixelIndices;
-    metal::array<half3, MAX_IMAGE_COUNT> linearizedPixels;
+    half3 linearizedPixels[MAX_IMAGE_COUNT];
+    
+    metal::array_ref<half3> linearDataArray = metal::array_ref<half3>(linearizedPixels, NumberOfinputImages);
     
     // linearize pixel
     for(uint i = 0; i < NumberOfinputImages; i++) {
@@ -60,7 +62,7 @@ kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>,
     }
     
     // calculate HDR Value
-    const half3 HDRPixel = HDRValue(linearizedPixels, PixelIndices, exposureTimes, weights);
+    const half3 HDRPixel = HDRValue(linearDataArray, PixelIndices, exposureTimes, weights);
     
     for(uint imageIndex = 0; imageIndex < NumberOfinputImages; imageIndex++) {
         const half3 µ = HDRPixel * exposureTimes[imageIndex];   // X * t_i is the mean value according to the model
@@ -96,7 +98,9 @@ kernel void writeMeasureToBins_float32(const metal::array<texture2d<float, acces
     device metal::array<float3, 256> & outputBufferSegment = outputbuffer[threadgroupIndex];
     
     metal::array<uchar3, MAX_IMAGE_COUNT> PixelIndices;
-    metal::array<half3, MAX_IMAGE_COUNT> linearizedPixels;
+    half3 linearizedPixels[MAX_IMAGE_COUNT];
+    
+    metal::array_ref<half3> linearDataArray = metal::array_ref<half3>(linearizedPixels, NumberOfinputImages);
     
     // linearize pixel
     for(uint i = 0; i < NumberOfinputImages; i++) {
@@ -106,7 +110,7 @@ kernel void writeMeasureToBins_float32(const metal::array<texture2d<float, acces
     }
     
     // calculate HDR Value
-    const half3 HDRPixel = HDRValue(linearizedPixels, PixelIndices, exposureTimes, weights);
+    const half3 HDRPixel = HDRValue(linearDataArray, PixelIndices, exposureTimes, weights);
     
     for(uint imageIndex = 0; imageIndex < NumberOfinputImages; imageIndex++) {
         const half3 µ = HDRPixel * exposureTimes[imageIndex];   // X * t_i is the mean value according to the model
