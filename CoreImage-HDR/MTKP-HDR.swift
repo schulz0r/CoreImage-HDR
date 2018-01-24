@@ -122,6 +122,8 @@ public struct MTKPHDR {
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
         
-        return CIImage(mtlTexture: HDRTexture, options: nil)!
+        let HDRConfiguration: [String:Any] = [kCIImageProperties : ImageBracket.first!.properties]
+        
+        return CIImage(mtlTexture: HDRTexture, options: HDRConfiguration)!
     }
 }
