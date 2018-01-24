@@ -32,7 +32,7 @@ class CoreImage_HDRTests: XCTestCase {
             fatalError(Errors.localizedDescription)
         }
     
-        let imageNames = ["01-qianyuan-1:250", "02-qianyuan-1:125", "03-qianyuan-1:60", "04-qianyuan-1:30", "05-qianyuan-1:15"]
+        let imageNames = ["dark", "medium", "bright"]
         
         /* Why does the Bundle Assets never contain images? Probably a XCode bug.
         Add an Asset catalogue to this test bundle and try to load any image. */
@@ -40,7 +40,7 @@ class CoreImage_HDRTests: XCTestCase {
         //let imagePath = AppBundle.path(forResource: "myImage", ofType: "jpg")
         
         // WORKAROUND: load images from disk
-        URLs = imageNames.map{FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents/Codes/Testpics/QianYuan/" + $0 + ".jpg")}
+        URLs = imageNames.map{FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents/Codes/Testpics/" + $0 + ".jpg")}
         
         Testimages = URLs.map{
             guard let image = CIImage(contentsOf: $0) else {
@@ -111,7 +111,6 @@ class CoreImage_HDRTests: XCTestCase {
     func testMTKPHDRWithResponse() {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
         var camParams = CameraParameter(withTrainingWeight: 12)
-        let imageExtent = Testimages.first!.extent
         
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
         metaComp.estimate(cameraParameters: &camParams, iterations: 10)
