@@ -106,7 +106,7 @@ class ResponseEstimationTests: XCTestCase {
         blitencoder.endEncoding()
         commandBuffer.commit()
         
-        var assets = MTKPAssets(ResponseCurveComputer.self)
+        var assets = MTKPAssets(HDRComputer.self)
         let MTLexposureTimes = device.makeBuffer(bytes: &exposureTime, length: MemoryLayout<Float>.size, options: .cpuCacheModeWriteCombined)
         let MTLCameraShifts = device.makeBuffer(bytes: &cameraShifts, length: MemoryLayout<int2>.size, options: .cpuCacheModeWriteCombined)
         
@@ -119,7 +119,7 @@ class ResponseEstimationTests: XCTestCase {
         
         let function = MTKPShader(name: "writeMeasureToBins_float32", io: reponseSumShaderIO, tgConfig: MTKPThreadgroupConfig(tgSize: TGSizeOfSummationShader, tgMemLength: [4 * TGSizeOfSummationShader.0 * TGSizeOfSummationShader.1]))
         assets.add(shader: function)
-        let computer = ResponseCurveComputer(assets: assets)
+        let computer = HDRComputer(assets: assets)
         computer.encode("writeMeasureToBins_float32")
         computer.commandBuffer.commit()
         computer.commandBuffer.waitUntilCompleted()
@@ -206,12 +206,12 @@ class ResponseEstimationTests: XCTestCase {
         }
         
         
-        var assets = MTKPAssets(ResponseCurveComputer.self)
+        var assets = MTKPAssets(HDRComputer.self)
         let ShaderIO = bufferReductionShaderIO(BinBuffer: MTLbuffer, bufferlength: buffer.count, cameraResponse: MTLResponseFunc, Cardinality: MTLCardinalities)
         let Shader = MTKPShader(name: "reduceBins_float", io: ShaderIO, tgConfig: MTKPThreadgroupConfig(tgSize: (256,1,1)))
         assets.add(shader: Shader)
         
-        let computer = ResponseCurveComputer(assets: assets)
+        let computer = HDRComputer(assets: assets)
         computer.encode("reduceBins_float", threads: MTLSizeMake(256, 1, 1))
         computer.commandBuffer.commit()
         computer.commandBuffer.waitUntilCompleted()

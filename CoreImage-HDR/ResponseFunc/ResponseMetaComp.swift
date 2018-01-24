@@ -11,12 +11,12 @@ import MetalPerformanceShaders
 
 /* A Metacomputer ensures that the computer executes/encodes the shader in the correct order
  and returns the result of the computation. */
-protocol MetaComputer {
-    var computer : ResponseCurveComputer {get}
+fileprivate protocol MetaComputer {
+    var computer : HDRComputer {get}
 }
 
 public final class ResponseEstimator: MetaComputer {
-    var computer : ResponseCurveComputer
+    var computer : HDRComputer
     
     private let calculation:MPSImageHistogram
     private var textures: [MTLTexture]! = nil
@@ -79,7 +79,7 @@ public final class ResponseEstimator: MetaComputer {
         assets.add(shader: MTKPShader(name: "reduceBins", io: bufferReductionAssets, tgConfig: bufferReductionThreadgroup))
         assets.add(shader: MTKPShader(name: "smoothResponse", io: smoothResponseAssets, tgConfig: smoothResponseThreadgroup))
         
-        computer = ResponseCurveComputer(assets: assets)
+        computer = HDRComputer(assets: assets)
     }
     
     public func estimate(cameraParameters: inout CameraParameter, iterations: Int) {

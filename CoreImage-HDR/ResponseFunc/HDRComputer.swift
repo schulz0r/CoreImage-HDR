@@ -8,7 +8,7 @@
 
 import MetalKitPlus
 
-final class ResponseCurveComputer : MTKPComputer {
+final class HDRComputer : MTKPComputer {
     var assets:MTKPAssets
     public var commandBuffer: MTLCommandBuffer!
     

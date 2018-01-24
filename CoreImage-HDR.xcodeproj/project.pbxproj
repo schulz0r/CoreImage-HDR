@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1703B8662018F6F60075D0F8 /* MTKP-HDR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1703B8652018F6F60075D0F8 /* MTKP-HDR.swift */; };
 		17202962200D3B240018989E /* CameraParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17202961200D3B240018989E /* CameraParameter.swift */; };
 		17215BFF1FDF43B700912238 /* TestSortNCount.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17215BFA1FDF321800912238 /* TestSortNCount.metal */; };
 		17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */; };
@@ -16,7 +17,7 @@
 		17A323FA1FEAF0CC00CFDAA8 /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A323F91FEAF0CC00CFDAA8 /* extensions.swift */; };
 		17AD8841200453EF007BBF6C /* smoothResponseShaderIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AD8840200453EF007BBF6C /* smoothResponseShaderIO.swift */; };
 		17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AEAA621FC57E2400CE17DF /* extensions.swift */; };
-		17B45F471FF557DC009BE0BF /* ResponseCurveComputer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B45F461FF557DC009BE0BF /* ResponseCurveComputer.swift */; };
+		17B45F471FF557DC009BE0BF /* HDRComputer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B45F461FF557DC009BE0BF /* HDRComputer.swift */; };
 		17DA9C3A1FFAC9610041E9BA /* ResponseSummationShaderIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DA9C391FFAC9610041E9BA /* ResponseSummationShaderIO.swift */; };
 		17E68ADB1FF1CD3E008F9DCE /* textureLoaderExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */; };
 		17E948061FFBE1AD007E0476 /* ResponseEstimationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948051FFBE1AD007E0476 /* ResponseEstimationTests.swift */; };
@@ -43,6 +44,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1703B8652018F6F60075D0F8 /* MTKP-HDR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MTKP-HDR.swift"; sourceTree = "<group>"; };
 		17202961200D3B240018989E /* CameraParameter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraParameter.swift; sourceTree = "<group>"; };
 		17215BFA1FDF321800912238 /* TestSortNCount.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = TestSortNCount.metal; sourceTree = "<group>"; };
 		17215C031FDF460400912238 /* SortAndCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
@@ -56,7 +58,7 @@
 		17A323F91FEAF0CC00CFDAA8 /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
 		17AD8840200453EF007BBF6C /* smoothResponseShaderIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = smoothResponseShaderIO.swift; sourceTree = "<group>"; };
 		17AEAA621FC57E2400CE17DF /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
-		17B45F461FF557DC009BE0BF /* ResponseCurveComputer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseCurveComputer.swift; sourceTree = "<group>"; };
+		17B45F461FF557DC009BE0BF /* HDRComputer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRComputer.swift; sourceTree = "<group>"; };
 		17DA9C391FFAC9610041E9BA /* ResponseSummationShaderIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseSummationShaderIO.swift; sourceTree = "<group>"; };
 		17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = textureLoaderExtensions.swift; sourceTree = "<group>"; };
 		17E948051FFBE1AD007E0476 /* ResponseEstimationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseEstimationTests.swift; sourceTree = "<group>"; };
@@ -92,6 +94,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1703B8642018F6830075D0F8 /* HDR */ = {
+			isa = PBXGroup;
+			children = (
+				17832D0D1FB49C4500E19938 /* HDRProcessor.swift */,
+				1703B8652018F6F60075D0F8 /* MTKP-HDR.swift */,
+			);
+			name = HDR;
+			sourceTree = "<group>";
+		};
 		17215BFC1FDF321F00912238 /* ShaderTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -134,10 +145,10 @@
 			children = (
 				17E948351FFEDECF007E0476 /* Shader */,
 				17A3254D1FEDCA1E00CFDAA8 /* ResponseFunc */,
+				1703B8642018F6830075D0F8 /* HDR */,
 				17AEAA621FC57E2400CE17DF /* extensions.swift */,
 				17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */,
 				175005351FBA608D005F6856 /* Framework */,
-				17832D0D1FB49C4500E19938 /* HDRProcessor.swift */,
 				17202961200D3B240018989E /* CameraParameter.swift */,
 			);
 			path = "CoreImage-HDR";
@@ -161,7 +172,7 @@
 			children = (
 				17B45F481FF557E3009BE0BF /* ShaderIOs */,
 				17E948091FFD3EAC007E0476 /* ResponseMetaComp.swift */,
-				17B45F461FF557DC009BE0BF /* ResponseCurveComputer.swift */,
+				17B45F461FF557DC009BE0BF /* HDRComputer.swift */,
 			);
 			path = ResponseFunc;
 			sourceTree = "<group>";
@@ -313,12 +324,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1703B8662018F6F60075D0F8 /* MTKP-HDR.swift in Sources */,
 				17E948481FFEDF2A007E0476 /* HDRShader.metal in Sources */,
 				17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */,
 				17E9480A1FFD3EAC007E0476 /* ResponseMetaComp.swift in Sources */,
 				17E68ADB1FF1CD3E008F9DCE /* textureLoaderExtensions.swift in Sources */,
 				17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */,
-				17B45F471FF557DC009BE0BF /* ResponseCurveComputer.swift in Sources */,
+				17B45F471FF557DC009BE0BF /* HDRComputer.swift in Sources */,
 				17E9483D1FFEDECF007E0476 /* CamResponseEstimation.metal in Sources */,
 				17202962200D3B240018989E /* CameraParameter.swift in Sources */,
 				17E948081FFC1E01007E0476 /* bufferReductionIO.swift in Sources */,

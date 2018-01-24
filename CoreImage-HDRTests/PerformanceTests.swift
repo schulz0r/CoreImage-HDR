@@ -23,7 +23,7 @@ class PerformanceTests: XCTestCase {
     var library:MTLLibrary?
     var textureLoader:MTKTextureLoader!
     
-    var computer:ResponseCurveComputer!
+    var computer:HDRComputer!
     
     /* Performance optimizations can be tested here */
     
