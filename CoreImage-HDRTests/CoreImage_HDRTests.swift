@@ -8,7 +8,6 @@
 
 import XCTest
 import CoreImage
-import ImageIO
 import MetalKit
 import MetalKitPlus
 @testable import CoreImage_HDR
@@ -103,6 +102,21 @@ class CoreImage_HDRTests: XCTestCase {
         } catch let Errors {
             XCTFail(Errors.localizedDescription)
         }
+        
+        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/result.png"))
+        
+        XCTAssertTrue(true)
+    }
+    
+    func testMTKPHDRWithResponse() {
+        let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
+        var camParams = CameraParameter(withTrainingWeight: 12)
+        let imageExtent = Testimages.first!.extent
+        
+        let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
+        metaComp.estimate(cameraParameters: &camParams, iterations: 10)
+        
+        let HDR = MTKPHDR.makeHDR(ImageBracket: self.Testimages, exposureTimes: self.ExposureTimes, cameraParameters: camParams)
         
         HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/result.png"))
         

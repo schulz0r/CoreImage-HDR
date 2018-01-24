@@ -14,7 +14,7 @@ import MetalKitPlus
 
 public struct MTKPHDR {
     
-    public static func makeHDR(ImageBracket: [CIImage], exposureTimes: [Float], cameraParameters: CameraParameter, context: CIContext? = nil) {
+    public static func makeHDR(ImageBracket: [CIImage], exposureTimes: [Float], cameraParameters: CameraParameter, context: CIContext? = nil) -> CIImage {
         
         let MaxImageCount = 5
         guard ImageBracket.count <= MaxImageCount else {
@@ -57,21 +57,24 @@ public struct MTKPHDR {
         let imageDimensions = MTLSizeMake(HDRTexture.width, HDRTexture.height, 1)
         
         var numberOfInputImages = uint(inputImages.count)
-        var cameraShifts = arguments?["CameraShifts"] ?? [int2](repeating: int2(0,0), count: inputImages.count)
+        var cameraShifts = [int2](repeating: int2(0,0), count: inputImages.count)
         
         guard
             let MinMaxMTLTexture = MTKPDevice.device.makeTexture(descriptor: descriptor),
             let MTLNumberOfImages = MTKPDevice.device.makeBuffer(bytes: &numberOfInputImages, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined),
             let MTLCameraShifts = MTKPDevice.device.makeBuffer(bytes: &cameraShifts, length: MemoryLayout<uint2>.size * inputImages.count, options: .cpuCacheModeWriteCombined),
             let MTLExposureTimes = MTKPDevice.device.makeBuffer(bytes: exposureTimes, length: MemoryLayout<Float>.size * inputImages.count, options: .cpuCacheModeWriteCombined),
-            let MTLWeightFunc = MTKPDevice.device.makeBuffer(bytes: &cameraParameters.weightFunction, length: cameraParameters.weightFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
-            let MTLResponseFunc = MTKPDevice.device.makeBuffer(bytes: &cameraParameters.responseFunction, length: cameraParameters.responseFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
+            let MTLWeightFunc = MTKPDevice.device.makeBuffer(bytes: cameraParameters.weightFunction, length: cameraParameters.weightFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
+            let MTLResponseFunc = MTKPDevice.device.makeBuffer(bytes: cameraParameters.responseFunction, length: cameraParameters.responseFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
             else {
                 fatalError()
         }
         
         
-        guard let encoder = commandBuffer.makeComputeCommandEncoder() else {
+        
+        guard
+            let commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer(),
+            let encoder = commandBuffer.makeComputeCommandEncoder() else {
             fatalError("Failed to create command encoder.")
         }
         
@@ -115,5 +118,10 @@ public struct MTKPHDR {
         } catch let error {
             fatalError(error.localizedDescription)
         }
+        
+        commandBuffer.commit()
+        commandBuffer.waitUntilCompleted()
+        
+        return CIImage(mtlTexture: HDRTexture, options: nil)!
     }
 }
