@@ -115,7 +115,7 @@ class CoreImage_HDRTests: XCTestCase {
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
         metaComp.estimate(cameraParameters: &camParams, iterations: 10)
         
-        let HDR = MTKPHDR.makeHDR(ImageBracket: Array(self.Testimages[2...4]), exposureTimes: Array(self.ExposureTimes[2...4]), cameraParameters: camParams)
+        let HDR = MTKPHDR.makeHDR(ImageBracket: self.Testimages, exposureTimes: self.ExposureTimes, cameraParameters: camParams)
         
         HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/result.png"))
         
