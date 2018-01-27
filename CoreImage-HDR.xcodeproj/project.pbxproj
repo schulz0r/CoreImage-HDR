@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1703B8662018F6F60075D0F8 /* MTKP-HDR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1703B8652018F6F60075D0F8 /* MTKP-HDR.swift */; };
+		17132874201BFAF200361D8F /* HDRCalcShaderIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17132873201BFAF200361D8F /* HDRCalcShaderIO.swift */; };
 		17202962200D3B240018989E /* CameraParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17202961200D3B240018989E /* CameraParameter.swift */; };
 		17215BFF1FDF43B700912238 /* TestSortNCount.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17215BFA1FDF321800912238 /* TestSortNCount.metal */; };
 		17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */; };
@@ -45,6 +46,7 @@
 
 /* Begin PBXFileReference section */
 		1703B8652018F6F60075D0F8 /* MTKP-HDR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MTKP-HDR.swift"; sourceTree = "<group>"; };
+		17132873201BFAF200361D8F /* HDRCalcShaderIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRCalcShaderIO.swift; sourceTree = "<group>"; };
 		17202961200D3B240018989E /* CameraParameter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraParameter.swift; sourceTree = "<group>"; };
 		17215BFA1FDF321800912238 /* TestSortNCount.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = TestSortNCount.metal; sourceTree = "<group>"; };
 		17215C031FDF460400912238 /* SortAndCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
@@ -97,10 +99,19 @@
 		1703B8642018F6830075D0F8 /* HDR */ = {
 			isa = PBXGroup;
 			children = (
+				17132872201BFACE00361D8F /* ShaderIO */,
 				17832D0D1FB49C4500E19938 /* HDRProcessor.swift */,
 				1703B8652018F6F60075D0F8 /* MTKP-HDR.swift */,
 			);
 			name = HDR;
+			sourceTree = "<group>";
+		};
+		17132872201BFACE00361D8F /* ShaderIO */ = {
+			isa = PBXGroup;
+			children = (
+				17132873201BFAF200361D8F /* HDRCalcShaderIO.swift */,
+			);
+			name = ShaderIO;
 			sourceTree = "<group>";
 		};
 		17215BFC1FDF321F00912238 /* ShaderTests */ = {
@@ -324,6 +335,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17132874201BFAF200361D8F /* HDRCalcShaderIO.swift in Sources */,
 				1703B8662018F6F60075D0F8 /* MTKP-HDR.swift in Sources */,
 				17E948481FFEDF2A007E0476 /* HDRShader.metal in Sources */,
 				17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */,
