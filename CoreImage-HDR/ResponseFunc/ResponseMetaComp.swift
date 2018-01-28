@@ -11,7 +11,7 @@ import MetalPerformanceShaders
 
 /* A Metacomputer ensures that the computer executes/encodes the shader in the correct order
  and returns the result of the computation. */
-fileprivate protocol MetaComputer {
+protocol MetaComputer {
     var computer : HDRComputer {get}
 }
 
