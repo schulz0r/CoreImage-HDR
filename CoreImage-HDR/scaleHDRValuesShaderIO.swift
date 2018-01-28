@@ -16,19 +16,9 @@ final class scaleHDRValueShaderIO: MTKPIOProvider {
     private let darkestImage:MTLTexture
     private let minMax:MTLTexture
     
-    init(HDRImage: MTLTexture, darkestImage: MTLTexture){
+    init(HDRImage: MTLTexture, darkestImage: MTLTexture, minMaxTexture: MTLTexture){
         self.HDR = HDRImage
         self.darkestImage = darkestImage
-        
-        let descriptor = MTLTextureDescriptor()
-        descriptor.textureType = .type1D
-        descriptor.pixelFormat = .rgba32Float
-        descriptor.width = 2
-        
-        guard let minMaxTexture = MTKPDevice.device.makeTexture(descriptor: descriptor) else {
-            fatalError()
-        }
-        
         self.minMax = minMaxTexture
     }
     

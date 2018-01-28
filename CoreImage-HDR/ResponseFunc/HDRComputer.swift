@@ -80,8 +80,8 @@ final class HDRComputer : MTKPComputer {
     }
     
     public func copy(texture: MTLTexture, toBuffer: MTLBuffer) {
-        guard let flushBlitEncoder = self.commandBuffer.makeBlitCommandEncoder() else {fatalError()}
-        flushBlitEncoder.copy(from: texture,
+        guard let copyBlitEncoder = self.commandBuffer.makeBlitCommandEncoder() else {fatalError()}
+        copyBlitEncoder.copy(from: texture,
                               sourceSlice: 0,
                               sourceLevel: 0,
                               sourceOrigin: MTLOriginMake(0, 0, 0),
@@ -90,7 +90,21 @@ final class HDRComputer : MTKPComputer {
                               destinationOffset: 0,
                               destinationBytesPerRow: toBuffer.length / texture.height,
                               destinationBytesPerImage: toBuffer.length)
-        flushBlitEncoder.endEncoding()
+        copyBlitEncoder.endEncoding()
+    }
+    
+    public func copy(buffer: MTLBuffer, toTexture: MTLTexture) {
+        guard let copyBlitEncoder = self.commandBuffer.makeBlitCommandEncoder() else {fatalError()}
+        copyBlitEncoder.copy(from: buffer,
+                              sourceOffset: 0,
+                              sourceBytesPerRow: buffer.length / toTexture.height,
+                              sourceBytesPerImage: buffer.length,
+                              sourceSize: toTexture.size(),
+                              to: toTexture,
+                              destinationSlice: 0,
+                              destinationLevel: 0,
+                              destinationOrigin: MTLOriginMake(0, 0, 0))
+        copyBlitEncoder.endEncoding()
     }
     
     public func encodeMPSHistogram(forImage: MTLTexture, MTLHistogramBuffer: MTLBuffer, minPixelValue: vector_float4 = vector_float4(0,0,0,0), maxPixelValue: vector_float4 = vector_float4(1,1,1,1)){
@@ -111,5 +125,11 @@ final class HDRComputer : MTKPComputer {
                            histogramOffset: 0)
     }
     
-    
+    public func encodeMPSMinMax(ofImage: MTLTexture, writeTo: MTLTexture) {
+        let MPSMinMax = MPSImageStatisticsMinAndMax(device: MTKPDevice.device)
+        MPSMinMax.clipRectSource = MTLRegionMake2D(0, 0, ofImage.width, ofImage.height)
+        MPSMinMax.encode(commandBuffer: self.commandBuffer,
+                         sourceTexture: ofImage,
+                         destinationTexture: writeTo)
+    }
 }

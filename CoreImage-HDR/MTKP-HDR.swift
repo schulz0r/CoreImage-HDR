@@ -44,7 +44,7 @@ public struct MTKPHDR {
         guard
             let minMaxTexture = MTKPDevice.device.makeTexture(descriptor: descriptor),
             let HDRTexture = MTKPDevice.device.makeTexture(descriptor: HDRTexDescriptor),
-            let MPSHistogramBuffer = MTKPDevice.device.makeBuffer(length: calculation.histogramSize(forSourceFormat: HDRTexture.pixelFormat), options: .storageModeShared),
+            let MPSHistogramBuffer = MTKPDevice.device.makeBuffer(length: 3 * MemoryLayout<Float>.size * 256, options: .storageModeShared),
             let MPSMinMaxBuffer = MTKPDevice.device.makeBuffer(length: 2 * MemoryLayout<float3>.size, options: .storageModeShared)
         else  {
                 fatalError()
@@ -61,7 +61,7 @@ public struct MTKPHDR {
                                           cameraShifts: cameraShifts,
                                           cameraParameters: cameraParameters)
         
-        let scaleHDRShaderIO = scaleHDRValueShaderIO(HDRImage: HDRTexture, darkestImage: inputImages[0])
+        let scaleHDRShaderIO = scaleHDRValueShaderIO(HDRImage: HDRTexture, darkestImage: inputImages[0], minMaxTexture: minMaxTexture)
         
         assets.add(shader: MTKPShader(name: "makeHDR", io: HDRShaderIO))
         assets.add(shader: MTKPShader(name: "scaleHDR", io: scaleHDRShaderIO))
@@ -70,7 +70,7 @@ public struct MTKPHDR {
         
         // generate HDR image
         computer.encode("makeHDR")
-        MPSMinMax.encode(commandBuffer: computer.commandBuffer, sourceTexture: HDRTexture, destinationTexture: minMaxTexture)
+        computer.encodeMPSMinMax(ofImage: HDRTexture, writeTo: minMaxTexture)
         computer.copy(texture: minMaxTexture, toBuffer: MPSMinMaxBuffer)
         computer.commandBuffer.commit()
         computer.commandBuffer.waitUntilCompleted()
@@ -82,13 +82,30 @@ public struct MTKPHDR {
         computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
         computer.encodeMPSHistogram(forImage: HDRTexture,
                                     MTLHistogramBuffer: MPSHistogramBuffer,
-                                    minPixelValue: vector_float4(MinMax.first!, 0),
-                                    maxPixelValue: vector_float4(MinMax.last!, 1))
+                                    minPixelValue: vector_float4(MinMax.first!.x, MinMax.first!.y, MinMax.first!.z, 0),
+                                    maxPixelValue: vector_float4(MinMax.last!.x, MinMax.last!.y, MinMax.last!.z, 1))
+        computer.commandBuffer.commit()
+        computer.commandBuffer.waitUntilCompleted()
         
+        let histogram:[uint3] = Array(UnsafeBufferPointer(start: MPSHistogramBuffer.contents().assumingMemoryBound(to: uint3.self), count: 256))
         
+        var sum = float3(0)
+        for (idx, bin) in histogram.reversed().enumerated() {
+            sum += float3(Float(bin.x), Float(bin.y), Float(bin.z)) / float3(256)
+            if sum.max()! > 0.01 {
+                MinMax[1] = (1 - Float(idx) / 256) * MinMax[1]
+                memcpy(MPSMinMaxBuffer.contents(), MinMax, MPSMinMaxBuffer.length)
+                break
+            }
+        }
+        
+        computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
+        computer.copy(buffer: MPSMinMaxBuffer, toTexture: minMaxTexture)
+        computer.encode("scaleHDR")
+        computer.commandBuffer.commit()
+        computer.commandBuffer.waitUntilCompleted()
         
         let HDRConfiguration: [String:Any] = [kCIImageProperties : ImageBracket.first!.properties]
-        
         return CIImage(mtlTexture: HDRTexture, options: HDRConfiguration)!
     }
 }
