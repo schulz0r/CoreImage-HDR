@@ -5,7 +5,7 @@
 //  Created by Philipp Waxweiler on 22.11.17.
 //  Copyright © 2017 Philipp Waxweiler. All rights reserved.
 //
-
+import MetalKit
 
 extension Int {
     func isPowerOfTwo() -> Bool {
@@ -14,7 +14,6 @@ extension Int {
 }
 
 extension MTLTexture {
-    
     func getDescriptor() -> MTLTextureDescriptor {
         let Descriptor = MTLTextureDescriptor()
         Descriptor.arrayLength = self.arrayLength
@@ -33,5 +32,24 @@ extension MTLTexture {
     
     func size() -> MTLSize {
         return MTLSizeMake(self.width, self.height, self.depth)
+    }
+}
+
+extension Array where Element == uint3 {
+    func indexOfUpper(percent: Float) -> Int {
+        var index = 0
+        var sum = float3(0)
+        let totalPixelCount = self.reduce(uint3(0), &+)
+        let totalPixelCount_float = float3(Float(totalPixelCount.x), Float(totalPixelCount.y), Float(totalPixelCount.z))
+        
+        for (idx, bin) in self.reversed().enumerated() {
+            sum += float3(Float(bin.x), Float(bin.y), Float(bin.z)) / totalPixelCount_float
+            if sum.max()! > percent {
+                index = idx
+                break
+            }
+        }
+        
+        return index
     }
 }

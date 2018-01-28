@@ -87,17 +87,9 @@ public struct MTKPHDR {
         computer.commandBuffer.commit()
         computer.commandBuffer.waitUntilCompleted()
         
-        let histogram:[uint3] = Array(UnsafeBufferPointer(start: MPSHistogramBuffer.contents().assumingMemoryBound(to: uint3.self), count: 256))
-        
-        var sum = float3(0)
-        for (idx, bin) in histogram.reversed().enumerated() {
-            sum += float3(Float(bin.x), Float(bin.y), Float(bin.z)) / float3(256)
-            if sum.max()! > 0.01 {
-                MinMax[1] = (1 - Float(idx) / 256) * MinMax[1]
-                memcpy(MPSMinMaxBuffer.contents(), MinMax, MPSMinMaxBuffer.length)
-                break
-            }
-        }
+        let clippingIndex = Array( UnsafeBufferPointer(start: MPSHistogramBuffer.contents().assumingMemoryBound(to: uint3.self), count: 256) ).indexOfUpper(percent: 0.02)
+        MinMax[1] *= Float(256 - clippingIndex) / 256
+        memcpy(MPSMinMaxBuffer.contents(), &MinMax, MPSMinMaxBuffer.length)
         
         computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
         computer.copy(buffer: MPSMinMaxBuffer, toTexture: minMaxTexture)
