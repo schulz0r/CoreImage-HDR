@@ -18,7 +18,6 @@ protocol MetaComputer {
 public final class ResponseEstimator: MetaComputer {
     var computer : HDRComputer
     
-    private let calculation:MPSImageHistogram
     private var textures: [MTLTexture]! = nil
     
     init(ImageBracket: [CIImage], CameraShifts: [int2], context: CIContext? = nil) {
@@ -40,21 +39,13 @@ public final class ResponseEstimator: MetaComputer {
         let textureLoader = MTKTextureLoader(device: MTKPDevice.device)
         textures = ImageBracket.map{textureLoader.newTexture(CIImage: $0, context: context ?? CIContext(mtlDevice: MTKPDevice.device))}
         
-        var histogramInfo = MPSImageHistogramInfo(
-            numberOfHistogramEntries: 256, histogramForAlpha: false,
-            minPixelValue: vector_float4(0,0,0,0),
-            maxPixelValue: vector_float4(1,1,1,1))
-        
-        self.calculation = MPSImageHistogram(device: MTKPDevice.device, histogramInfo: &histogramInfo)
-        self.calculation.zeroHistogram = false
-        
         // create shared ressources
         let TGSizeOfSummationShader = (16, 16, 1)
         let totalBlocksCount = (textures.first!.height / TGSizeOfSummationShader.1) * (textures.first!.width / TGSizeOfSummationShader.0)
         let bufferLen = totalBlocksCount * 256
         
         guard
-            let MTLCardinalities = MTKPDevice.device.makeBuffer(length: calculation.histogramSize(forSourceFormat: textures[0].pixelFormat), options: .storageModePrivate),
+            let MTLCardinalities = MTKPDevice.device.makeBuffer(length: 3 * MemoryLayout<Float>.size * 256, options: .storageModePrivate),
             let MTLCameraShifts = MTKPDevice.device.makeBuffer(bytes: CameraShifts, length: MemoryLayout<uint2>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
             let MTLExposureTimes = MTKPDevice.device.makeBuffer(bytes: ExposureTimes, length: MemoryLayout<Float>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
             let buffer = MTKPDevice.device.makeBuffer(length: bufferLen * MemoryLayout<float3>.size/2, options: .storageModePrivate),  // float3 / 2 = half3
@@ -100,10 +91,7 @@ public final class ResponseEstimator: MetaComputer {
         computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
         
         textures.forEach({ texture in
-            calculation.encode(to: computer.commandBuffer,
-                               sourceTexture: texture,
-                               histogram: MTLCardinalityBuffer,
-                               histogramOffset: 0)
+            computer.encodeMPSHistogram(forImage: texture, MTLHistogramBuffer: MTLCardinalityBuffer)
         })
         
         (0..<iterations).forEach({ iterationIdx in
