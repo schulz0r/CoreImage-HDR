@@ -14,6 +14,7 @@ extension Int {
 }
 
 extension MTLTexture {
+    
     func getDescriptor() -> MTLTextureDescriptor {
         let Descriptor = MTLTextureDescriptor()
         Descriptor.arrayLength = self.arrayLength
@@ -28,5 +29,9 @@ extension MTLTexture {
         Descriptor.width = self.width
         
         return Descriptor
+    }
+    
+    func size() -> MTLSize {
+        return MTLSizeMake(self.width, self.height, self.depth)
     }
 }

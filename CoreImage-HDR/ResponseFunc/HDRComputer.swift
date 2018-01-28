@@ -7,6 +7,7 @@
 //
 
 import MetalKitPlus
+import MetalPerformanceShaders
 
 final class HDRComputer : MTKPComputer {
     var assets:MTKPAssets
@@ -77,4 +78,38 @@ final class HDRComputer : MTKPComputer {
         flushBlitEncoder.fill(buffer: buffer, range: Range(0...buffer.length), value: 0)
         flushBlitEncoder.endEncoding()
     }
+    
+    public func copy(texture: MTLTexture, toBuffer: MTLBuffer) {
+        guard let flushBlitEncoder = self.commandBuffer.makeBlitCommandEncoder() else {fatalError()}
+        flushBlitEncoder.copy(from: texture,
+                              sourceSlice: 0,
+                              sourceLevel: 0,
+                              sourceOrigin: MTLOriginMake(0, 0, 0),
+                              sourceSize: texture.size(),
+                              to: toBuffer,
+                              destinationOffset: 0,
+                              destinationBytesPerRow: toBuffer.length / texture.height,
+                              destinationBytesPerImage: toBuffer.length)
+        flushBlitEncoder.endEncoding()
+    }
+    
+    public func encodeMPSHistogram(forImage: MTLTexture, MTLHistogramBuffer: MTLBuffer, minPixelValue: vector_float4 = vector_float4(0,0,0,0), maxPixelValue: vector_float4 = vector_float4(1,1,1,1)){
+        var histogramInfo = MPSImageHistogramInfo(
+            numberOfHistogramEntries: 256, histogramForAlpha: false,
+            minPixelValue: minPixelValue,
+            maxPixelValue: maxPixelValue)
+        let calculation = MPSImageHistogram(device: MTKPDevice.device, histogramInfo: &histogramInfo)
+        calculation.zeroHistogram = false
+        
+        guard MTLHistogramBuffer.length == calculation.histogramSize(forSourceFormat: forImage.pixelFormat) else {
+            fatalError("Did not allocate enough memory for storing histogram Data in given buffer.")
+        }
+        
+        calculation.encode(to: commandBuffer,
+                           sourceTexture: forImage,
+                           histogram: MTLHistogramBuffer,
+                           histogramOffset: 0)
+    }
+    
+    
 }

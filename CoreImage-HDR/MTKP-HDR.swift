@@ -31,26 +31,28 @@ public struct MTKPHDR {
         let textureLoader = MTKTextureLoader(device: MTKPDevice.device)
         let inputImages = ImageBracket.map{textureLoader.newTexture(CIImage: $0, context: context ?? CIContext(mtlDevice: MTKPDevice.device))}
         
+        
         let HDRTexDescriptor = inputImages.first!.getDescriptor()
         HDRTexDescriptor.pixelFormat = .rgba16Float
-        
-        guard let HDRTexture = MTKPDevice.device.makeTexture(descriptor: HDRTexDescriptor) else  {
-                fatalError()
-        }
-        
         
         let descriptor = MTLTextureDescriptor()
         descriptor.textureType = .type1D
         descriptor.pixelFormat = .rgba32Float
         descriptor.width = 2
         
-        let MPSMinMax = MPSImageStatisticsMinAndMax(device: MTKPDevice.device)
-        MPSMinMax.clipRectSource = MTLRegionMake2D(0, 0, HDRTexture.width, HDRTexture.height)
         
-        let imageDimensions = MTLSizeMake(HDRTexture.width, HDRTexture.height, 1)
+        guard
+            let minMaxTexture = MTKPDevice.device.makeTexture(descriptor: descriptor),
+            let HDRTexture = MTKPDevice.device.makeTexture(descriptor: HDRTexDescriptor),
+            let MPSHistogramBuffer = MTKPDevice.device.makeBuffer(length: calculation.histogramSize(forSourceFormat: HDRTexture.pixelFormat), options: .storageModeShared),
+            let MPSMinMaxBuffer = MTKPDevice.device.makeBuffer(length: 2 * MemoryLayout<float3>.size, options: .storageModeShared)
+        else  {
+                fatalError()
+        }
         
-        var numberOfInputImages = uint(inputImages.count)
-        var cameraShifts = [int2](repeating: int2(0,0), count: inputImages.count)
+        
+        
+        let cameraShifts = [int2](repeating: int2(0,0), count: inputImages.count)
         
         let HDRShaderIO = HDRCalcShaderIO(inputTextures: inputImages,
                                           maximumLDRCount: MaxImageCount,
@@ -58,37 +60,32 @@ public struct MTKPHDR {
                                           exposureTimes: exposureTimes,
                                           cameraShifts: cameraShifts,
                                           cameraParameters: cameraParameters)
-        let scaleHDRShaderIO = scaleHDRValueShaderIO(HDRImage: HDRTexture, minMax: )
+        
+        let scaleHDRShaderIO = scaleHDRValueShaderIO(HDRImage: HDRTexture, darkestImage: inputImages[0])
         
         assets.add(shader: MTKPShader(name: "makeHDR", io: HDRShaderIO))
         assets.add(shader: MTKPShader(name: "scaleHDR", io: scaleHDRShaderIO))
         
         let computer = HDRComputer(assets: assets)
         
+        // generate HDR image
         computer.encode("makeHDR")
+        MPSMinMax.encode(commandBuffer: computer.commandBuffer, sourceTexture: HDRTexture, destinationTexture: minMaxTexture)
+        computer.copy(texture: minMaxTexture, toBuffer: MPSMinMaxBuffer)
+        computer.commandBuffer.commit()
+        computer.commandBuffer.waitUntilCompleted()
+        
+        var MinMax = Array(UnsafeBufferPointer(start: MPSMinMaxBuffer.contents().assumingMemoryBound(to: float3.self), count: 2))
+        
+        // CLIP UPPER 1% OF PIXEL VALUES TO DISCARD NUMERICAL OUTLIERS
+        // ... for that, get a histogram
+        computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
+        computer.encodeMPSHistogram(forImage: HDRTexture,
+                                    MTLHistogramBuffer: MPSHistogramBuffer,
+                                    minPixelValue: vector_float4(MinMax.first!, 0),
+                                    maxPixelValue: vector_float4(MinMax.last!, 1))
         
         
-        do {
-            guard
-                let scaleFunc = library.makeFunction(name: "scaleHDR"),
-                let ScaleEncoder = commandBuffer.makeComputeCommandEncoder() else {
-                    fatalError("Failed to create command encoder.")
-            }
-            
-            let HDRScaleState = try MTKPDevice.device.makeComputePipelineState(function: scaleFunc)
-            ScaleEncoder.setComputePipelineState(HDRScaleState)
-            ScaleEncoder.setTexture(HDRTexture, index: 0)
-            ScaleEncoder.setTexture(HDRTexture, index: 1)
-            ScaleEncoder.setTexture(inputImages[0], index: 2)
-            ScaleEncoder.setTexture(MinMaxMTLTexture, index: 3)
-            ScaleEncoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: MTLSizeMake(8, 8, 1))
-            ScaleEncoder.endEncoding()
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
-        
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
         
         let HDRConfiguration: [String:Any] = [kCIImageProperties : ImageBracket.first!.properties]
         
