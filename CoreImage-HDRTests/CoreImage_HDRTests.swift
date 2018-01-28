@@ -84,6 +84,15 @@ class CoreImage_HDRTests: XCTestCase {
         XCTAssertTrue(true)
     }
     
+    func testMTKPHDR() {
+        let camParams = CameraParameter(withTrainingWeight: 7, BSplineKnotCount: 4)
+        let HDR = MTKPHDR.makeHDR(ImageBracket: Array(self.Testimages[0...3]), exposureTimes: Array(self.ExposureTimes[0...3]), cameraParameters: camParams)
+        
+        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/MTKPHDR.png"))
+        
+        XCTAssertTrue(true)
+    }
+    
     func testWithResponse() {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
         var camParams = CameraParameter(withTrainingWeight: 12)
@@ -117,7 +126,7 @@ class CoreImage_HDRTests: XCTestCase {
         
         let HDR = MTKPHDR.makeHDR(ImageBracket: self.Testimages, exposureTimes: self.ExposureTimes, cameraParameters: camParams)
         
-        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/result.png"))
+        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/MTKPHDRwithResponse.png"))
         
         XCTAssertTrue(true)
     }
