@@ -24,15 +24,11 @@ final class HDRCalcShaderIO: MTKPIOProvider {
         self.HDR = HDRImage
         var imageCount = inputTextures.count
         
-        guard
-            self.MTLNumberOfInputImages = MTKPDevice.device.makeBuffer(bytes: &imageCount, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined),
-            self.MTLCameraShifts = MTKPDevice.device.makeBuffer(bytes: cameraShifts, length: MemoryLayout<uint2>.size * inputImages.count, options: .cpuCacheModeWriteCombined),
-            self.MTLExposureTimes = MTKPDevice.device.makeBuffer(bytes: exposureTimes, length: MemoryLayout<Float>.size * inputImages.count, options: .cpuCacheModeWriteCombined),
-            self.MTLWeightFunc = MTKPDevice.device.makeBuffer(bytes: cameraParameters.weightFunction, length: cameraParameters.weightFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
-            self.MTLResponseFunc = MTKPDevice.device.makeBuffer(bytes: cameraParameters.responseFunction, length: cameraParameters.responseFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
-        else {
-            fatalError()
-        }
+        self.MTLNumberOfInputImages = MTKPDevice.device.makeBuffer(bytes: &imageCount, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)!
+        self.MTLCameraShifts = MTKPDevice.device.makeBuffer(bytes: cameraShifts, length: MemoryLayout<uint2>.size * inputImages.count, options: .cpuCacheModeWriteCombined)!
+        self.MTLExposureTimes = MTKPDevice.device.makeBuffer(bytes: exposureTimes, length: MemoryLayout<Float>.size * inputImages.count, options: .cpuCacheModeWriteCombined)!
+        self.MTLWeightFunc = MTKPDevice.device.makeBuffer(bytes: cameraParameters.weightFunction, length: cameraParameters.weightFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)!
+        self.MTLResponseFunc = MTKPDevice.device.makeBuffer(bytes: cameraParameters.responseFunction, length: cameraParameters.responseFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)!
     }
     
     func fetchTextures() -> [MTLTexture]? {
