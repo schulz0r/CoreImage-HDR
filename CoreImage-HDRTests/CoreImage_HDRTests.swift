@@ -79,14 +79,14 @@ class CoreImage_HDRTests: XCTestCase {
             XCTFail(Errors.localizedDescription)
         }
         
-        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/noobs.png"))
+        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/HDR.png"))
         
         XCTAssertTrue(true)
     }
     
     func testMTKPHDR() {
-        let camParams = CameraParameter(withTrainingWeight: 7, BSplineKnotCount: 4)
-        let HDR = MTKPHDR.makeHDR(ImageBracket: Array(self.Testimages[0...3]), exposureTimes: Array(self.ExposureTimes[0...3]), cameraParameters: camParams)
+        let camParams = CameraParameter(withTrainingWeight: 7)
+        let HDR = MTKPHDR.makeHDR(ImageBracket: self.Testimages, exposureTimes: self.ExposureTimes, cameraParameters: camParams)
         
         HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/MTKPHDR.png"))
         

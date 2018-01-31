@@ -26,7 +26,7 @@ public final class ResponseEstimator: MetaComputer {
         guard ImageBracket.count > 1, ImageBracket.count <= 5 else {
             fatalError("Image bracket length must be at least 2 and 5 at maximum.")
         }
-        guard MPSSupportsMTLDevice(MTKPDevice.device) else {
+        guard MPSSupportsMTLDevice(MTKPDevice.instance) else {
             fatalError("Your device does not support Metal Performance Shaders.")
         }
         
@@ -38,8 +38,8 @@ public final class ResponseEstimator: MetaComputer {
         }
         
         var assets = MTKPAssets(ResponseEstimator.self)
-        let textureLoader = MTKTextureLoader(device: MTKPDevice.device)
-        textures = ImageBracket.map{textureLoader.newTexture(CIImage: $0, context: context ?? CIContext(mtlDevice: MTKPDevice.device))}
+        let textureLoader = MTKTextureLoader(device: MTKPDevice.instance)
+        textures = ImageBracket.map{textureLoader.newTexture(CIImage: $0, context: context ?? CIContext(mtlDevice: MTKPDevice.instance))}
         
         // create shared ressources
         let TGSizeOfSummationShader = (16, 16, 1)
@@ -47,12 +47,12 @@ public final class ResponseEstimator: MetaComputer {
         let bufferLen = totalBlocksCount * 256
         
         guard
-            let MTLCardinalities = MTKPDevice.device.makeBuffer(length: 3 * MemoryLayout<Float>.size * 256, options: .storageModePrivate),
-            let MTLCameraShifts = MTKPDevice.device.makeBuffer(bytes: CameraShifts, length: MemoryLayout<uint2>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
-            let MTLExposureTimes = MTKPDevice.device.makeBuffer(bytes: ExposureTimes, length: MemoryLayout<Float>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
-            let buffer = MTKPDevice.device.makeBuffer(length: bufferLen * MemoryLayout<float3>.size/2, options: .storageModePrivate),  // float3 / 2 = half3
-            let MTLWeightFuncBuffer = MTKPDevice.device.makeBuffer(length: 256 * MemoryLayout<float3>.size, options: .storageModeShared),
-            let MTLResponseFuncBuffer = MTKPDevice.device.makeBuffer(length: 256 * MemoryLayout<float3>.size, options: .storageModeShared)
+            let MTLCardinalities = MTKPDevice.instance.makeBuffer(length: 3 * MemoryLayout<Float>.size * 256, options: .storageModePrivate),
+            let MTLCameraShifts = MTKPDevice.instance.makeBuffer(bytes: CameraShifts, length: MemoryLayout<uint2>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
+            let MTLExposureTimes = MTKPDevice.instance.makeBuffer(bytes: ExposureTimes, length: MemoryLayout<Float>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
+            let buffer = MTKPDevice.instance.makeBuffer(length: bufferLen * MemoryLayout<float3>.size/2, options: .storageModePrivate),  // float3 / 2 = half3
+            let MTLWeightFuncBuffer = MTKPDevice.instance.makeBuffer(length: 256 * MemoryLayout<float3>.size, options: .storageModeShared),
+            let MTLResponseFuncBuffer = MTKPDevice.instance.makeBuffer(length: 256 * MemoryLayout<float3>.size, options: .storageModeShared)
         else {
                 fatalError("Could not initialize Buffers")
         }

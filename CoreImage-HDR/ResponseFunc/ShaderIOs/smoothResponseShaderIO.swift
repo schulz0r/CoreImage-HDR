@@ -19,7 +19,7 @@ final class smoothResponseShaderIO: MTKPIOProvider {
         self.weightFunction = weightFunction
     }
     
-    func fetchTextures() -> [MTLTexture]? {
+    func fetchTextures() -> [MTLTexture?]? {
         return nil
     }
     
@@ -36,8 +36,8 @@ final class smoothResponseShaderIO: MTKPIOProvider {
                                float4(0.5,-1,0,2.0/3.0),
                                float4(-0.5,0.5,0.5,1.0/6.0),
                                float4(1.0/6.0,0,0,0)]    // = float4x4
-        let cubicMatrix = MTKPDevice.device.makeBuffer(bytes: &matrix, length: MemoryLayout<float4>.size * 4, options: .cpuCacheModeWriteCombined)!
-        let controlPointBuffer = MTKPDevice.device.makeBuffer(bytes: &controlPoints, length: MemoryLayout<Int32>.size * controlPoints.count, options: .cpuCacheModeWriteCombined)!
+        let cubicMatrix = MTKPDevice.instance.makeBuffer(bytes: &matrix, length: MemoryLayout<float4>.size * 4, options: .cpuCacheModeWriteCombined)!
+        let controlPointBuffer = MTKPDevice.instance.makeBuffer(bytes: &controlPoints, length: MemoryLayout<Int32>.size * controlPoints.count, options: .cpuCacheModeWriteCombined)!
         
         return [cameraResponse, weightFunction, controlPointBuffer, cubicMatrix]
     }

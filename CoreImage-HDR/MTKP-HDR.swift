@@ -28,8 +28,8 @@ public struct MTKPHDR {
         }
         
         var assets = MTKPAssets(ResponseEstimator.self)
-        let textureLoader = MTKTextureLoader(device: MTKPDevice.device)
-        let inputImages = ImageBracket.map{textureLoader.newTexture(CIImage: $0, context: context ?? CIContext(mtlDevice: MTKPDevice.device))}
+        let textureLoader = MTKTextureLoader(device: MTKPDevice.instance)
+        let inputImages = ImageBracket.map{textureLoader.newTexture(CIImage: $0, context: context ?? CIContext(mtlDevice: MTKPDevice.instance))}
         
         
         let HDRTexDescriptor = inputImages.first!.getDescriptor()
@@ -42,10 +42,10 @@ public struct MTKPHDR {
         
         
         guard
-            let minMaxTexture = MTKPDevice.device.makeTexture(descriptor: descriptor),
-            let HDRTexture = MTKPDevice.device.makeTexture(descriptor: HDRTexDescriptor),
-            let MPSHistogramBuffer = MTKPDevice.device.makeBuffer(length: 3 * MemoryLayout<Float>.size * 256, options: .storageModeShared),
-            let MPSMinMaxBuffer = MTKPDevice.device.makeBuffer(length: 2 * MemoryLayout<float3>.size, options: .storageModeShared)
+            let minMaxTexture = MTKPDevice.instance.makeTexture(descriptor: descriptor),
+            let HDRTexture = MTKPDevice.instance.makeTexture(descriptor: HDRTexDescriptor),
+            let MPSHistogramBuffer = MTKPDevice.instance.makeBuffer(length: 3 * MemoryLayout<Float>.size * 256, options: .storageModeShared),
+            let MPSMinMaxBuffer = MTKPDevice.instance.makeBuffer(length: 2 * MemoryLayout<float3>.size, options: .storageModeShared)
         else  {
                 fatalError()
         }

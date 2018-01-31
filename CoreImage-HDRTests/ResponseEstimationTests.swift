@@ -139,7 +139,7 @@ class ResponseEstimationTests: XCTestCase {
         let threadgroupSize = MTLSizeMake(256, 1, 1)
         
         do {
-            let library = try MTKPDevice.device.makeDefaultLibrary(bundle: Bundle(for: CoreImage_HDRTests.self))
+            let library = try MTKPDevice.instance.makeDefaultLibrary(bundle: Bundle(for: CoreImage_HDRTests.self))
             var unsorted:[Float] = (1...4).map{ _ in Float((arc4random() % 9) + 1) }
             let threadgroupSizeSortShader = MTLSizeMake(unsorted.count, 1, 1)
             
@@ -148,15 +148,15 @@ class ResponseEstimationTests: XCTestCase {
             }
             
             guard
-                let TestSortNCountBuffer = MTKPDevice.device.makeBuffer(length: MemoryLayout<Float>.size * 4, options: .storageModeShared),
-                let TestSortBuffer = MTKPDevice.device.makeBuffer(bytes: &unsorted, length: MemoryLayout<Float>.size * unsorted.count, options: .storageModeShared),
+                let TestSortNCountBuffer = MTKPDevice.instance.makeBuffer(length: MemoryLayout<Float>.size * 4, options: .storageModeShared),
+                let TestSortBuffer = MTKPDevice.instance.makeBuffer(bytes: &unsorted, length: MemoryLayout<Float>.size * unsorted.count, options: .storageModeShared),
                 let testShader = library.makeFunction(name: "testSortAlgorithm"),
                 let sortShader = library.makeFunction(name: "testSortAlgorithmNoCount"),
                 let encoder = commandBuffer.makeComputeCommandEncoder()
                 else { fatalError() }
             
-            let testState = try MTKPDevice.device.makeComputePipelineState(function: testShader)
-            let testSortState = try MTKPDevice.device.makeComputePipelineState(function: sortShader)
+            let testState = try MTKPDevice.instance.makeComputePipelineState(function: testShader)
+            let testSortState = try MTKPDevice.instance.makeComputePipelineState(function: sortShader)
             
             encoder.setComputePipelineState(testState)
             encoder.setBuffer(TestSortNCountBuffer, offset: 0, index: 0)

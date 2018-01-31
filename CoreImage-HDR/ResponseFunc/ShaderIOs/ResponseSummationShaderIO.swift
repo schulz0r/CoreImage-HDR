@@ -27,14 +27,14 @@ final class ResponseSummationShaderIO: MTKPIOProvider {
         var imageCount = uint(self.inputImages.count)
         self.BinBuffer = BinBuffer
         
-        self.imageCount = MTKPDevice.device.makeBuffer(bytes: &imageCount, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)!
+        self.imageCount = MTKPDevice.instance.makeBuffer(bytes: &imageCount, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)!
         self.exposureTimes = exposureTimes
         self.cameraShifts = cameraShifts
         self.weights = weights
         self.cameraResponse = cameraResponse
     }
     
-    func fetchTextures() -> [MTLTexture]? {
+    func fetchTextures() -> [MTLTexture?]? {
         return inputImages
     }
     

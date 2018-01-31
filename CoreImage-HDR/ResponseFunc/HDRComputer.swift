@@ -30,7 +30,7 @@ final class HDRComputer : MTKPComputer {
         guard (threads != nil) || (descriptor.textures != nil) else {
             fatalError("The thread count is unknown. Pass it as an argument to the encode function.")
         }
-        let threadCount = threads ?? MTLSizeMake(descriptor.textures![0].width, descriptor.textures![0].height, 1)
+        let threadCount = threads ?? descriptor.textures![0]!.size()
         
         computeEncoder.setComputePipelineState(descriptor.state!)
         if let textures = descriptor.textures {
@@ -112,7 +112,7 @@ final class HDRComputer : MTKPComputer {
             numberOfHistogramEntries: 256, histogramForAlpha: false,
             minPixelValue: minPixelValue,
             maxPixelValue: maxPixelValue)
-        let calculation = MPSImageHistogram(device: MTKPDevice.device, histogramInfo: &histogramInfo)
+        let calculation = MPSImageHistogram(device: MTKPDevice.instance, histogramInfo: &histogramInfo)
         calculation.zeroHistogram = false
         
         guard MTLHistogramBuffer.length == calculation.histogramSize(forSourceFormat: forImage.pixelFormat) else {
@@ -126,7 +126,7 @@ final class HDRComputer : MTKPComputer {
     }
     
     public func encodeMPSMinMax(ofImage: MTLTexture, writeTo: MTLTexture) {
-        let MPSMinMax = MPSImageStatisticsMinAndMax(device: MTKPDevice.device)
+        let MPSMinMax = MPSImageStatisticsMinAndMax(device: MTKPDevice.instance)
         MPSMinMax.clipRectSource = MTLRegionMake2D(0, 0, ofImage.width, ofImage.height)
         MPSMinMax.encode(commandBuffer: self.commandBuffer,
                          sourceTexture: ofImage,

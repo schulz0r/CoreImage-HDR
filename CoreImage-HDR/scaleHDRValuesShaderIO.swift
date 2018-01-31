@@ -22,7 +22,7 @@ final class scaleHDRValueShaderIO: MTKPIOProvider {
         self.minMax = minMaxTexture
     }
     
-    func fetchTextures() -> [MTLTexture]? {
+    func fetchTextures() -> [MTLTexture?]? {
         return [HDR, HDR, darkestImage, minMax]
     }
     

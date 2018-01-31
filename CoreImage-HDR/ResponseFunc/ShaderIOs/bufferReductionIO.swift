@@ -20,12 +20,12 @@ final class bufferReductionShaderIO: MTKPIOProvider {
         var bufflen = uint(bufferlength)
         
         self.BinBuffer = BinBuffer
-        self.bufferSize = MTKPDevice.device.makeBuffer(bytes: &bufflen, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)!
+        self.bufferSize = MTKPDevice.instance.makeBuffer(bytes: &bufflen, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)!
         self.cameraResponse = cameraResponse
         self.Cardinality = Cardinality
     }
     
-    func fetchTextures() -> [MTLTexture]? {
+    func fetchTextures() -> [MTLTexture?]? {
         return nil
     }
     
