@@ -1,1 +1,2 @@
-./*.framework/*
+./*.framework
+./MetalKitPlus.framework
