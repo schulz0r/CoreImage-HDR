@@ -6,7 +6,6 @@
 //  Copyright © 2018 Philipp Waxweiler. All rights reserved.
 //
 
-import Foundation
 import MetalKit
 import MetalKitPlus
 
@@ -15,11 +14,15 @@ final class scaleHDRValueShaderIO: MTKPIOProvider {
     private let HDR:MTLTexture
     private let darkestImage:MTLTexture
     private let minMax:MTLTexture
+    private let MTLCameraShifts:MTLBuffer
     
-    init(HDRImage: MTLTexture, darkestImage: MTLTexture, minMaxTexture: MTLTexture){
+    init(HDRImage: MTLTexture, darkestImage: MTLTexture, cameraShiftOfDarkestImage: int2, minMaxTexture: MTLTexture){
         self.HDR = HDRImage
         self.darkestImage = darkestImage
         self.minMax = minMaxTexture
+        
+        var shift = cameraShiftOfDarkestImage
+        self.MTLCameraShifts = MTKPDevice.instance.makeBuffer(bytes: &shift, length: MemoryLayout<uint2>.size, options: .cpuCacheModeWriteCombined)!
     }
     
     func fetchTextures() -> [MTLTexture?]? {
@@ -27,6 +30,6 @@ final class scaleHDRValueShaderIO: MTKPIOProvider {
     }
     
     func fetchBuffers() -> [MTLBuffer]? {
-        return nil
+        return [MTLCameraShifts]
     }
 }

@@ -12,8 +12,8 @@
 		17132876201E037200361D8F /* scaleHDRValuesShaderIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17132875201E037200361D8F /* scaleHDRValuesShaderIO.swift */; };
 		17202962200D3B240018989E /* CameraParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17202961200D3B240018989E /* CameraParameter.swift */; };
 		17215BFF1FDF43B700912238 /* TestSortNCount.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17215BFA1FDF321800912238 /* TestSortNCount.metal */; };
-		177BF6192020FC8500173CAF /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 177BF6182020FC8500173CAF /* MetalKitPlus.framework */; };
-		177BF61A2020FC8500173CAF /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 177BF6182020FC8500173CAF /* MetalKitPlus.framework */; };
+		177BF61C2022874F00173CAF /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 177BF61B2022874F00173CAF /* MetalKitPlus.framework */; };
+		177BF61D2022874F00173CAF /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 177BF61B2022874F00173CAF /* MetalKitPlus.framework */; };
 		17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */; };
 		17832D021FB49C1500E19938 /* CoreImage_HDRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */; };
 		17832D041FB49C1500E19938 /* CoreImage_HDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17832CF61FB49C1500E19938 /* CoreImage_HDR.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -53,7 +53,7 @@
 		17202961200D3B240018989E /* CameraParameter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraParameter.swift; sourceTree = "<group>"; };
 		17215BFA1FDF321800912238 /* TestSortNCount.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = TestSortNCount.metal; sourceTree = "<group>"; };
 		17215C031FDF460400912238 /* SortAndCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
-		177BF6182020FC8500173CAF /* MetalKitPlus.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MetalKitPlus.framework; sourceTree = "<group>"; };
+		177BF61B2022874F00173CAF /* MetalKitPlus.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MetalKitPlus.framework; sourceTree = "<group>"; };
 		17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreImage_HDR.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		17832CF61FB49C1500E19938 /* CoreImage_HDR.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CoreImage_HDR.h; sourceTree = "<group>"; };
 		17832CF71FB49C1500E19938 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -84,7 +84,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				177BF6192020FC8500173CAF /* MetalKitPlus.framework in Frameworks */,
+				177BF61C2022874F00173CAF /* MetalKitPlus.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,7 +93,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */,
-				177BF61A2020FC8500173CAF /* MetalKitPlus.framework in Frameworks */,
+				177BF61D2022874F00173CAF /* MetalKitPlus.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -140,7 +140,7 @@
 		17832CE91FB49C1500E19938 = {
 			isa = PBXGroup;
 			children = (
-				177BF6182020FC8500173CAF /* MetalKitPlus.framework */,
+				177BF61B2022874F00173CAF /* MetalKitPlus.framework */,
 				17832CF51FB49C1500E19938 /* CoreImage-HDR */,
 				17832D001FB49C1500E19938 /* CoreImage-HDRTests */,
 				17832CF41FB49C1500E19938 /* Products */,

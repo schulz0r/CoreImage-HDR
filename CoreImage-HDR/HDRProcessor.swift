@@ -18,12 +18,11 @@ final class HDRProcessor: CIImageProcessorKernel {
     
     override final class func process(with inputs: [CIImageProcessorInput]?, arguments: [String : Any]?, output: CIImageProcessorOutput) throws {
         guard
-            let device = device,
             let commandBuffer = output.metalCommandBuffer,
             let inputImages = inputs?.map({$0.metalTexture}),
             let HDRTexture = output.metalTexture,
             let exposureTimes = arguments?["ExposureTimes"] as? [Float],
-            var cameraParameters = arguments?["CameraParameter"] as? CameraParameter
+            let cameraParameters = arguments?["CameraParameter"] as? CameraParameter
         else  {
                 return
         }
@@ -49,9 +48,6 @@ final class HDRProcessor: CIImageProcessorKernel {
         descriptor.pixelFormat = .rgba32Float
         descriptor.width = 2
         
-        let MPSMinMax = MPSImageStatisticsMinAndMax(device: MTKPDevice.instance)
-        MPSMinMax.clipRectSource = MTLRegionMake2D(0, 0, HDRTexture.width, HDRTexture.height)
-        
         guard let minMaxTexture = MTKPDevice.instance.makeTexture(descriptor: descriptor) else  {
                 fatalError()
         }
@@ -65,6 +61,7 @@ final class HDRProcessor: CIImageProcessorKernel {
         
         let scaleHDRShaderIO = scaleHDRValueShaderIO(HDRImage: HDRTexture,
                                                      darkestImage: inputImages[0]!,
+                                                     cameraShiftOfDarkestImage: cameraShifts.first!,
                                                      minMaxTexture: minMaxTexture)
         
         assets.add(shader: MTKPShader(name: "makeHDR", io: HDRShaderIO))

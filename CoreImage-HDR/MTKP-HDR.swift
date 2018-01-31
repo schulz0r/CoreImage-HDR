@@ -61,7 +61,10 @@ public struct MTKPHDR {
                                           cameraShifts: cameraShifts,
                                           cameraParameters: cameraParameters)
         
-        let scaleHDRShaderIO = scaleHDRValueShaderIO(HDRImage: HDRTexture, darkestImage: inputImages[0], minMaxTexture: minMaxTexture)
+        let scaleHDRShaderIO = scaleHDRValueShaderIO(HDRImage: HDRTexture,
+                                                     darkestImage: inputImages[0],
+                                                     cameraShiftOfDarkestImage: cameraShifts.first!,
+                                                     minMaxTexture: minMaxTexture)
         
         assets.add(shader: MTKPShader(name: "makeHDR", io: HDRShaderIO))
         assets.add(shader: MTKPShader(name: "scaleHDR", io: scaleHDRShaderIO))
