@@ -46,6 +46,7 @@ kernel void scaleHDR(texture2d<half, access::read> HDRImage,
                      texture2d<half, access::write> scaledHDRImage,
                      texture2d<half, access::read> darkestImage,
                      texture1d<half, access::read> MinMax,
+                     constant int2 & shift,
                      uint2 gid [[thread_position_in_grid]]) {
     
     const half3 Minimum = MinMax.read(uint(0)).rgb;
@@ -56,7 +57,7 @@ kernel void scaleHDR(texture2d<half, access::read> HDRImage,
     
     const half3 Range = absoluteMaximum - absoluteMinimum;
     
-    const half3 pixel = any(darkestImage.read(gid).rgb == 1.0) ? 1.0 : (HDRImage.read(gid).rgb - absoluteMinimum) / Range;
+    const half3 pixel = any(darkestImage.read(uint2(int2(gid) + shift)).rgb == 1.0) ? 1.0 : (HDRImage.read(gid).rgb - absoluteMinimum) / Range;
     scaledHDRImage.write(half4(pixel, 1), gid);
 }
 
