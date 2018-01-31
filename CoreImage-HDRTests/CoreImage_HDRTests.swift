@@ -79,7 +79,7 @@ class CoreImage_HDRTests: XCTestCase {
             XCTFail(Errors.localizedDescription)
         }
         
-        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/HDR.png"))
+        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/CI-HDR.png"))
         
         XCTAssertTrue(true)
     }
@@ -95,7 +95,7 @@ class CoreImage_HDRTests: XCTestCase {
     
     func testWithResponse() {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
-        var camParams = CameraParameter(withTrainingWeight: 12)
+        var camParams = CameraParameter(withTrainingWeight: 7, BSplineKnotCount: 8)
         let imageExtent = Testimages.first!.extent
         
         let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
@@ -112,7 +112,7 @@ class CoreImage_HDRTests: XCTestCase {
             XCTFail(Errors.localizedDescription)
         }
         
-        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/result.png"))
+        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/CI-HDR-response.png"))
         
         XCTAssertTrue(true)
     }

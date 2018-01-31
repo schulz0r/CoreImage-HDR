@@ -10,6 +10,7 @@ import Foundation
 import CoreImage
 import MetalKit
 import MetalPerformanceShaders
+import MetalKitPlus
 
 final class HDRProcessor: CIImageProcessorKernel {
     
@@ -38,83 +39,43 @@ final class HDRProcessor: CIImageProcessorKernel {
             fatalError("Length of Camera Response is not a power of two.")
         }
        
-        var library:MTLLibrary
+        let cameraShifts = arguments?["CameraShifts"] as? [int2] ?? [int2](repeating: int2(0,0), count: inputImages.count)
         
-        do{
-            library = try device.makeDefaultLibrary(bundle: Bundle(for: HDRProcessor.self))
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        var assets = MTKPAssets(ResponseEstimator.self)
         
+        // prepare MPSMinMax shader
         let descriptor = MTLTextureDescriptor()
         descriptor.textureType = .type1D
         descriptor.pixelFormat = .rgba32Float
         descriptor.width = 2
         
-        let MPSMinMax = MPSImageStatisticsMinAndMax(device: device)
+        let MPSMinMax = MPSImageStatisticsMinAndMax(device: MTKPDevice.instance)
         MPSMinMax.clipRectSource = MTLRegionMake2D(0, 0, HDRTexture.width, HDRTexture.height)
         
-        let imageDimensions = MTLSizeMake(HDRTexture.width, HDRTexture.height, 1)
-        
-        var numberOfInputImages = uint(inputImages.count)
-        var cameraShifts = arguments?["CameraShifts"] ?? [int2](repeating: int2(0,0), count: inputImages.count)
-        
-        guard
-            let MinMaxMTLTexture = device.makeTexture(descriptor: descriptor),
-            let MTLNumberOfImages = device.makeBuffer(bytes: &numberOfInputImages, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined),
-            let MTLCameraShifts = device.makeBuffer(bytes: &cameraShifts, length: MemoryLayout<uint2>.size * inputImages.count, options: .cpuCacheModeWriteCombined),
-            let MTLExposureTimes = device.makeBuffer(bytes: exposureTimes, length: MemoryLayout<Float>.size * inputImages.count, options: .cpuCacheModeWriteCombined),
-            let MTLWeightFunc = device.makeBuffer(bytes: &cameraParameters.weightFunction, length: cameraParameters.weightFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
-            let MTLResponseFunc = device.makeBuffer(bytes: &cameraParameters.responseFunction, length: cameraParameters.responseFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
-        else {
-            fatalError()
+        guard let minMaxTexture = MTKPDevice.instance.makeTexture(descriptor: descriptor) else  {
+                fatalError()
         }
         
+        let HDRShaderIO = HDRCalcShaderIO(inputTextures: inputImages,
+                                          maximumLDRCount: MaxImageCount,
+                                          HDRImage: HDRTexture,
+                                          exposureTimes: exposureTimes,
+                                          cameraShifts: cameraShifts,
+                                          cameraParameters: cameraParameters)
         
-        guard let encoder = commandBuffer.makeComputeCommandEncoder() else {
-            fatalError("Failed to create command encoder.")
-        }
+        let scaleHDRShaderIO = scaleHDRValueShaderIO(HDRImage: HDRTexture,
+                                                     darkestImage: inputImages[0]!,
+                                                     minMaxTexture: minMaxTexture)
         
-        do{
-            guard
-                let HDRFunc = library.makeFunction(name: "makeHDR")
-            else { fatalError() }
-            let HDRState = try device.makeComputePipelineState(function: HDRFunc)
-            encoder.setComputePipelineState(HDRState)
-        } catch let Errors {
-            fatalError(Errors.localizedDescription)
-        }
+        assets.add(shader: MTKPShader(name: "makeHDR", io: HDRShaderIO))
+        assets.add(shader: MTKPShader(name: "scaleHDR", io: scaleHDRShaderIO))
         
-        encoder.setTextures(inputImages, range: Range<Int>(0..<inputImages.count))
-        encoder.setTexture(HDRTexture, index: MaxImageCount)
-        encoder.setBuffer(MTLNumberOfImages, offset: 0, index: 0)
-        encoder.setBuffer(MTLCameraShifts, offset: 0, index: 1)
-        encoder.setBuffer(MTLExposureTimes, offset: 0, index: 2)
-        encoder.setBuffers([MTLResponseFunc, MTLWeightFunc], offsets: [0,0], range: Range<Int>(3...4))
-        encoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: MTLSizeMake(8, 8, 1))
-        encoder.endEncoding()
+        let computer = HDRComputer(assets: assets)
         
-        MPSMinMax.encode(commandBuffer: commandBuffer,
-                         sourceTexture: HDRTexture,
-                         destinationTexture: MinMaxMTLTexture)
-        
-        do {
-            guard
-                let scaleFunc = library.makeFunction(name: "scaleHDR"),
-                let ScaleEncoder = commandBuffer.makeComputeCommandEncoder() else {
-                    fatalError("Failed to create command encoder.")
-            }
-            
-            let HDRScaleState = try device.makeComputePipelineState(function: scaleFunc)
-            ScaleEncoder.setComputePipelineState(HDRScaleState)
-            ScaleEncoder.setTexture(HDRTexture, index: 0)
-            ScaleEncoder.setTexture(HDRTexture, index: 1)
-            ScaleEncoder.setTexture(inputImages[0], index: 2)
-            ScaleEncoder.setTexture(MinMaxMTLTexture, index: 3)
-            ScaleEncoder.dispatchThreads(imageDimensions, threadsPerThreadgroup: MTLSizeMake(8, 8, 1))
-            ScaleEncoder.endEncoding()
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        // encode all shaders
+        computer.commandBuffer = commandBuffer
+        computer.encode("makeHDR")
+        computer.encodeMPSMinMax(ofImage: HDRTexture, writeTo: minMaxTexture)
+        computer.encode("scaleHDR")
     }
 }
