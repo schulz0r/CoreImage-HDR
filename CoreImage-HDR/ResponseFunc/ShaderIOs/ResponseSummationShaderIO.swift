@@ -11,7 +11,7 @@ import MetalKitPlus
 
 final class ResponseSummationShaderIO: MTKPIOProvider {
     
-    private var inputImages:[MTLTexture]! = nil
+    private var inputImages = [MTLTexture?](repeating: nil, count: 5)
     private var imageCount:MTLBuffer! = nil
     private var BinBuffer:MTLBuffer! = nil
     private var cameraShifts:MTLBuffer! = nil
@@ -19,11 +19,11 @@ final class ResponseSummationShaderIO: MTKPIOProvider {
     private var cameraResponse:MTLBuffer! = nil
     private var weights:MTLBuffer! = nil
     
-    init(inputTextures: [MTLTexture], BinBuffer: MTLBuffer, exposureTimes: MTLBuffer, cameraShifts: MTLBuffer, cameraResponse: MTLBuffer, weights: MTLBuffer){
+    init(inputTextures: [MTLTexture?], BinBuffer: MTLBuffer, exposureTimes: MTLBuffer, cameraShifts: MTLBuffer, cameraResponse: MTLBuffer, weights: MTLBuffer){
         guard inputTextures.count > 0 else {
             fatalError()
         }
-        self.inputImages = inputTextures
+        self.inputImages.replaceSubrange(0..<inputTextures.count, with: inputTextures)
         var imageCount = uint(self.inputImages.count)
         self.BinBuffer = BinBuffer
         

@@ -11,7 +11,7 @@ import MetalKitPlus
 
 final class HDRCalcShaderIO: MTKPIOProvider {
     
-    private let inputImages:[MTLTexture]
+    private var inputImages = [MTLTexture?](repeating: nil, count: 5)
     private let HDR:MTLTexture
     private let MTLNumberOfInputImages:MTLBuffer
     private var MTLCameraShifts:MTLBuffer
@@ -19,8 +19,8 @@ final class HDRCalcShaderIO: MTKPIOProvider {
     private var MTLWeightFunc:MTLBuffer
     private var MTLResponseFunc:MTLBuffer
     
-    init(inputTextures: [MTLTexture], maximumLDRCount: Int, HDRImage: MTLTexture, exposureTimes: [Float], cameraShifts: [int2], cameraParameters: CameraParameter){
-        self.inputImages = inputTextures
+    init(inputTextures: [MTLTexture?], maximumLDRCount: Int, HDRImage: MTLTexture, exposureTimes: [Float], cameraShifts: [int2], cameraParameters: CameraParameter){
+        self.inputImages.replaceSubrange(0..<inputTextures.count, with: inputTextures)
         self.HDR = HDRImage
         var imageCount = inputTextures.count
         

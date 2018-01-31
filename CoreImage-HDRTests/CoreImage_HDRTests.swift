@@ -130,4 +130,18 @@ class CoreImage_HDRTests: XCTestCase {
         
         XCTAssertTrue(true)
     }
+    
+    func testMTKPHDRWithLessThanMaximumImages() {
+        let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
+        var camParams = CameraParameter(withTrainingWeight: 7, BSplineKnotCount: 4)
+        
+        let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
+        metaComp.estimate(cameraParameters: &camParams, iterations: 10)
+        
+        let HDR = MTKPHDR.makeHDR(ImageBracket: Array(self.Testimages[0..<2]), exposureTimes: Array(self.ExposureTimes[0..<2]), cameraParameters: camParams)
+        
+        HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/MTKPHDRWithLessThanMaximumImages.png"))
+        
+        XCTAssertTrue(true)
+    }
 }
