@@ -11,7 +11,6 @@ import MetalKit
 import MetalKitPlus
 
 final class LDRImagesShaderIO: MTKPIOProvider {
-    
     private var inputImages = [MTLTexture?](repeating: nil, count: 5)
     var MTLNumberOfInputImages, MTLCameraShifts, MTLExposureTimes : MTLBuffer
     
@@ -39,5 +38,29 @@ final class LDRImagesShaderIO: MTKPIOProvider {
     
     func fetchBuffers() -> [MTLBuffer]? {
         return [MTLNumberOfInputImages, MTLCameraShifts, MTLExposureTimes]
+    }
+}
+
+final class CameraParametersShaderIO: MTKPIOProvider {
+    private var MTLWeightFunc, MTLResponseFunc:MTLBuffer
+    
+    init(cameraParameters: CameraParameter) {
+        guard
+            let MTLWeightFunc = MTKPDevice.instance.makeBuffer(bytes: cameraParameters.weightFunction, length: cameraParameters.weightFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
+            let MTLResponseFunc = MTKPDevice.instance.makeBuffer(bytes: cameraParameters.responseFunction, length: cameraParameters.responseFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
+            else {
+                fatalError()
+        }
+        
+        self.MTLResponseFunc = MTLResponseFunc
+        self.MTLWeightFunc = MTLWeightFunc
+    }
+    
+    func fetchTextures() -> [MTLTexture?]? {
+        return nil
+    }
+    
+    func fetchBuffers() -> [MTLBuffer]? {
+        return [MTLResponseFunc, MTLWeightFunc]
     }
 }
