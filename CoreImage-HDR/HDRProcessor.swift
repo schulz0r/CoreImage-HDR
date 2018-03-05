@@ -69,7 +69,7 @@ final class HDRProcessor: CIImageProcessorKernel {
         
         // encode all shaders
         computer.encode("makeHDR", to: commandBuffer)
-        computer.encodeMPSMinMax(ofImage: HDRTexture, writeTo: minMaxTexture)
+        computer.encodeMPSMinMax(ofImage: HDRTexture, writeTo: minMaxTexture, to: commandBuffer)
         computer.encode("scaleHDR", to: commandBuffer)
     }
 }

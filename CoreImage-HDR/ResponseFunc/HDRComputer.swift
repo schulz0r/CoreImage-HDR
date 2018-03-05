@@ -15,7 +15,7 @@ final class HDRComputer : MTKPComputer {
     
     init(assets: MTKPAssets) {
         self.assets = assets
-        self.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
+        //self.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
     }
     
     // shader execution functions
@@ -25,12 +25,14 @@ final class HDRComputer : MTKPComputer {
             let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,
             descriptor.state != nil,
             let computeEncoder = commandBuffer_.makeComputeCommandEncoder()
-            else {
+        else {
                 fatalError()
         }
+        
         guard let threadCount = descriptor.textures?[0]?.size() else {
             fatalError("The thread count is unknown. Pass it as an argument to the encode function.")
         }
+        
         computeEncoder.setComputePipelineState(descriptor.state!)
         if let textures = descriptor.textures {
             computeEncoder.setTextures(textures, range: 0..<textures.count)
@@ -148,10 +150,11 @@ final class HDRComputer : MTKPComputer {
                            histogramOffset: 0)
     }
     
-    public func encodeMPSMinMax(ofImage: MTLTexture, writeTo: MTLTexture) {
+    public func encodeMPSMinMax(ofImage: MTLTexture, writeTo: MTLTexture, to cmdBuffer: MTLCommandBuffer? = nil) {
+        let commandBuffer:MTLCommandBuffer = cmdBuffer ?? self.commandBuffer
         let MPSMinMax = MPSImageStatisticsMinAndMax(device: MTKPDevice.instance)
         MPSMinMax.clipRectSource = MTLRegionMake2D(0, 0, ofImage.width, ofImage.height)
-        MPSMinMax.encode(commandBuffer: self.commandBuffer,
+        MPSMinMax.encode(commandBuffer: commandBuffer,
                          sourceTexture: ofImage,
                          destinationTexture: writeTo)
     }
