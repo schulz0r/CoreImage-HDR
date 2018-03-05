@@ -11,35 +11,39 @@ import MetalKitPlus
 
 final class ResponseSummationShaderIO: MTKPIOProvider {
     
-    private var inputImages = [MTLTexture?](repeating: nil, count: 5)
-    private var imageCount:MTLBuffer! = nil
-    private var BinBuffer:MTLBuffer! = nil
-    private var cameraShifts:MTLBuffer! = nil
-    private var exposureTimes:MTLBuffer! = nil
-    private var cameraResponse:MTLBuffer! = nil
-    private var weights:MTLBuffer! = nil
+    private var inputImageIO:LDRImagesShaderIO
+    private var camParams: CameraParametersShaderIO
+    private var BinBuffer, bufferSize, MTLCardinalities: MTLBuffer
     
-    init(inputTextures: [MTLTexture?], BinBuffer: MTLBuffer, exposureTimes: MTLBuffer, cameraShifts: MTLBuffer, cameraResponse: MTLBuffer, weights: MTLBuffer){
-        guard inputTextures.count > 0 else {
+    init(inputTextures: LDRImagesShaderIO, camParameters: CameraParametersShaderIO){
+        
+        let textureDim = inputTextures.fetchTextures()!.first!!.size()
+        
+        let TGSizeOfSummationShader = (16, 16, 1)
+        let totalBlocksCount = (textureDim.height / TGSizeOfSummationShader.1) * (textureDim.width / TGSizeOfSummationShader.0)
+        var bufferLen = totalBlocksCount * 256
+        
+        guard
+            let buffer = MTKPDevice.instance.makeBuffer(length: bufferLen * MemoryLayout<float3>.size/2, options: .storageModePrivate),
+            let bufferSize = MTKPDevice.instance.makeBuffer(bytes: &bufferLen, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined),
+            let MTLCardinalities = MTKPDevice.instance.makeBuffer(length: 3 * MemoryLayout<Float>.size * 256, options: .storageModePrivate)
+        else {
             fatalError()
         }
-        self.inputImages.replaceSubrange(0..<inputTextures.count, with: inputTextures)
-        var imageCount = uint(self.inputImages.count)
-        self.BinBuffer = BinBuffer
         
-        self.imageCount = MTKPDevice.instance.makeBuffer(bytes: &imageCount, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)!
-        self.exposureTimes = exposureTimes
-        self.cameraShifts = cameraShifts
-        self.weights = weights
-        self.cameraResponse = cameraResponse
+        self.inputImageIO = inputTextures
+        self.camParams = camParameters
+        self.BinBuffer = buffer
+        self.bufferSize = bufferSize
+        self.MTLCardinalities = MTLCardinalities
     }
     
     func fetchTextures() -> [MTLTexture?]? {
-        return inputImages
+        return inputImageIO.fetchTextures()
     }
     
     func fetchBuffers() -> [MTLBuffer]? {
-        return [self.BinBuffer, self.imageCount, self.cameraShifts, self.exposureTimes, self.cameraResponse, self.weights]
+        return [self.BinBuffer, self.bufferSize, self.MTLCardinalities] + inputImageIO.fetchBuffers()! + camParams.fetchBuffers()!
     }
 }
 
