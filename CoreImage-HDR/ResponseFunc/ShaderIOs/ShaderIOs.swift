@@ -92,6 +92,18 @@ final class HDRImageIO: MTKPIOProvider {
 final class CameraParametersShaderIO: MTKPIOProvider {
     private var MTLWeightFunc, MTLResponseFunc:MTLBuffer
     
+    init(cameraParameters: CameraParameter) {
+        guard
+            let MTLWeightFunc = MTKPDevice.instance.makeBuffer(bytes: cameraParameters.weightFunction, length: cameraParameters.weightFunction.count * MemoryLayout<float3>.size, options: .storageModeShared),
+            let MTLResponseFunc = MTKPDevice.instance.makeBuffer(bytes: cameraParameters.responseFunction, length: cameraParameters.responseFunction.count * MemoryLayout<float3>.size, options: .storageModeShared)
+            else {
+                fatalError()
+        }
+        
+        self.MTLResponseFunc = MTLResponseFunc
+        self.MTLWeightFunc = MTLWeightFunc
+    }
+    
     init(cameraParameters: inout CameraParameter) {
         guard
             let MTLWeightFunc = MTKPDevice.instance.makeBuffer(bytes: cameraParameters.weightFunction, length: cameraParameters.weightFunction.count * MemoryLayout<float3>.size, options: .storageModeShared),
