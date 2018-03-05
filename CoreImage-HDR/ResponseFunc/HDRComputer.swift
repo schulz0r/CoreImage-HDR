@@ -19,6 +19,29 @@ final class HDRComputer : MTKPComputer {
     }
     
     // shader execution functions
+    // this encode function is being used in
+    public func encode(_ name:String, to commandBuffer_: MTLCommandBuffer) {
+        guard
+            let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,
+            descriptor.state != nil,
+            let computeEncoder = commandBuffer_.makeComputeCommandEncoder()
+            else {
+                fatalError()
+        }
+        guard let threadCount = descriptor.textures?[0]?.size() else {
+            fatalError("The thread count is unknown. Pass it as an argument to the encode function.")
+        }
+        computeEncoder.setComputePipelineState(descriptor.state!)
+        if let textures = descriptor.textures {
+            computeEncoder.setTextures(textures, range: 0..<textures.count)
+        }
+        if let buffers = descriptor.buffers {
+            computeEncoder.setBuffers(buffers, offsets: [Int](repeating: 0, count: buffers.count), range: 0..<buffers.count)
+        }
+        computeEncoder.dispatchThreads(threadCount, threadsPerThreadgroup: descriptor.tgConfig.tgSize)
+        computeEncoder.endEncoding()
+    }
+    
     public func encode(_ name:String, threads: MTLSize? = nil) {
         guard
             let descriptor = self.assets[name] as? MTKPComputePipelineStateDescriptor,

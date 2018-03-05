@@ -68,9 +68,8 @@ final class HDRProcessor: CIImageProcessorKernel {
         let computer = HDRComputer(assets: assets)
         
         // encode all shaders
-        computer.commandBuffer = commandBuffer
-        computer.encode("makeHDR")
+        computer.encode("makeHDR", to: commandBuffer)
         computer.encodeMPSMinMax(ofImage: HDRTexture, writeTo: minMaxTexture)
-        computer.encode("scaleHDR")
+        computer.encode("scaleHDR", to: commandBuffer)
     }
 }
