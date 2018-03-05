@@ -6,7 +6,7 @@
 //  Copyright © 2018 Philipp Waxweiler. All rights reserved.
 //
 
-import Foundation
+import CoreImage
 import MetalKit
 import MetalKitPlus
 
@@ -24,6 +24,29 @@ final class LDRImagesShaderIO: MTKPIOProvider {
             let MTLExposureTimes = MTKPDevice.instance.makeBuffer(bytes: exposureTimes, length: MemoryLayout<Float>.size * inputImages.count, options: .cpuCacheModeWriteCombined)
         else {
             fatalError()
+        }
+        
+        
+        self.MTLNumberOfInputImages = MTLNumberOfInputImages
+        self.MTLCameraShifts = MTLCameraShifts
+        self.MTLExposureTimes = MTLExposureTimes
+    }
+    
+    init(ImageBracket: [CIImage], cameraShifts: [int2]) {
+        
+        let textureLoader = MTKTextureLoader(device: MTKPDevice.instance)
+        let inputTextures:[MTLTexture?] = ImageBracket.map{textureLoader.newTexture(CIImage: $0, context: CIContext(mtlDevice: MTKPDevice.instance))}
+        self.inputImages.replaceSubrange(0..<inputTextures.count, with: inputTextures)
+        
+        var imageCount = inputTextures.count
+        let exposureTimes = ImageBracket.map{$0.exposureTime()}
+        
+        guard
+            let MTLNumberOfInputImages = MTKPDevice.instance.makeBuffer(bytes: &imageCount, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined),
+            let MTLCameraShifts = MTKPDevice.instance.makeBuffer(bytes: cameraShifts, length: MemoryLayout<uint2>.size * inputImages.count, options: .cpuCacheModeWriteCombined),
+            let MTLExposureTimes = MTKPDevice.instance.makeBuffer(bytes: exposureTimes, length: MemoryLayout<Float>.size * inputImages.count, options: .cpuCacheModeWriteCombined)
+            else {
+                fatalError()
         }
         
         
@@ -69,11 +92,23 @@ final class HDRImageIO: MTKPIOProvider {
 final class CameraParametersShaderIO: MTKPIOProvider {
     private var MTLWeightFunc, MTLResponseFunc:MTLBuffer
     
-    init(cameraParameters: CameraParameter) {
+    init(cameraParameters: inout CameraParameter) {
         guard
-            let MTLWeightFunc = MTKPDevice.instance.makeBuffer(bytes: cameraParameters.weightFunction, length: cameraParameters.weightFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined),
-            let MTLResponseFunc = MTKPDevice.instance.makeBuffer(bytes: cameraParameters.responseFunction, length: cameraParameters.responseFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)
+            let MTLWeightFunc = MTKPDevice.instance.makeBuffer(bytes: cameraParameters.weightFunction, length: cameraParameters.weightFunction.count * MemoryLayout<float3>.size, options: .storageModeShared),
+            let MTLResponseFunc = MTKPDevice.instance.makeBuffer(bytes: cameraParameters.responseFunction, length: cameraParameters.responseFunction.count * MemoryLayout<float3>.size, options: .storageModeShared)
             else {
+                fatalError()
+        }
+        
+        self.MTLResponseFunc = MTLResponseFunc
+        self.MTLWeightFunc = MTLWeightFunc
+    }
+    
+    init() {
+        guard
+            let MTLWeightFunc = MTKPDevice.instance.makeBuffer(length: 256 * MemoryLayout<float3>.size, options: .storageModeShared),
+            let MTLResponseFunc = MTKPDevice.instance.makeBuffer(length: 256 * MemoryLayout<float3>.size, options: .storageModeShared)
+        else {
                 fatalError()
         }
         
