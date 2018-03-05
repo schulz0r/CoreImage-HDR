@@ -7,6 +7,15 @@
 //
 import MetalKit
 
+extension CIImage {
+    func exposureTime() -> Float {
+        guard let metaData = self.properties["{Exif}"] as? Dictionary<String, Any> else {
+            fatalError("Cannot read Exif Dictionary from image.")
+        }
+        return metaData["ExposureTime"] as! Float
+    }
+}
+
 extension Int {
     func isPowerOfTwo() -> Bool {
         return (self & (self - 1)) == 0
