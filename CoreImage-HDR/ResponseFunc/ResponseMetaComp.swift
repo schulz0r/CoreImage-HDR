@@ -19,61 +19,17 @@ public final class ResponseEstimator: MetaComputer {
     var computer : HDRComputer
     
     private var textures: [MTLTexture]! = nil
-    private let MTLWeightFunc : MTLBuffer
-    private let MTLResponseFunc : MTLBuffer
     
-    init(ImageBracket: [CIImage], CameraShifts: [int2], context: CIContext? = nil) {
+    init() {
+        var assets = MTKPAssets(ResponseEstimator.self)
+        self.computer = HDRComputer(assets: assets)
+    }
+    
+    public func estimate(ImageBracket: [CIImage], cameraShifts: [int2], cameraParameters: inout CameraParameter, iterations: Int) {
         guard ImageBracket.count > 1, ImageBracket.count <= 5 else {
             fatalError("Image bracket length must be at least 2 and 5 at maximum.")
         }
-        guard MPSSupportsMTLDevice(MTKPDevice.instance) else {
-            fatalError("Your device does not support Metal Performance Shaders.")
-        }
         
-        let ExposureTimes:[Float] = ImageBracket.map{
-            guard let metaData = $0.properties["{Exif}"] as? Dictionary<String, Any> else {
-                fatalError("Cannot read Exif Dictionary from image.")
-            }
-            return metaData["ExposureTime"] as! Float
-        }
-        
-        var assets = MTKPAssets(ResponseEstimator.self)
-        let textureLoader = MTKTextureLoader(device: MTKPDevice.instance)
-        textures = ImageBracket.map{textureLoader.newTexture(CIImage: $0, context: context ?? CIContext(mtlDevice: MTKPDevice.instance))}
-        
-        // create shared ressources
-        let TGSizeOfSummationShader = (16, 16, 1)
-        let totalBlocksCount = (textures.first!.height / TGSizeOfSummationShader.1) * (textures.first!.width / TGSizeOfSummationShader.0)
-        let bufferLen = totalBlocksCount * 256
-        
-        guard
-            let MTLCardinalities = MTKPDevice.instance.makeBuffer(length: 3 * MemoryLayout<Float>.size * 256, options: .storageModePrivate),
-            let MTLCameraShifts = MTKPDevice.instance.makeBuffer(bytes: CameraShifts, length: MemoryLayout<uint2>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
-            let MTLExposureTimes = MTKPDevice.instance.makeBuffer(bytes: ExposureTimes, length: MemoryLayout<Float>.size * ImageBracket.count, options: .cpuCacheModeWriteCombined),
-            let buffer = MTKPDevice.instance.makeBuffer(length: bufferLen * MemoryLayout<float3>.size/2, options: .storageModePrivate),  // float3 / 2 = half3
-            let MTLWeightFuncBuffer = MTKPDevice.instance.makeBuffer(length: 256 * MemoryLayout<float3>.size, options: .storageModeShared),
-            let MTLResponseFuncBuffer = MTKPDevice.instance.makeBuffer(length: 256 * MemoryLayout<float3>.size, options: .storageModeShared)
-        else {
-                fatalError("Could not initialize Buffers")
-        }
-        
-        self.MTLWeightFunc = MTLWeightFuncBuffer
-        self.MTLResponseFunc = MTLResponseFuncBuffer
-        
-        let ResponseSummationAssets = ResponseSummationShaderIO(inputTextures: textures, BinBuffer: buffer, exposureTimes: MTLExposureTimes, cameraShifts: MTLCameraShifts, cameraResponse: MTLResponseFunc, weights: MTLWeightFunc)
-        let bufferReductionAssets = bufferReductionShaderIO(BinBuffer: buffer, bufferlength: bufferLen, cameraResponse: MTLResponseFunc, Cardinality: MTLCardinalities)
-        
-        // configure threadgroups for each shader
-        let ResponseSummationThreadgroup = MTKPThreadgroupConfig(tgSize: TGSizeOfSummationShader, tgMemLength: [4 * TGSizeOfSummationShader.0 * TGSizeOfSummationShader.1])
-        let bufferReductionThreadgroup = MTKPThreadgroupConfig(tgSize: (256,1,1))
-        
-        assets.add(shader: MTKPShader(name: "writeMeasureToBins", io: ResponseSummationAssets, tgConfig: ResponseSummationThreadgroup))
-        assets.add(shader: MTKPShader(name: "reduceBins", io: bufferReductionAssets, tgConfig: bufferReductionThreadgroup))
-        
-        computer = HDRComputer(assets: assets)
-    }
-    
-    public func estimate(cameraParameters: inout CameraParameter, iterations: Int) {
         guard
             let summationShader = computer.assets["writeMeasureToBins"],
             let buffer = summationShader.buffers?[0],
@@ -82,6 +38,21 @@ public final class ResponseEstimator: MetaComputer {
         else {
             fatalError()
         }
+        
+        
+        // create shared ressources
+        let TGSizeOfSummationShader = (16, 16, 1)
+        
+        let Inputs = LDRImagesShaderIO(ImageBracket: ImageBracket, cameraShifts: cameraShifts)
+        let CameraParametersIO = CameraParametersShaderIO(cameraParameters: cameraParameters)
+        let ResponseSummationAssets = ResponseSummationShaderIO(inputTextures: Inputs, camParameters: CameraParametersIO)
+        
+        // configure threadgroups for each shader
+        let ResponseSummationThreadgroup = MTKPThreadgroupConfig(tgSize: TGSizeOfSummationShader, tgMemLength: [4 * TGSizeOfSummationShader.0 * TGSizeOfSummationShader.1])
+        let bufferReductionThreadgroup = MTKPThreadgroupConfig(tgSize: (256,1,1))
+        
+        self.computer.assets.add(shader: MTKPShader(name: "writeMeasureToBins", io: ResponseSummationAssets, tgConfig: ResponseSummationThreadgroup))
+        self.computer.assets.add(shader: MTKPShader(name: "reduceBins", io: ResponseSummationAssets, tgConfig: bufferReductionThreadgroup))
         
         
         let smoothResponseAssets = smoothResponseShaderIO(cameraResponse: MTLResponseFunc, weightFunction: MTLWeightFunc, controlPointCount: cameraParameters.BSplineKnotCount)
