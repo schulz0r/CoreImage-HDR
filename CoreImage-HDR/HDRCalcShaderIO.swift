@@ -11,32 +11,22 @@ import MetalKitPlus
 
 final class HDRCalcShaderIO: MTKPIOProvider {
     
-    private var inputImages = [MTLTexture?](repeating: nil, count: 5)
-    private let HDR:MTLTexture
-    private let MTLNumberOfInputImages:MTLBuffer
-    private var MTLCameraShifts:MTLBuffer
-    private var MTLExposureTimes:MTLBuffer
-    private var MTLWeightFunc:MTLBuffer
-    private var MTLResponseFunc:MTLBuffer
+    private let HDR: MTLTexture
+    private var inputImages: LDRImagesShaderIO
+    private var CamParametersIO:CameraParametersShaderIO
     
-    init(inputTextures: [MTLTexture?], maximumLDRCount: Int, HDRImage: MTLTexture, exposureTimes: [Float], cameraShifts: [int2], cameraParameters: CameraParameter){
-        self.inputImages.replaceSubrange(0..<inputTextures.count, with: inputTextures)
+    init(InputImageIO: LDRImagesShaderIO, HDRImage: MTLTexture, cameraParametersIO: CameraParametersShaderIO){
         self.HDR = HDRImage
-        var imageCount = inputTextures.count
-        
-        self.MTLNumberOfInputImages = MTKPDevice.instance.makeBuffer(bytes: &imageCount, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined)!
-        self.MTLCameraShifts = MTKPDevice.instance.makeBuffer(bytes: cameraShifts, length: MemoryLayout<uint2>.size * inputImages.count, options: .cpuCacheModeWriteCombined)!
-        self.MTLExposureTimes = MTKPDevice.instance.makeBuffer(bytes: exposureTimes, length: MemoryLayout<Float>.size * inputImages.count, options: .cpuCacheModeWriteCombined)!
-        self.MTLWeightFunc = MTKPDevice.instance.makeBuffer(bytes: cameraParameters.weightFunction, length: cameraParameters.weightFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)!
-        self.MTLResponseFunc = MTKPDevice.instance.makeBuffer(bytes: cameraParameters.responseFunction, length: cameraParameters.responseFunction.count * MemoryLayout<float3>.size, options: .cpuCacheModeWriteCombined)!
+        self.inputImages = InputImageIO
+        self.CamParametersIO = cameraParametersIO
     }
     
     func fetchTextures() -> [MTLTexture?]? {
-        return inputImages + [HDR]
+        return inputImages.fetchTextures()! + [HDR]
     }
     
     func fetchBuffers() -> [MTLBuffer]? {
-        return [MTLNumberOfInputImages, MTLCameraShifts, MTLExposureTimes, MTLResponseFunc, MTLWeightFunc]
+        return inputImages.fetchBuffers()! + CamParametersIO.fetchBuffers()!
     }
 }
 

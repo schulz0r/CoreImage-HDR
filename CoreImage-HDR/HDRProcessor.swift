@@ -52,12 +52,10 @@ final class HDRProcessor: CIImageProcessorKernel {
                 fatalError()
         }
         
-        let HDRShaderIO = HDRCalcShaderIO(inputTextures: inputImages,
-                                          maximumLDRCount: MaxImageCount,
-                                          HDRImage: HDRTexture,
-                                          exposureTimes: exposureTimes,
-                                          cameraShifts: cameraShifts,
-                                          cameraParameters: cameraParameters)
+        let Inputs = LDRImagesShaderIO(inputTextures: inputImages, exposureTimes: exposureTimes, cameraShifts: cameraShifts)
+        let CameraParametersIO = CameraParametersShaderIO(cameraParameters: cameraParameters)
+        
+        let HDRShaderIO = HDRCalcShaderIO(InputImageIO: Inputs, HDRImage: HDRTexture, cameraParametersIO: CameraParametersIO)
         
         let scaleHDRShaderIO = scaleHDRValueShaderIO(HDRImage: HDRTexture,
                                                      darkestImage: inputImages[0]!,

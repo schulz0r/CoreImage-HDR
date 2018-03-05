@@ -12,8 +12,8 @@
 		17132876201E037200361D8F /* scaleHDRValuesShaderIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17132875201E037200361D8F /* scaleHDRValuesShaderIO.swift */; };
 		17202962200D3B240018989E /* CameraParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17202961200D3B240018989E /* CameraParameter.swift */; };
 		17215BFF1FDF43B700912238 /* TestSortNCount.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17215BFA1FDF321800912238 /* TestSortNCount.metal */; };
-		177BF61C2022874F00173CAF /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 177BF61B2022874F00173CAF /* MetalKitPlus.framework */; };
-		177BF61D2022874F00173CAF /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 177BF61B2022874F00173CAF /* MetalKitPlus.framework */; };
+		17555807202A845E0046B151 /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17555806202A845E0046B151 /* MetalKitPlus.framework */; };
+		17555808202A845E0046B151 /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17555806202A845E0046B151 /* MetalKitPlus.framework */; };
 		17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */; };
 		17832D021FB49C1500E19938 /* CoreImage_HDRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */; };
 		17832D041FB49C1500E19938 /* CoreImage_HDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17832CF61FB49C1500E19938 /* CoreImage_HDR.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -23,6 +23,7 @@
 		17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AEAA621FC57E2400CE17DF /* extensions.swift */; };
 		17B45F471FF557DC009BE0BF /* HDRComputer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B45F461FF557DC009BE0BF /* HDRComputer.swift */; };
 		17DA9C3A1FFAC9610041E9BA /* ResponseSummationShaderIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DA9C391FFAC9610041E9BA /* ResponseSummationShaderIO.swift */; };
+		17E27784204C8BCE007C2C05 /* ShaderIOs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E27783204C8BCE007C2C05 /* ShaderIOs.swift */; };
 		17E68ADB1FF1CD3E008F9DCE /* textureLoaderExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */; };
 		17E948061FFBE1AD007E0476 /* ResponseEstimationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948051FFBE1AD007E0476 /* ResponseEstimationTests.swift */; };
 		17E948081FFC1E01007E0476 /* bufferReductionIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948071FFC1E01007E0476 /* bufferReductionIO.swift */; };
@@ -53,7 +54,7 @@
 		17202961200D3B240018989E /* CameraParameter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraParameter.swift; sourceTree = "<group>"; };
 		17215BFA1FDF321800912238 /* TestSortNCount.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = TestSortNCount.metal; sourceTree = "<group>"; };
 		17215C031FDF460400912238 /* SortAndCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
-		177BF61B2022874F00173CAF /* MetalKitPlus.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MetalKitPlus.framework; sourceTree = "<group>"; };
+		17555806202A845E0046B151 /* MetalKitPlus.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKitPlus.framework; path = "../../../../Library/Developer/Xcode/DerivedData/MetalKitPlus-dqmoobbmlxbqmrdxoomyadsxrbck/Build/Products/Debug/MetalKitPlus.framework"; sourceTree = "<group>"; };
 		17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreImage_HDR.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		17832CF61FB49C1500E19938 /* CoreImage_HDR.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CoreImage_HDR.h; sourceTree = "<group>"; };
 		17832CF71FB49C1500E19938 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -66,6 +67,7 @@
 		17AEAA621FC57E2400CE17DF /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
 		17B45F461FF557DC009BE0BF /* HDRComputer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRComputer.swift; sourceTree = "<group>"; };
 		17DA9C391FFAC9610041E9BA /* ResponseSummationShaderIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseSummationShaderIO.swift; sourceTree = "<group>"; };
+		17E27783204C8BCE007C2C05 /* ShaderIOs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderIOs.swift; sourceTree = "<group>"; };
 		17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = textureLoaderExtensions.swift; sourceTree = "<group>"; };
 		17E948051FFBE1AD007E0476 /* ResponseEstimationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseEstimationTests.swift; sourceTree = "<group>"; };
 		17E948071FFC1E01007E0476 /* bufferReductionIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = bufferReductionIO.swift; sourceTree = "<group>"; };
@@ -84,7 +86,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				177BF61C2022874F00173CAF /* MetalKitPlus.framework in Frameworks */,
+				17555807202A845E0046B151 /* MetalKitPlus.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,7 +95,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */,
-				177BF61D2022874F00173CAF /* MetalKitPlus.framework in Frameworks */,
+				17555808202A845E0046B151 /* MetalKitPlus.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -140,7 +142,7 @@
 		17832CE91FB49C1500E19938 = {
 			isa = PBXGroup;
 			children = (
-				177BF61B2022874F00173CAF /* MetalKitPlus.framework */,
+				17555806202A845E0046B151 /* MetalKitPlus.framework */,
 				17832CF51FB49C1500E19938 /* CoreImage-HDR */,
 				17832D001FB49C1500E19938 /* CoreImage-HDRTests */,
 				17832CF41FB49C1500E19938 /* Products */,
@@ -199,6 +201,7 @@
 				17DA9C391FFAC9610041E9BA /* ResponseSummationShaderIO.swift */,
 				17E948071FFC1E01007E0476 /* bufferReductionIO.swift */,
 				17AD8840200453EF007BBF6C /* smoothResponseShaderIO.swift */,
+				17E27783204C8BCE007C2C05 /* ShaderIOs.swift */,
 			);
 			path = ShaderIOs;
 			sourceTree = "<group>";
@@ -344,6 +347,7 @@
 				1703B8662018F6F60075D0F8 /* MTKP-HDR.swift in Sources */,
 				17E948481FFEDF2A007E0476 /* HDRShader.metal in Sources */,
 				17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */,
+				17E27784204C8BCE007C2C05 /* ShaderIOs.swift in Sources */,
 				17132876201E037200361D8F /* scaleHDRValuesShaderIO.swift in Sources */,
 				17E9480A1FFD3EAC007E0476 /* ResponseMetaComp.swift in Sources */,
 				17E68ADB1FF1CD3E008F9DCE /* textureLoaderExtensions.swift in Sources */,
@@ -507,6 +511,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/CoreImage-HDR",
 				);
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = "CoreImage-HDR/Info.plist";
@@ -536,6 +541,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/CoreImage-HDR",
 				);
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = "CoreImage-HDR/Info.plist";
@@ -559,6 +565,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/CoreImage-HDR",
 				);
 				INFOPLIST_FILE = "CoreImage-HDRTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks $(PROJECT_DIR)";
@@ -578,6 +585,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/CoreImage-HDR",
 				);
 				INFOPLIST_FILE = "CoreImage-HDRTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks $(PROJECT_DIR)";

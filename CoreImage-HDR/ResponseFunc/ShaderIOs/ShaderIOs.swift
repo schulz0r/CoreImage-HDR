@@ -41,6 +41,31 @@ final class LDRImagesShaderIO: MTKPIOProvider {
     }
 }
 
+final class HDRImageIO: MTKPIOProvider {
+    private var HDRTexture: MTLTexture
+    
+    init(inputTexture: [MTLTexture]) {
+        let HDRTexDescriptor = inputTexture.first!.getDescriptor()
+        HDRTexDescriptor.pixelFormat = .rgba16Float
+        
+        guard
+            let HDRTexture = MTKPDevice.instance.makeTexture(descriptor: HDRTexDescriptor)
+        else  {
+                fatalError()
+        }
+        
+        self.HDRTexture = HDRTexture
+    }
+    
+    func fetchTextures() -> [MTLTexture?]? {
+        return [HDRTexture]
+    }
+    
+    func fetchBuffers() -> [MTLBuffer]? {
+        return nil
+    }
+}
+
 final class CameraParametersShaderIO: MTKPIOProvider {
     private var MTLWeightFunc, MTLResponseFunc:MTLBuffer
     
