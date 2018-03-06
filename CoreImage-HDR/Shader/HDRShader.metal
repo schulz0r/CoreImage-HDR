@@ -28,8 +28,8 @@ struct CameraParameters {
 kernel void makeHDR(const metal::array<texture2d<half, access::read>, MAX_IMAGE_COUNT> inputArray [[texture(0)]],
                     texture2d<half, access::write> HDRImage [[texture(MAX_IMAGE_COUNT)]],
                     constant uint & NumberOfinputImages [[buffer(0)]],
-                    constant int2 * cameraShifts [[buffer(1)]],
-                    constant float * exposureTimes [[buffer(2)]],
+                    constant array<int2, MAX_IMAGE_COUNT> & cameraShifts [[buffer(1)]],
+                    constant array<float, MAX_IMAGE_COUNT> & exposureTimes [[buffer(2)]],
                     constant CameraParameters & CamParams [[buffer(3)]],
                     uint2 gid [[thread_position_in_grid]]){
     
