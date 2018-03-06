@@ -31,13 +31,17 @@ inline uchar3 toUChar(const thread half3 & pixel){
     return uchar3(pixel * 255);
 }
 
+struct CameraParameters {
+    array<float3, 256> response;
+    array<float3, 256> weights;
+};
+
 kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>, MAX_IMAGE_COUNT> inputArray [[texture(0)]],
                                device metal::array<half3, 256> * outputbuffer [[buffer(0)]],
                                constant uint & NumberOfinputImages [[buffer(1)]],
                                constant int2 * cameraShifts [[buffer(2)]],
                                constant float * exposureTimes [[buffer(3)]],
-                               constant float3 * cameraResponse [[buffer(4)]],
-                               constant float3 * weights [[buffer(5)]],
+                               constant CameraParameters & cameraParams [[buffer(4)]],
                                threadgroup SortAndCountElement<ushort, half> * ElementsToSort [[threadgroup(0)]],
                                uint2 gid [[thread_position_in_grid]],
                                uint tid [[thread_index_in_threadgroup]],
@@ -58,11 +62,11 @@ kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>,
     for(uint i = 0; i < NumberOfinputImages; i++) {
         const half3 pixel = inputArray[i].read(uint2(int2(gid) + cameraShifts[i])).rgb;
         PixelIndices[i] = toUChar(pixel);
-        linearizedPixels[i] = half3(cameraResponse[PixelIndices[i].x].x, cameraResponse[PixelIndices[i].y].y, cameraResponse[PixelIndices[i].z].z);
+        linearizedPixels[i] = half3(cameraParams.response[PixelIndices[i].x].x, cameraParams.response[PixelIndices[i].y].y, cameraParams.response[PixelIndices[i].z].z);
     }
     
     // calculate HDR Value
-    const half3 HDRPixel = HDRValue(linearDataArray, PixelIndices, exposureTimes, weights);
+    const half3 HDRPixel = HDRValue(linearDataArray, PixelIndices, exposureTimes, cameraParams.weights);
     
     for(uint imageIndex = 0; imageIndex < NumberOfinputImages; imageIndex++) {
         const half3 µ = HDRPixel * exposureTimes[imageIndex];   // X * t_i is the mean value according to the model
@@ -84,8 +88,7 @@ kernel void writeMeasureToBins_float32(const metal::array<texture2d<float, acces
                                        constant uint & NumberOfinputImages [[buffer(1)]],
                                        constant int2 * cameraShifts [[buffer(2)]],
                                        constant float * exposureTimes [[buffer(3)]],
-                                       constant float3 * cameraResponse [[buffer(4)]],
-                                       constant float3 * weights [[buffer(5)]],
+                                       constant CameraParameters & cameraParams [[buffer(4)]],
                                        threadgroup SortAndCountElement<ushort, half> * ElementsToSort [[threadgroup(0)]],
                                        uint2 gid [[thread_position_in_grid]],
                                        uint tid [[thread_index_in_threadgroup]],
@@ -106,11 +109,11 @@ kernel void writeMeasureToBins_float32(const metal::array<texture2d<float, acces
     for(uint i = 0; i < NumberOfinputImages; i++) {
         const float3 pixel = inputArray[i].read(uint2(int2(gid) + cameraShifts[i])).rgb;
         PixelIndices[i] = uchar3(pixel * 255);
-        linearizedPixels[i] = half3(cameraResponse[PixelIndices[i].x].x, cameraResponse[PixelIndices[i].y].y, cameraResponse[PixelIndices[i].z].z);
+        linearizedPixels[i] = half3(cameraParams.response[PixelIndices[i].x].x, cameraParams.response[PixelIndices[i].y].y, cameraParams.response[PixelIndices[i].z].z);
     }
     
     // calculate HDR Value
-    const half3 HDRPixel = HDRValue(linearDataArray, PixelIndices, exposureTimes, weights);
+    const half3 HDRPixel = HDRValue(linearDataArray, PixelIndices, exposureTimes, cameraParams.response);
     
     for(uint imageIndex = 0; imageIndex < NumberOfinputImages; imageIndex++) {
         const half3 µ = HDRPixel * exposureTimes[imageIndex];   // X * t_i is the mean value according to the model
