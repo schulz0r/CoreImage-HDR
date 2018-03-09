@@ -67,66 +67,28 @@ class ResponseEstimationTests: XCTestCase {
     }
     
     func testBinningShader(){
-        var cameraShifts = int2(0,0)
-        var exposureTime:Float = 1
-        let TGSizeOfSummationShader = (16,16,1)
-        let lengthOfBuffer = 512;
-        guard let commandQ = device.makeCommandQueue() else {fatalError()}
-        var TextureFill = [float3](repeating: float3(0.5), count: lengthOfBuffer)
-        var FunctionDummy = [float3](repeating: float3(1.0), count: lengthOfBuffer)
-        
-        // allocate half size buffer
-        guard
-            let imageBuffer = device.makeBuffer(bytes: &TextureFill, length: lengthOfBuffer * MemoryLayout<float3>.size, options: .storageModeManaged),
-            let MTLFunctionDummyBuffer = device.makeBuffer(bytes: &FunctionDummy, length: FunctionDummy.count * MemoryLayout<float3>.size, options: .storageModeManaged)
-            else {fatalError()}
-        
-        let testTextureDescriptor = MTLTextureDescriptor().makeTestTextureDescriptor(width: 32, height: 16)
-        guard let testTexture = device.makeTexture(descriptor: testTextureDescriptor) else {fatalError()}
-        let imageDimensions = MTLSizeMake(testTexture.width, testTexture.height, 1)
-        
-        // collect image in bins
-        guard
-            let commandBuffer = commandQ.makeCommandBuffer(),
-            let blitencoder = commandBuffer.makeBlitCommandEncoder(),
-            let buffer = device.makeBuffer(length: MemoryLayout<float3>.size * lengthOfBuffer, options: .storageModeManaged)
-            else {
-                fatalError("Failed to create command encoder.")
-        }
-        
-        blitencoder.copy(from: imageBuffer,
-                         sourceOffset: 0,
-                         sourceBytesPerRow: imageBuffer.length / imageDimensions.height,
-                         sourceBytesPerImage: imageBuffer.length,
-                         sourceSize: imageDimensions,
-                         to: testTexture,
-                         destinationSlice: 0,
-                         destinationLevel: 0,
-                         destinationOrigin: MTLOriginMake(0, 0, 0))
-        blitencoder.endEncoding()
-        commandBuffer.commit()
+        let ImageSize = MTLSizeMake(32, 16, 1)
         
         var assets = MTKPAssets(HDRComputer.self)
-        let MTLexposureTimes = device.makeBuffer(bytes: &exposureTime, length: MemoryLayout<Float>.size, options: .cpuCacheModeWriteCombined)
-        let MTLCameraShifts = device.makeBuffer(bytes: &cameraShifts, length: MemoryLayout<int2>.size, options: .cpuCacheModeWriteCombined)
+        let testIO = testBinningShaderIO(inputTextureSize: ImageSize)
         
-        let reponseSumShaderIO = ResponseSummationShaderIO(inputTextures: [testTexture],
-                                                           BinBuffer: buffer,
-                                                           exposureTimes: MTLexposureTimes!,
-                                                           cameraShifts: MTLCameraShifts!,
-                                                           cameraResponse: MTLFunctionDummyBuffer,
-                                                           weights: MTLFunctionDummyBuffer)
+        var TextureFill = [float3](repeating: float3(0.5), count: ImageSize.width * ImageSize.height)
+        let imageBuffer = MTKPDevice.instance.makeBuffer(bytes: &TextureFill,
+                                                         length: ImageSize.width * ImageSize.height * MemoryLayout<float3>.size,
+                                                         options: .storageModeShared)
         
-        let function = MTKPShader(name: "writeMeasureToBins_float32", io: reponseSumShaderIO, tgConfig: MTKPThreadgroupConfig(tgSize: TGSizeOfSummationShader, tgMemLength: [4 * TGSizeOfSummationShader.0 * TGSizeOfSummationShader.1]))
+        let function = MTKPShader(name: "writeMeasureToBins_float32",
+                                  io: testIO,
+                                  tgConfig: MTKPThreadgroupConfig(tgSize: TGSizeOfSummationShader, tgMemLength: [4 * TGSizeOfSummationShader.0 * TGSizeOfSummationShader.1]))
+        
         assets.add(shader: function)
         let computer = HDRComputer(assets: assets)
-        computer.encode("writeMeasureToBins_float32")
-        computer.commandBuffer.commit()
-        computer.commandBuffer.waitUntilCompleted()
         
+        computer.copy(buffer: imageBuffer, toTexture: testTexture)
+        computer.execute("writeMeasureToBins_float32")
         
-        memcpy(&FunctionDummy, buffer.contents(), buffer.length)
-        let SummedElements = FunctionDummy.map{$0.x}.filter{$0 != 0}
+        memcpy(&TextureFill, buffer.contents(), buffer.length)
+        let SummedElements = TextureFill.map{$0.x}.filter{$0 != 0}
         
         XCTAssert(SummedElements.count > 0)
         XCTAssert(SummedElements[0] == 256.0)
@@ -230,8 +192,8 @@ class ResponseEstimationTests: XCTestCase {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
         var camParams = CameraParameter(withTrainingWeight: 10)
         
-        let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
-        metaComp.estimate(cameraParameters: &camParams, iterations: 10)
+        let metaComp = ResponseEstimator()
+        metaComp.estimate(ImageBracket: Testimages, cameraShifts: cameraShifts, cameraParameters: &camParams, iterations: 10)
         
         print("Response: \(camParams.responseFunction.description)\n\nWeights: \(camParams.weightFunction.description)")
         
