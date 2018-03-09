@@ -30,10 +30,10 @@ class PerformanceTests: XCTestCase {
     func testResponseEstimation() {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
         var camParams = CameraParameter(withTrainingWeight: 5.1)
-        let metaComp = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts)
+        let metaComp = ResponseEstimator()
         // This is an example of a performance test case.
         self.measure {
-            metaComp.estimate(cameraParameters: &camParams, iterations: 5)
+            metaComp.estimate(ImageBracket: Testimages, cameraShifts: cameraShifts, cameraParameters: &camParams, iterations: 5)
         }
     }
     
@@ -84,15 +84,10 @@ class PerformanceTests: XCTestCase {
         }
         
         // load exposure times
-        ExposureTimes = Testimages.map{
-            guard let metaData = $0.properties["{Exif}"] as? Dictionary<String, Any> else {
-                fatalError("Cannot read Exif Dictionary")
-            }
-            return metaData["ExposureTime"] as! Float
-        }
+        ExposureTimes = Testimages.map{ $0.exposureTime() }
         
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
-        self.computer = ResponseEstimator(ImageBracket: self.Testimages, CameraShifts: cameraShifts).computer
+        self.computer = ResponseEstimator().computer
             
         textureLoader = MTKTextureLoader(device: self.device)
     }
