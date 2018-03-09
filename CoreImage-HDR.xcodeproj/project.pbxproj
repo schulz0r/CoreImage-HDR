@@ -14,6 +14,7 @@
 		17215BFF1FDF43B700912238 /* TestSortNCount.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17215BFA1FDF321800912238 /* TestSortNCount.metal */; };
 		17555807202A845E0046B151 /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17555806202A845E0046B151 /* MetalKitPlus.framework */; };
 		17555808202A845E0046B151 /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17555806202A845E0046B151 /* MetalKitPlus.framework */; };
+		175F2CCD205347B5003CD8FA /* TestShaderIOs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175F2CCC205347B5003CD8FA /* TestShaderIOs.swift */; };
 		17832CFD1FB49C1500E19938 /* CoreImage_HDR.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */; };
 		17832D021FB49C1500E19938 /* CoreImage_HDRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D011FB49C1500E19938 /* CoreImage_HDRTests.swift */; };
 		17832D041FB49C1500E19938 /* CoreImage_HDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17832CF61FB49C1500E19938 /* CoreImage_HDR.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -55,6 +56,7 @@
 		17215BFA1FDF321800912238 /* TestSortNCount.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = TestSortNCount.metal; sourceTree = "<group>"; };
 		17215C031FDF460400912238 /* SortAndCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
 		17555806202A845E0046B151 /* MetalKitPlus.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKitPlus.framework; path = "../../../../Library/Developer/Xcode/DerivedData/MetalKitPlus-dqmoobbmlxbqmrdxoomyadsxrbck/Build/Products/Debug/MetalKitPlus.framework"; sourceTree = "<group>"; };
+		175F2CCC205347B5003CD8FA /* TestShaderIOs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestShaderIOs.swift; sourceTree = "<group>"; };
 		17832CF31FB49C1500E19938 /* CoreImage_HDR.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreImage_HDR.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		17832CF61FB49C1500E19938 /* CoreImage_HDR.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CoreImage_HDR.h; sourceTree = "<group>"; };
 		17832CF71FB49C1500E19938 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -181,6 +183,7 @@
 				17832D031FB49C1500E19938 /* Info.plist */,
 				17215BFC1FDF321F00912238 /* ShaderTests */,
 				17A323F91FEAF0CC00CFDAA8 /* extensions.swift */,
+				175F2CCC205347B5003CD8FA /* TestShaderIOs.swift */,
 			);
 			path = "CoreImage-HDRTests";
 			sourceTree = "<group>";
@@ -369,6 +372,7 @@
 				17215BFF1FDF43B700912238 /* TestSortNCount.metal in Sources */,
 				17A323FA1FEAF0CC00CFDAA8 /* extensions.swift in Sources */,
 				17E9484A1FFFF484007E0476 /* PerformanceTests.swift in Sources */,
+				175F2CCD205347B5003CD8FA /* TestShaderIOs.swift in Sources */,
 				17E948061FFBE1AD007E0476 /* ResponseEstimationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
