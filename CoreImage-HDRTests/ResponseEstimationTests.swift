@@ -67,18 +67,25 @@ class ResponseEstimationTests: XCTestCase {
     }
     
     func testBinningShader(){
-        let ImageSize = MTLSizeMake(32, 16, 1)
+        let ImageSize = MTLSizeMake(16 * 100, 16, 1)
         
         var assets = MTKPAssets(HDRComputer.self)
         let testIO = testBinningShaderIO(inputTextureSize: ImageSize)
         
-        var TextureFill = [float3](repeating: float3(0.5), count: ImageSize.width * ImageSize.height)
-        let imageBuffer = MTKPDevice.instance.makeBuffer(bytes: &TextureFill,
-                                                         length: ImageSize.width * ImageSize.height * MemoryLayout<float3>.size,
-                                                         options: .storageModeShared)
         
-        let function = MTKPShader(name: "writeMeasureToBins_float32",
-                                  io: testIO,
+        let TGSizeOfSummationShader = (16,16,1)
+        var TextureFill = [float3](repeating: float3(0.5), count: ImageSize.width * ImageSize.height)
+        
+        guard
+            let testTexture = testIO.fetchTextures()![0],
+            let buffer = testIO.fetchBuffers()?[0],
+            let imageBuffer = MTKPDevice.instance.makeBuffer(bytes: &TextureFill, length: TextureFill.count * MemoryLayout<float3>.size, options: .storageModeShared)
+        else {
+            fatalError()
+        }
+        
+        
+        let function = MTKPShader(name: "writeMeasureToBins_float32", io: testIO,
                                   tgConfig: MTKPThreadgroupConfig(tgSize: TGSizeOfSummationShader, tgMemLength: [4 * TGSizeOfSummationShader.0 * TGSizeOfSummationShader.1]))
         
         assets.add(shader: function)
