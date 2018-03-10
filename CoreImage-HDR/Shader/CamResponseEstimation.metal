@@ -151,8 +151,8 @@ kernel void reduceBins(device half3 * buffer [[buffer(0)]],
 
 kernel void reduceBins_float(device float3 * buffer [[buffer(0)]],
                              constant uint & bufferSize [[buffer(1)]],
-                             device float3 * cameraResponse [[buffer(2)]],
-                             constant colourHistogram<BIN_COUNT> & Cardinality [[buffer(3)]],
+                             constant colourHistogram<BIN_COUNT> & Cardinality [[buffer(2)]],
+                             device float3 * cameraResponse [[buffer(6)]],
                              uint threadID [[thread_index_in_threadgroup]],
                              uint warpSize [[threads_per_threadgroup]]) {
     
