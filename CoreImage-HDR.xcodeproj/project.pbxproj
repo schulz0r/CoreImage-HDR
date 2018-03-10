@@ -27,7 +27,6 @@
 		17E27784204C8BCE007C2C05 /* ShaderIOs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E27783204C8BCE007C2C05 /* ShaderIOs.swift */; };
 		17E68ADB1FF1CD3E008F9DCE /* textureLoaderExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */; };
 		17E948061FFBE1AD007E0476 /* ResponseEstimationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948051FFBE1AD007E0476 /* ResponseEstimationTests.swift */; };
-		17E948081FFC1E01007E0476 /* bufferReductionIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948071FFC1E01007E0476 /* bufferReductionIO.swift */; };
 		17E9480A1FFD3EAC007E0476 /* ResponseMetaComp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948091FFD3EAC007E0476 /* ResponseMetaComp.swift */; };
 		17E9483D1FFEDECF007E0476 /* CamResponseEstimation.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17E948361FFEDECF007E0476 /* CamResponseEstimation.metal */; };
 		17E9483E1FFEDECF007E0476 /* SortAndCount.h in Headers */ = {isa = PBXBuildFile; fileRef = 17E948371FFEDECF007E0476 /* SortAndCount.h */; };
@@ -72,7 +71,6 @@
 		17E27783204C8BCE007C2C05 /* ShaderIOs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderIOs.swift; sourceTree = "<group>"; };
 		17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = textureLoaderExtensions.swift; sourceTree = "<group>"; };
 		17E948051FFBE1AD007E0476 /* ResponseEstimationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseEstimationTests.swift; sourceTree = "<group>"; };
-		17E948071FFC1E01007E0476 /* bufferReductionIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = bufferReductionIO.swift; sourceTree = "<group>"; };
 		17E948091FFD3EAC007E0476 /* ResponseMetaComp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseMetaComp.swift; sourceTree = "<group>"; };
 		17E948361FFEDECF007E0476 /* CamResponseEstimation.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = CamResponseEstimation.metal; sourceTree = "<group>"; };
 		17E948371FFEDECF007E0476 /* SortAndCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
@@ -202,7 +200,6 @@
 			isa = PBXGroup;
 			children = (
 				17DA9C391FFAC9610041E9BA /* ResponseSummationShaderIO.swift */,
-				17E948071FFC1E01007E0476 /* bufferReductionIO.swift */,
 				17AD8840200453EF007BBF6C /* smoothResponseShaderIO.swift */,
 				17E27783204C8BCE007C2C05 /* ShaderIOs.swift */,
 			);
@@ -358,7 +355,6 @@
 				17B45F471FF557DC009BE0BF /* HDRComputer.swift in Sources */,
 				17E9483D1FFEDECF007E0476 /* CamResponseEstimation.metal in Sources */,
 				17202962200D3B240018989E /* CameraParameter.swift in Sources */,
-				17E948081FFC1E01007E0476 /* bufferReductionIO.swift in Sources */,
 				17AD8841200453EF007BBF6C /* smoothResponseShaderIO.swift in Sources */,
 				17DA9C3A1FFAC9610041E9BA /* ResponseSummationShaderIO.swift in Sources */,
 			);
