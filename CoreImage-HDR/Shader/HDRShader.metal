@@ -13,24 +13,17 @@ using namespace metal;
 
 #define MAX_IMAGE_COUNT 5
 
-struct InputBracket {
-    const metal::array<texture2d<half, access::read>, MAX_IMAGE_COUNT> inputArray;
-    constant uint & count;
-    constant int2 * cameraShifts;
-    constant float * exposureTimes;
-};
-
-struct CameraParameters {
+struct CameraParameters {   // must be provided by CameraParametersShaderIO
     array<float3, 256> response;
     array<float3, 256> weights;
 };
 
-kernel void makeHDR(const metal::array<texture2d<half, access::read>, MAX_IMAGE_COUNT> inputArray [[texture(0)]],
-                    texture2d<half, access::write> HDRImage [[texture(MAX_IMAGE_COUNT)]],
-                    constant uint & NumberOfinputImages [[buffer(0)]],
-                    constant array<int2, MAX_IMAGE_COUNT> & cameraShifts [[buffer(1)]],
-                    constant array<float, MAX_IMAGE_COUNT> & exposureTimes [[buffer(2)]],
-                    constant CameraParameters & CamParams [[buffer(3)]],
+kernel void makeHDR(const metal::array<texture2d<half, access::read>, MAX_IMAGE_COUNT> inputArray,
+                    texture2d<half, access::write> HDRImage,
+                    constant uint & NumberOfinputImages,
+                    constant array<int2, MAX_IMAGE_COUNT> & cameraShifts,
+                    constant array<float, MAX_IMAGE_COUNT> & exposureTimes,
+                    constant CameraParameters & CamParams,
                     uint2 gid [[thread_position_in_grid]]){
     
     half3 linearData[MAX_IMAGE_COUNT];
