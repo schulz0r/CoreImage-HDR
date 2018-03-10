@@ -39,37 +39,22 @@ final class HDRProcessor: CIImageProcessorKernel {
         }
        
         let cameraShifts = arguments?["CameraShifts"] as? [int2] ?? [int2](repeating: int2(0,0), count: inputImages.count)
-        
         var assets = MTKPAssets(ResponseEstimator.self)
         
-        // prepare MPSMinMax shader
-        let descriptor = MTLTextureDescriptor()
-        descriptor.textureType = .type1D
-        descriptor.pixelFormat = .rgba32Float
-        descriptor.width = 2
-        
-        guard let minMaxTexture = MTKPDevice.instance.makeTexture(descriptor: descriptor) else  {
-                fatalError()
-        }
-        
+        // allocate ressources in IOs
         let Inputs = LDRImagesShaderIO(inputTextures: inputImages, exposureTimes: exposureTimes, cameraShifts: cameraShifts)
         let CameraParametersIO = CameraParametersShaderIO(cameraParameters: cameraParameters)
-        
+        // these IOs will provide the ressources to the kernels
         let HDRShaderIO = HDRCalcShaderIO(InputImageIO: Inputs, HDRImage: HDRTexture, cameraParametersIO: CameraParametersIO)
-        
-        let scaleHDRShaderIO = scaleHDRValueShaderIO(HDRImage: HDRTexture,
-                                                     darkestImage: inputImages[0]!,
-                                                     cameraShiftOfDarkestImage: cameraShifts.first!,
-                                                     minMaxTexture: minMaxTexture)
+        let scaleHDRShaderIO = scaleHDRValueShaderIO(HDRImage: HDRTexture, Inputs: Inputs)
         
         assets.add(shader: MTKPShader(name: "makeHDR", io: HDRShaderIO))
         assets.add(shader: MTKPShader(name: "scaleHDR", io: scaleHDRShaderIO))
-        
         let computer = HDRComputer(assets: assets)
         
         // encode all shaders
         computer.encode("makeHDR", to: commandBuffer)
-        computer.encodeMPSMinMax(ofImage: HDRTexture, writeTo: minMaxTexture, to: commandBuffer)
+        computer.encodeMPSMinMax(ofImage: HDRTexture, writeTo: scaleHDRShaderIO.minMaxTexture, to: commandBuffer)
         computer.encode("scaleHDR", to: commandBuffer)
     }
 }
