@@ -51,12 +51,7 @@ class ResponseEstimationTests: XCTestCase {
         }
         
         // load exposure times
-        ExposureTimes = Testimages.map{
-            guard let metaData = $0.properties["{Exif}"] as? Dictionary<String, Any> else {
-                fatalError("Cannot read Exif Dictionary")
-            }
-            return metaData["ExposureTime"] as! Float
-        }
+        ExposureTimes = Testimages.map{$0.exposureTime()}
         
         textureLoader = MTKTextureLoader(device: self.device)
     }
@@ -84,7 +79,6 @@ class ResponseEstimationTests: XCTestCase {
             fatalError()
         }
         
-        
         let function = MTKPShader(name: "writeMeasureToBins_float32", io: testIO,
                                   tgConfig: MTKPThreadgroupConfig(tgSize: TGSizeOfSummationShader, tgMemLength: [4 * TGSizeOfSummationShader.0 * TGSizeOfSummationShader.1]))
         
@@ -98,8 +92,7 @@ class ResponseEstimationTests: XCTestCase {
         let SummedElements = TextureFill.map{$0.x}.filter{$0 != 0}
         
         XCTAssert(SummedElements.count > 0)
-        XCTAssert(SummedElements[0] == 256.0)
-        XCTAssert(SummedElements[1] == 256.0)
+        XCTAssert(SummedElements.reduce(true){$0 && ($1 == 256)})
     }
     
     func testSortAlgorithm() {
@@ -161,36 +154,30 @@ class ResponseEstimationTests: XCTestCase {
     }
     
     func testBufferReductionShader() {
-        let lengthOfBuffer:uint = 512;
-        var buffer = [float3](repeating: float3(1.0), count: Int(lengthOfBuffer))
-        var cardinalities = [uint](repeating: 1, count: 256 * 3)
+        let ImageSize = MTLSizeMake(16 * 10, 16, 1)
+        let testIO = testBinningShaderIO(inputTextureSize: ImageSize)
         
-        // Assets
         guard
-            let MTLbuffer = device.makeBuffer(bytes: &buffer, length: MemoryLayout<float3>.size * buffer.count, options: .cpuCacheModeWriteCombined),
-            let MTLResponseFunc = device.makeBuffer(length: MemoryLayout<float3>.size * 256, options: .cpuCacheModeWriteCombined),
-            let MTLCardinalities = device.makeBuffer(bytes: &cardinalities, length: MemoryLayout<uint>.size * cardinalities.count, options: .cpuCacheModeWriteCombined)
+            let MTLbuffer = testIO.fetchBuffers()?[0],
+            let ReducedResult = testIO.fetchBuffers()?[6]
         else {
             fatalError()
         }
         
+        var buffer = [float3](repeating: float3(1.0), count: Int(ImageSize.height * ImageSize.width))
+        memcpy(MTLbuffer.contents(), &buffer, MTLbuffer.length)
         
         var assets = MTKPAssets(HDRComputer.self)
-        let ShaderIO = bufferReductionShaderIO(BinBuffer: MTLbuffer, bufferlength: buffer.count, cameraResponse: MTLResponseFunc, Cardinality: MTLCardinalities)
-        let Shader = MTKPShader(name: "reduceBins_float", io: ShaderIO, tgConfig: MTKPThreadgroupConfig(tgSize: (256,1,1)))
+        let Shader = MTKPShader(name: "reduceBins_float", io: testIO, tgConfig: MTKPThreadgroupConfig(tgSize: (256,1,1)))
         assets.add(shader: Shader)
-        
         let computer = HDRComputer(assets: assets)
-        computer.encode("reduceBins_float", threads: MTLSizeMake(256, 1, 1))
-        computer.commandBuffer.commit()
-        computer.commandBuffer.waitUntilCompleted()
-        
+        computer.execute("reduceBins_float", threads: MTLSizeMake(256, 1, 1))
         
         var result = [float3](repeating: float3(0), count: 256)
-        memcpy(&result, MTLResponseFunc.contents(), 256 * MemoryLayout<float3>.size)
+        memcpy(&result, ReducedResult.contents(), 256 * MemoryLayout<float3>.size)
         
         let resultX = result.map{$0.x}
-        let expectedSum = lengthOfBuffer / 256
+        let expectedSum = ImageSize.width * ImageSize.height / 256
         
         XCTAssert( resultX.allNonSaturatedEqual(value: Float(expectedSum)) )
     }
