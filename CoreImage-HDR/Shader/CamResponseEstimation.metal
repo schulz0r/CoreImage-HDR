@@ -71,8 +71,11 @@ kernel void writeMeasureToBins(const metal::array<texture2d<half, access::read>,
     for(uint imageIndex = 0; imageIndex < NumberOfinputImages; imageIndex++) {
         const half3 µ = HDRPixel * exposureTimes[imageIndex];   // X * t_i is the mean value according to the model
         for(uint colorChannelIndex = 0; colorChannelIndex < 3; colorChannelIndex++) {
+            
             ElementsToSort[tid].element = PixelIndices[imageIndex][colorChannelIndex];
             ElementsToSort[tid].counter = µ[colorChannelIndex];
+            
+            threadgroup_barrier(mem_flags::mem_threadgroup);
             
             bitonicSortAndCount<ushort, half>(tid, numberOfThreadsPerThreadgroup / 2, ElementsToSort);
             
@@ -118,8 +121,11 @@ kernel void writeMeasureToBins_float32(const metal::array<texture2d<float, acces
     for(uint imageIndex = 0; imageIndex < NumberOfinputImages; imageIndex++) {
         const half3 µ = HDRPixel * exposureTimes[imageIndex];   // X * t_i is the mean value according to the model
         for(uint colorChannelIndex = 0; colorChannelIndex < 3; colorChannelIndex++) {
+            
             ElementsToSort[tid].element = PixelIndices[imageIndex][colorChannelIndex];
             ElementsToSort[tid].counter = µ[colorChannelIndex];
+            
+            threadgroup_barrier(mem_flags::mem_threadgroup);
             
             bitonicSortAndCount<ushort, half>(tid, numberOfThreadsPerThreadgroup / 2, ElementsToSort);
             
