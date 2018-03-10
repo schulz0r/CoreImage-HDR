@@ -40,19 +40,13 @@ class PerformanceTests: XCTestCase {
     func testBinningShaderPerformance() {
         let threadsForBinReductionShader = computer.assets["reduceBins"]?.tgConfig.tgSize
         self.measure {
-            computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
-            computer.encode("reduceBins", threads: threadsForBinReductionShader)
-            computer.commandBuffer.commit()
-            computer.commandBuffer.waitUntilCompleted()
+            computer.execute("reduceBins", threads: threadsForBinReductionShader)
         }
     }
     
     func testResponseSummationPerformance() {
         self.measure {
-            computer.commandBuffer = MTKPDevice.commandQueue.makeCommandBuffer()
-            computer.encode("writeMeasureToBins")
-            computer.commandBuffer.commit()
-            computer.commandBuffer.waitUntilCompleted()
+            computer.execute("writeMeasureToBins")
         }
     }
     
@@ -85,8 +79,6 @@ class PerformanceTests: XCTestCase {
         
         // load exposure times
         ExposureTimes = Testimages.map{ $0.exposureTime() }
-        
-        let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
         self.computer = ResponseEstimator().computer
             
         textureLoader = MTKTextureLoader(device: self.device)
