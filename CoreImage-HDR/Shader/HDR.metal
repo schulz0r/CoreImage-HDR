@@ -16,7 +16,7 @@ using namespace metal;
 kernel void makeHDR(const metal::array<texture2d<half, access::read>, MAX_IMAGE_COUNT> inputArray [[texture(0)]],
                     texture2d<half, access::write> HDRImage [[texture(MAX_IMAGE_COUNT)]],
                     constant uint & NumberOfinputImages [[buffer(0)]],
-                    constant int2 * cameraShifts [[buffer(1)]],
+                    constant int2 * cameraShifts [[buffer(1)]], // the translation between the images (in case the shot was taken hand-held)
                     constant float * exposureTimes [[buffer(2)]],
                     constant float3 * response [[buffer(3)]],
                     constant float3 * weights [[buffer(4)]],
@@ -41,9 +41,10 @@ kernel void makeHDR(const metal::array<texture2d<half, access::read>, MAX_IMAGE_
     HDRImage.write(half4(enhancedPixel, 1), gid);
 }
 
+/* CoreImage saturates pixels which are outside the Intervall [0...1]. Thats why the HDR image will be scaled in the last pass. */
 kernel void scaleHDR(texture2d<half, access::read> HDRImage,
                      texture2d<half, access::write> scaledHDRImage,
-                     texture1d<float, access::read> MinMax,
+                     texture1d<float, access::read> MinMax, // this texture must be filled by a MPS function beforehand
                      texture2d<half, access::read> darkestImage,
                      constant int2 & shift [[buffer(1)]],
                      uint2 gid [[thread_position_in_grid]]) {

@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		1703B8662018F6F60075D0F8 /* MTKP-HDR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1703B8652018F6F60075D0F8 /* MTKP-HDR.swift */; };
-		17132874201BFAF200361D8F /* HDRCalcShaderIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17132873201BFAF200361D8F /* HDRCalcShaderIO.swift */; };
-		17132876201E037200361D8F /* scaleHDRValuesShaderIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17132875201E037200361D8F /* scaleHDRValuesShaderIO.swift */; };
+		17132874201BFAF200361D8F /* HDRIOProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17132873201BFAF200361D8F /* HDRIOProvider.swift */; };
+		17132876201E037200361D8F /* HDRScaleIOProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17132875201E037200361D8F /* HDRScaleIOProvider.swift */; };
 		17202962200D3B240018989E /* CameraParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17202961200D3B240018989E /* CameraParameter.swift */; };
 		17215BFF1FDF43B700912238 /* TestSortNCount.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17215BFA1FDF321800912238 /* TestSortNCount.metal */; };
 		17555807202A845E0046B151 /* MetalKitPlus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17555806202A845E0046B151 /* MetalKitPlus.framework */; };
@@ -20,20 +20,20 @@
 		17832D041FB49C1500E19938 /* CoreImage_HDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17832CF61FB49C1500E19938 /* CoreImage_HDR.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17832D0D1FB49C4500E19938 /* HDRProcessor.swift */; };
 		17A323FA1FEAF0CC00CFDAA8 /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A323F91FEAF0CC00CFDAA8 /* extensions.swift */; };
-		17AD8841200453EF007BBF6C /* smoothResponseShaderIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AD8840200453EF007BBF6C /* smoothResponseShaderIO.swift */; };
+		17AD8841200453EF007BBF6C /* ResponseSmoothingIOProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AD8840200453EF007BBF6C /* ResponseSmoothingIOProvider.swift */; };
 		17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AEAA621FC57E2400CE17DF /* extensions.swift */; };
-		17B45F471FF557DC009BE0BF /* HDRComputer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B45F461FF557DC009BE0BF /* HDRComputer.swift */; };
-		17DA9C3A1FFAC9610041E9BA /* ResponseSummationShaderIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DA9C391FFAC9610041E9BA /* ResponseSummationShaderIO.swift */; };
-		17E27784204C8BCE007C2C05 /* ShaderIOs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E27783204C8BCE007C2C05 /* ShaderIOs.swift */; };
+		17B45F471FF557DC009BE0BF /* MTKPComputer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B45F461FF557DC009BE0BF /* MTKPComputer.swift */; };
+		17DA9C3A1FFAC9610041E9BA /* ResponseEstimationIOProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DA9C391FFAC9610041E9BA /* ResponseEstimationIOProvider.swift */; };
+		17E27784204C8BCE007C2C05 /* IOProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E27783204C8BCE007C2C05 /* IOProvider.swift */; };
 		17E68ADB1FF1CD3E008F9DCE /* textureLoaderExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */; };
 		17E948061FFBE1AD007E0476 /* ResponseEstimationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948051FFBE1AD007E0476 /* ResponseEstimationTests.swift */; };
 		17E9480A1FFD3EAC007E0476 /* ResponseMetaComp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948091FFD3EAC007E0476 /* ResponseMetaComp.swift */; };
-		17E9483D1FFEDECF007E0476 /* CamResponseEstimation.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17E948361FFEDECF007E0476 /* CamResponseEstimation.metal */; };
+		17E9483D1FFEDECF007E0476 /* ResponseEstimation.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17E948361FFEDECF007E0476 /* ResponseEstimation.metal */; };
 		17E9483E1FFEDECF007E0476 /* SortAndCount.h in Headers */ = {isa = PBXBuildFile; fileRef = 17E948371FFEDECF007E0476 /* SortAndCount.h */; };
 		17E9483F1FFEDECF007E0476 /* movingAverage.h in Headers */ = {isa = PBXBuildFile; fileRef = 17E948381FFEDECF007E0476 /* movingAverage.h */; };
 		17E948411FFEDECF007E0476 /* calculateHDR.h in Headers */ = {isa = PBXBuildFile; fileRef = 17E9483A1FFEDECF007E0476 /* calculateHDR.h */; };
 		17E948421FFEDECF007E0476 /* colourHistogram.h in Headers */ = {isa = PBXBuildFile; fileRef = 17E9483B1FFEDECF007E0476 /* colourHistogram.h */; };
-		17E948481FFEDF2A007E0476 /* HDRShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17E948471FFEDF2A007E0476 /* HDRShader.metal */; };
+		17E948481FFEDF2A007E0476 /* HDR.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17E948471FFEDF2A007E0476 /* HDR.metal */; };
 		17E9484A1FFFF484007E0476 /* PerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948491FFFF484007E0476 /* PerformanceTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -49,8 +49,8 @@
 
 /* Begin PBXFileReference section */
 		1703B8652018F6F60075D0F8 /* MTKP-HDR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MTKP-HDR.swift"; sourceTree = "<group>"; };
-		17132873201BFAF200361D8F /* HDRCalcShaderIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRCalcShaderIO.swift; sourceTree = "<group>"; };
-		17132875201E037200361D8F /* scaleHDRValuesShaderIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = scaleHDRValuesShaderIO.swift; sourceTree = "<group>"; };
+		17132873201BFAF200361D8F /* HDRIOProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRIOProvider.swift; sourceTree = "<group>"; };
+		17132875201E037200361D8F /* HDRScaleIOProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRScaleIOProvider.swift; sourceTree = "<group>"; };
 		17202961200D3B240018989E /* CameraParameter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraParameter.swift; sourceTree = "<group>"; };
 		17215BFA1FDF321800912238 /* TestSortNCount.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = TestSortNCount.metal; sourceTree = "<group>"; };
 		17215C031FDF460400912238 /* SortAndCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
@@ -64,20 +64,20 @@
 		17832D031FB49C1500E19938 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		17832D0D1FB49C4500E19938 /* HDRProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRProcessor.swift; sourceTree = "<group>"; };
 		17A323F91FEAF0CC00CFDAA8 /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
-		17AD8840200453EF007BBF6C /* smoothResponseShaderIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = smoothResponseShaderIO.swift; sourceTree = "<group>"; };
+		17AD8840200453EF007BBF6C /* ResponseSmoothingIOProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseSmoothingIOProvider.swift; sourceTree = "<group>"; };
 		17AEAA621FC57E2400CE17DF /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
-		17B45F461FF557DC009BE0BF /* HDRComputer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRComputer.swift; sourceTree = "<group>"; };
-		17DA9C391FFAC9610041E9BA /* ResponseSummationShaderIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseSummationShaderIO.swift; sourceTree = "<group>"; };
-		17E27783204C8BCE007C2C05 /* ShaderIOs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderIOs.swift; sourceTree = "<group>"; };
+		17B45F461FF557DC009BE0BF /* MTKPComputer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKPComputer.swift; sourceTree = "<group>"; };
+		17DA9C391FFAC9610041E9BA /* ResponseEstimationIOProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseEstimationIOProvider.swift; sourceTree = "<group>"; };
+		17E27783204C8BCE007C2C05 /* IOProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOProvider.swift; sourceTree = "<group>"; };
 		17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = textureLoaderExtensions.swift; sourceTree = "<group>"; };
 		17E948051FFBE1AD007E0476 /* ResponseEstimationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseEstimationTests.swift; sourceTree = "<group>"; };
 		17E948091FFD3EAC007E0476 /* ResponseMetaComp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseMetaComp.swift; sourceTree = "<group>"; };
-		17E948361FFEDECF007E0476 /* CamResponseEstimation.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = CamResponseEstimation.metal; sourceTree = "<group>"; };
+		17E948361FFEDECF007E0476 /* ResponseEstimation.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = ResponseEstimation.metal; sourceTree = "<group>"; };
 		17E948371FFEDECF007E0476 /* SortAndCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
 		17E948381FFEDECF007E0476 /* movingAverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = movingAverage.h; sourceTree = "<group>"; };
 		17E9483A1FFEDECF007E0476 /* calculateHDR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calculateHDR.h; sourceTree = "<group>"; };
 		17E9483B1FFEDECF007E0476 /* colourHistogram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = colourHistogram.h; sourceTree = "<group>"; };
-		17E948471FFEDF2A007E0476 /* HDRShader.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = HDRShader.metal; sourceTree = "<group>"; };
+		17E948471FFEDF2A007E0476 /* HDR.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = HDR.metal; sourceTree = "<group>"; };
 		17E948491FFFF484007E0476 /* PerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -102,23 +102,12 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1703B8642018F6830075D0F8 /* HDR */ = {
+		1703B8642018F6830075D0F8 /* CoreImage-Version */ = {
 			isa = PBXGroup;
 			children = (
-				17132872201BFACE00361D8F /* ShaderIO */,
 				17832D0D1FB49C4500E19938 /* HDRProcessor.swift */,
-				1703B8652018F6F60075D0F8 /* MTKP-HDR.swift */,
 			);
-			name = HDR;
-			sourceTree = "<group>";
-		};
-		17132872201BFACE00361D8F /* ShaderIO */ = {
-			isa = PBXGroup;
-			children = (
-				17132873201BFAF200361D8F /* HDRCalcShaderIO.swift */,
-				17132875201E037200361D8F /* scaleHDRValuesShaderIO.swift */,
-			);
-			name = ShaderIO;
+			name = "CoreImage-Version";
 			sourceTree = "<group>";
 		};
 		17215BFC1FDF321F00912238 /* ShaderTests */ = {
@@ -137,6 +126,24 @@
 				17832CF71FB49C1500E19938 /* Info.plist */,
 			);
 			name = Framework;
+			sourceTree = "<group>";
+		};
+		1776C0A52055F1C300A82CB8 /* Convenience */ = {
+			isa = PBXGroup;
+			children = (
+				17AEAA621FC57E2400CE17DF /* extensions.swift */,
+				17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */,
+			);
+			path = Convenience;
+			sourceTree = "<group>";
+		};
+		1776C0A62055F59F00A82CB8 /* MTKP-Version */ = {
+			isa = PBXGroup;
+			children = (
+				1703B8652018F6F60075D0F8 /* MTKP-HDR.swift */,
+				17E948091FFD3EAC007E0476 /* ResponseMetaComp.swift */,
+			);
+			path = "MTKP-Version";
 			sourceTree = "<group>";
 		};
 		17832CE91FB49C1500E19938 = {
@@ -162,12 +169,12 @@
 			isa = PBXGroup;
 			children = (
 				17E948351FFEDECF007E0476 /* Shader */,
-				17A3254D1FEDCA1E00CFDAA8 /* ResponseFunc */,
-				1703B8642018F6830075D0F8 /* HDR */,
-				17AEAA621FC57E2400CE17DF /* extensions.swift */,
-				17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */,
-				175005351FBA608D005F6856 /* Framework */,
+				1703B8642018F6830075D0F8 /* CoreImage-Version */,
+				1776C0A62055F59F00A82CB8 /* MTKP-Version */,
+				1776C0A52055F1C300A82CB8 /* Convenience */,
 				17202961200D3B240018989E /* CameraParameter.swift */,
+				17B45F461FF557DC009BE0BF /* MTKPComputer.swift */,
+				175005351FBA608D005F6856 /* Framework */,
 			);
 			path = "CoreImage-HDR";
 			sourceTree = "<group>";
@@ -186,32 +193,25 @@
 			path = "CoreImage-HDRTests";
 			sourceTree = "<group>";
 		};
-		17A3254D1FEDCA1E00CFDAA8 /* ResponseFunc */ = {
+		17B45F481FF557E3009BE0BF /* ProviderIO */ = {
 			isa = PBXGroup;
 			children = (
-				17B45F481FF557E3009BE0BF /* ShaderIOs */,
-				17E948091FFD3EAC007E0476 /* ResponseMetaComp.swift */,
-				17B45F461FF557DC009BE0BF /* HDRComputer.swift */,
+				17132873201BFAF200361D8F /* HDRIOProvider.swift */,
+				17132875201E037200361D8F /* HDRScaleIOProvider.swift */,
+				17DA9C391FFAC9610041E9BA /* ResponseEstimationIOProvider.swift */,
+				17AD8840200453EF007BBF6C /* ResponseSmoothingIOProvider.swift */,
+				17E27783204C8BCE007C2C05 /* IOProvider.swift */,
 			);
-			path = ResponseFunc;
-			sourceTree = "<group>";
-		};
-		17B45F481FF557E3009BE0BF /* ShaderIOs */ = {
-			isa = PBXGroup;
-			children = (
-				17DA9C391FFAC9610041E9BA /* ResponseSummationShaderIO.swift */,
-				17AD8840200453EF007BBF6C /* smoothResponseShaderIO.swift */,
-				17E27783204C8BCE007C2C05 /* ShaderIOs.swift */,
-			);
-			path = ShaderIOs;
+			path = ProviderIO;
 			sourceTree = "<group>";
 		};
 		17E948351FFEDECF007E0476 /* Shader */ = {
 			isa = PBXGroup;
 			children = (
+				17B45F481FF557E3009BE0BF /* ProviderIO */,
 				17E948441FFEDEDE007E0476 /* Header */,
-				17E948471FFEDF2A007E0476 /* HDRShader.metal */,
-				17E948361FFEDECF007E0476 /* CamResponseEstimation.metal */,
+				17E948471FFEDF2A007E0476 /* HDR.metal */,
+				17E948361FFEDECF007E0476 /* ResponseEstimation.metal */,
 			);
 			name = Shader;
 			path = "CoreImage-HDR/Shader";
@@ -343,20 +343,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				17132874201BFAF200361D8F /* HDRCalcShaderIO.swift in Sources */,
+				17132874201BFAF200361D8F /* HDRIOProvider.swift in Sources */,
 				1703B8662018F6F60075D0F8 /* MTKP-HDR.swift in Sources */,
-				17E948481FFEDF2A007E0476 /* HDRShader.metal in Sources */,
+				17E948481FFEDF2A007E0476 /* HDR.metal in Sources */,
 				17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */,
-				17E27784204C8BCE007C2C05 /* ShaderIOs.swift in Sources */,
-				17132876201E037200361D8F /* scaleHDRValuesShaderIO.swift in Sources */,
+				17E27784204C8BCE007C2C05 /* IOProvider.swift in Sources */,
+				17132876201E037200361D8F /* HDRScaleIOProvider.swift in Sources */,
 				17E9480A1FFD3EAC007E0476 /* ResponseMetaComp.swift in Sources */,
 				17E68ADB1FF1CD3E008F9DCE /* textureLoaderExtensions.swift in Sources */,
 				17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */,
-				17B45F471FF557DC009BE0BF /* HDRComputer.swift in Sources */,
-				17E9483D1FFEDECF007E0476 /* CamResponseEstimation.metal in Sources */,
+				17B45F471FF557DC009BE0BF /* MTKPComputer.swift in Sources */,
+				17E9483D1FFEDECF007E0476 /* ResponseEstimation.metal in Sources */,
 				17202962200D3B240018989E /* CameraParameter.swift in Sources */,
-				17AD8841200453EF007BBF6C /* smoothResponseShaderIO.swift in Sources */,
-				17DA9C3A1FFAC9610041E9BA /* ResponseSummationShaderIO.swift in Sources */,
+				17AD8841200453EF007BBF6C /* ResponseSmoothingIOProvider.swift in Sources */,
+				17DA9C3A1FFAC9610041E9BA /* ResponseEstimationIOProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
