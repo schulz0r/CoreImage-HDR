@@ -10,6 +10,7 @@ import CoreImage
 import MetalKit
 import MetalKitPlus
 
+
 final class LDRImagesShaderIO: MTKPIOProvider {
     private var inputImages = [MTLTexture?](repeating: nil, count: 5)
     var MTLNumberOfInputImages, MTLCameraShifts, MTLExposureTimes : MTLBuffer
@@ -20,8 +21,8 @@ final class LDRImagesShaderIO: MTKPIOProvider {
         
         guard
             let MTLNumberOfInputImages = MTKPDevice.instance.makeBuffer(bytes: &imageCount, length: MemoryLayout<uint>.size, options: .cpuCacheModeWriteCombined),
-            let MTLCameraShifts = MTKPDevice.instance.makeBuffer(bytes: cameraShifts, length: MemoryLayout<uint2>.size * inputImages.count, options: .cpuCacheModeWriteCombined),
-            let MTLExposureTimes = MTKPDevice.instance.makeBuffer(bytes: exposureTimes, length: MemoryLayout<Float>.size * inputImages.count, options: .cpuCacheModeWriteCombined)
+            let MTLCameraShifts = MTKPDevice.instance.makeBuffer(bytes: cameraShifts, length: MemoryLayout<uint2>.size * 5, options: .cpuCacheModeWriteCombined),
+            let MTLExposureTimes = MTKPDevice.instance.makeBuffer(bytes: exposureTimes, length: MemoryLayout<Float>.size * 5, options: .cpuCacheModeWriteCombined)
         else {
             fatalError()
         }
