@@ -66,10 +66,15 @@ final class LDRImagesShaderIO: MTKPIOProvider {
 }
 
 final class HDRImageIO: MTKPIOProvider {
-    private var HDRTexture: MTLTexture
+    var HDRTexture: MTLTexture
     
-    init(inputTexture: [MTLTexture]) {
-        let HDRTexDescriptor = inputTexture.first!.getDescriptor()
+    init(size: MTLSize) {
+        let HDRTexDescriptor = MTLTextureDescriptor()
+        HDRTexDescriptor.width = size.width
+        HDRTexDescriptor.height = size.height
+        HDRTexDescriptor.textureType = .type2D
+        HDRTexDescriptor.resourceOptions = .storageModePrivate
+        HDRTexDescriptor.usage = .shaderWrite
         HDRTexDescriptor.pixelFormat = .rgba16Float
         
         guard

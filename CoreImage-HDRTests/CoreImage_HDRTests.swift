@@ -19,18 +19,10 @@ class CoreImage_HDRTests: XCTestCase {
     
     var URLs:[URL] = []
     var Testimages:[CIImage] = []
-    var ExposureTimes:[Float] = []
-    var library:MTLLibrary?
-    var textureLoader:MTKTextureLoader!
+    let HDRAlgorithm = MTKPHDR()
     
     override func setUp() {
         super.setUp()
-        
-        do {
-            library = try device.makeDefaultLibrary(bundle: Bundle(for: HDRProcessor.self))
-        } catch let Errors {
-            fatalError(Errors.localizedDescription)
-        }
     
         let imageNames = ["pic2", "pic3", "pic4", "pic5", "pic6"]
         
@@ -48,16 +40,6 @@ class CoreImage_HDRTests: XCTestCase {
             }
             return image
         }
-        
-        // load exposure times
-        ExposureTimes = Testimages.map{
-            guard let metaData = $0.properties["{Exif}"] as? Dictionary<String, Any> else {
-                fatalError("Cannot read Exif Dictionary")
-            }
-            return metaData["ExposureTime"] as! Float
-        }
-        
-        textureLoader = MTKTextureLoader(device: self.device)
     }
     
     override func tearDown() {
@@ -73,7 +55,7 @@ class CoreImage_HDRTests: XCTestCase {
         do{
             HDR = try HDRProcessor.apply(withExtent: imageExtent,
                                          inputs: Testimages,
-                                         arguments: ["ExposureTimes" : self.ExposureTimes,
+                                         arguments: ["ExposureTimes" : Testimages.map{$0.exposureTime()},
                                                      "CameraParameter" : camParams])
         } catch let Errors {
             XCTFail(Errors.localizedDescription)
@@ -86,7 +68,7 @@ class CoreImage_HDRTests: XCTestCase {
     
     func testMTKPHDR() {
         let camParams = CameraParameter(withTrainingWeight: 7)
-        let HDR = MTKPHDR.makeHDR(ImageBracket: self.Testimages, exposureTimes: self.ExposureTimes, cameraParameters: camParams)
+        let HDR = HDRAlgorithm.makeHDR(ImageBracket: self.Testimages, cameraParameters: camParams)
         
         HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/MTKPHDR.png"))
         
@@ -98,15 +80,13 @@ class CoreImage_HDRTests: XCTestCase {
         var camParams = CameraParameter(withTrainingWeight: 7, BSplineKnotCount: 8)
         let imageExtent = Testimages.first!.extent
         
-        let metaComp = ResponseEstimator()
-        metaComp.estimate(ImageBracket: Testimages, cameraShifts: cameraShifts, cameraParameters: &camParams, iterations: 10)
-        
+        HDRAlgorithm.estimateResponse(ImageBracket: Testimages, cameraShifts: cameraShifts, cameraParameters: &camParams, iterations: 10)
         
         var HDR:CIImage = CIImage()
         do{
             HDR = try HDRProcessor.apply(withExtent: imageExtent,
                                          inputs: Testimages,
-                                         arguments: ["ExposureTimes" : self.ExposureTimes,
+                                         arguments: ["ExposureTimes" : Testimages.map{$0.exposureTime()},
                                                      "CameraParameter" : camParams])
         } catch let Errors {
             XCTFail(Errors.localizedDescription)
@@ -121,10 +101,8 @@ class CoreImage_HDRTests: XCTestCase {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
         var camParams = CameraParameter(withTrainingWeight: 7, BSplineKnotCount: 4)
         
-        let metaComp = ResponseEstimator()
-        metaComp.estimate(ImageBracket: Testimages, cameraShifts: cameraShifts, cameraParameters: &camParams, iterations: 10)
-        
-        let HDR = MTKPHDR.makeHDR(ImageBracket: self.Testimages, exposureTimes: self.ExposureTimes, cameraParameters: camParams)
+        HDRAlgorithm.estimateResponse(ImageBracket: Testimages, cameraShifts: cameraShifts, cameraParameters: &camParams, iterations: 10)
+        let HDR = HDRAlgorithm.makeHDR(ImageBracket: self.Testimages, cameraParameters: camParams)
         
         HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/MTKPHDRwithResponse.png"))
         
@@ -135,10 +113,8 @@ class CoreImage_HDRTests: XCTestCase {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
         var camParams = CameraParameter(withTrainingWeight: 7, BSplineKnotCount: 4)
         
-        let metaComp = ResponseEstimator()
-        metaComp.estimate(ImageBracket: Testimages, cameraShifts: cameraShifts, cameraParameters: &camParams, iterations: 10)
-        
-        let HDR = MTKPHDR.makeHDR(ImageBracket: Array(self.Testimages[0..<2]), exposureTimes: Array(self.ExposureTimes[0..<2]), cameraParameters: camParams)
+        HDRAlgorithm.estimateResponse(ImageBracket: Testimages, cameraShifts: cameraShifts, cameraParameters: &camParams, iterations: 10)
+        let HDR = HDRAlgorithm.makeHDR(ImageBracket: Array(self.Testimages[0..<2]), cameraParameters: camParams)
         
         HDR.write(url: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/MTKPHDRWithLessThanMaximumImages.png"))
         

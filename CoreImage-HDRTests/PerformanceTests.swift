@@ -30,10 +30,10 @@ class PerformanceTests: XCTestCase {
     func testResponseEstimation() {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
         var camParams = CameraParameter(withTrainingWeight: 5.1)
-        let metaComp = ResponseEstimator()
+        let HDRAlgorithm = MTKPHDR()
         // This is an example of a performance test case.
         self.measure {
-            metaComp.estimate(ImageBracket: Testimages, cameraShifts: cameraShifts, cameraParameters: &camParams, iterations: 5)
+            HDRAlgorithm.estimateResponse(ImageBracket: Testimages, cameraShifts: cameraShifts, cameraParameters: &camParams, iterations: 5)
         }
     }
     
@@ -54,12 +54,6 @@ class PerformanceTests: XCTestCase {
     override func setUp() {
         super.setUp()
         
-        do {
-            library = try device.makeDefaultLibrary(bundle: Bundle(for: ResponseEstimator.self))
-        } catch let Errors {
-            fatalError(Errors.localizedDescription)
-        }
-        
         let imageNames = ["01-qianyuan-1:250", "02-qianyuan-1:125", "03-qianyuan-1:60", "04-qianyuan-1:30", "05-qianyuan-1:15"]
         
         /* Why does the Bundle Assets never contain images? Probably a XCode bug.
@@ -76,12 +70,6 @@ class PerformanceTests: XCTestCase {
             }
             return image
         }
-        
-        // load exposure times
-        ExposureTimes = Testimages.map{ $0.exposureTime() }
-        self.computer = ResponseEstimator().computer
-            
-        textureLoader = MTKTextureLoader(device: self.device)
     }
     
     override func tearDown() {

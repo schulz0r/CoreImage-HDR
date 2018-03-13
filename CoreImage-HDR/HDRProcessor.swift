@@ -31,15 +31,12 @@ final class HDRProcessor: CIImageProcessorKernel {
         guard inputImages.count <= MaxImageCount else {
             fatalError("Only up to \(MaxImageCount) images are allowed. It is an arbitrary number and can be changed in the HDR kernel any time.")
         }
-        guard exposureTimes.count == inputImages.count else {
-            fatalError("Each of the \(inputImages.count) input images require an exposure time. Only \(exposureTimes.count) could be found.")
-        }
         guard cameraParameters.responseFunction.count.isPowerOfTwo() else {
             fatalError("Length of Camera Response is not a power of two.")
         }
        
         let cameraShifts = arguments?["CameraShifts"] as? [int2] ?? [int2](repeating: int2(0,0), count: inputImages.count)
-        var assets = MTKPAssets(ResponseEstimator.self)
+        var assets = MTKPAssets(HDRProcessor.self)
         
         // allocate ressources in IOs
         let Inputs = LDRImagesShaderIO(inputTextures: inputImages, exposureTimes: exposureTimes, cameraShifts: cameraShifts)

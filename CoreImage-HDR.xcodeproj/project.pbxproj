@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1703B8662018F6F60075D0F8 /* MTKP-HDR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1703B8652018F6F60075D0F8 /* MTKP-HDR.swift */; };
 		17132874201BFAF200361D8F /* HDRIOProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17132873201BFAF200361D8F /* HDRIOProvider.swift */; };
 		17132876201E037200361D8F /* HDRScaleIOProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17132875201E037200361D8F /* HDRScaleIOProvider.swift */; };
 		17202962200D3B240018989E /* CameraParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17202961200D3B240018989E /* CameraParameter.swift */; };
@@ -28,7 +27,7 @@
 		17E27784204C8BCE007C2C05 /* IOProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E27783204C8BCE007C2C05 /* IOProvider.swift */; };
 		17E68ADB1FF1CD3E008F9DCE /* textureLoaderExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */; };
 		17E948061FFBE1AD007E0476 /* ResponseEstimationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948051FFBE1AD007E0476 /* ResponseEstimationTests.swift */; };
-		17E9480A1FFD3EAC007E0476 /* ResponseMetaComp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948091FFD3EAC007E0476 /* ResponseMetaComp.swift */; };
+		17E9480A1FFD3EAC007E0476 /* MTKP-HDR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E948091FFD3EAC007E0476 /* MTKP-HDR.swift */; };
 		17E9483D1FFEDECF007E0476 /* ResponseEstimation.metal in Sources */ = {isa = PBXBuildFile; fileRef = 17E948361FFEDECF007E0476 /* ResponseEstimation.metal */; };
 		17E9483E1FFEDECF007E0476 /* SortAndCount.h in Headers */ = {isa = PBXBuildFile; fileRef = 17E948371FFEDECF007E0476 /* SortAndCount.h */; };
 		17E9483F1FFEDECF007E0476 /* movingAverage.h in Headers */ = {isa = PBXBuildFile; fileRef = 17E948381FFEDECF007E0476 /* movingAverage.h */; };
@@ -49,7 +48,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1703B8652018F6F60075D0F8 /* MTKP-HDR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MTKP-HDR.swift"; sourceTree = "<group>"; };
 		17132873201BFAF200361D8F /* HDRIOProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRIOProvider.swift; sourceTree = "<group>"; };
 		17132875201E037200361D8F /* HDRScaleIOProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRScaleIOProvider.swift; sourceTree = "<group>"; };
 		17202961200D3B240018989E /* CameraParameter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraParameter.swift; sourceTree = "<group>"; };
@@ -73,7 +71,7 @@
 		17E27783204C8BCE007C2C05 /* IOProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOProvider.swift; sourceTree = "<group>"; };
 		17E68ADA1FF1CD3E008F9DCE /* textureLoaderExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = textureLoaderExtensions.swift; sourceTree = "<group>"; };
 		17E948051FFBE1AD007E0476 /* ResponseEstimationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseEstimationTests.swift; sourceTree = "<group>"; };
-		17E948091FFD3EAC007E0476 /* ResponseMetaComp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseMetaComp.swift; sourceTree = "<group>"; };
+		17E948091FFD3EAC007E0476 /* MTKP-HDR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MTKP-HDR.swift"; sourceTree = "<group>"; };
 		17E948361FFEDECF007E0476 /* ResponseEstimation.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = ResponseEstimation.metal; sourceTree = "<group>"; };
 		17E948371FFEDECF007E0476 /* SortAndCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SortAndCount.h; sourceTree = "<group>"; };
 		17E948381FFEDECF007E0476 /* movingAverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = movingAverage.h; sourceTree = "<group>"; };
@@ -142,8 +140,7 @@
 		1776C0A62055F59F00A82CB8 /* MTKP-Version */ = {
 			isa = PBXGroup;
 			children = (
-				1703B8652018F6F60075D0F8 /* MTKP-HDR.swift */,
-				17E948091FFD3EAC007E0476 /* ResponseMetaComp.swift */,
+				17E948091FFD3EAC007E0476 /* MTKP-HDR.swift */,
 			);
 			path = "MTKP-Version";
 			sourceTree = "<group>";
@@ -347,12 +344,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				17132874201BFAF200361D8F /* HDRIOProvider.swift in Sources */,
-				1703B8662018F6F60075D0F8 /* MTKP-HDR.swift in Sources */,
 				17E948481FFEDF2A007E0476 /* HDR.metal in Sources */,
 				17832D0E1FB49C4500E19938 /* HDRProcessor.swift in Sources */,
 				17E27784204C8BCE007C2C05 /* IOProvider.swift in Sources */,
 				17132876201E037200361D8F /* HDRScaleIOProvider.swift in Sources */,
-				17E9480A1FFD3EAC007E0476 /* ResponseMetaComp.swift in Sources */,
+				17E9480A1FFD3EAC007E0476 /* MTKP-HDR.swift in Sources */,
 				1776C0A82055F6B500A82CB8 /* ResponseEstimation_float.metal in Sources */,
 				17E68ADB1FF1CD3E008F9DCE /* textureLoaderExtensions.swift in Sources */,
 				17AEAA631FC57E2400CE17DF /* extensions.swift in Sources */,

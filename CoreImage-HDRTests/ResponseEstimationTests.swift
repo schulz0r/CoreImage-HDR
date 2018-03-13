@@ -20,18 +20,10 @@ class ResponseEstimationTests: XCTestCase {
     
     var URLs:[URL] = []
     var Testimages:[CIImage] = []
-    var ExposureTimes:[Float] = []
     var library:MTLLibrary?
-    var textureLoader:MTKTextureLoader!
     
     override func setUp() {
         super.setUp()
-        
-        do {
-            library = try device.makeDefaultLibrary(bundle: Bundle(for: ResponseEstimator.self))
-        } catch let Errors {
-            fatalError(Errors.localizedDescription)
-        }
         
         let imageNames = ["pic2", "pic3", "pic4", "pic5", "pic6"]
         
@@ -49,11 +41,6 @@ class ResponseEstimationTests: XCTestCase {
             }
             return image
         }
-        
-        // load exposure times
-        ExposureTimes = Testimages.map{$0.exposureTime()}
-        
-        textureLoader = MTKTextureLoader(device: self.device)
     }
     
     override func tearDown() {
@@ -186,8 +173,7 @@ class ResponseEstimationTests: XCTestCase {
         let cameraShifts = [int2](repeating: int2(0,0), count: self.Testimages.count)
         var camParams = CameraParameter(withTrainingWeight: 10)
         
-        let metaComp = ResponseEstimator()
-        metaComp.estimate(ImageBracket: Testimages, cameraShifts: cameraShifts, cameraParameters: &camParams, iterations: 10)
+        MTKPHDR().estimateResponse(ImageBracket: Testimages, cameraShifts: cameraShifts, cameraParameters: &camParams, iterations: 10)
         
         print("Response: \(camParams.responseFunction.description)\n\nWeights: \(camParams.weightFunction.description)")
         
