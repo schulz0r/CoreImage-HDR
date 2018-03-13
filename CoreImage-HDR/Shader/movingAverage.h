@@ -11,7 +11,7 @@ using namespace metal;
 
 half weightFunction(uint x);
 
-void movingAverage(thread half3 * linearPixel, constant array<float, 5> & t, const uint arraySize) {
+void movingAverage(thread half3 * linearPixel, constant float * t, const uint arraySize) {
     half3 zaehler, nenner, weight;
     for(uint a = 0; a < arraySize - 1; a++){  // -1 for last pixel not being corrected
         zaehler = 0;

@@ -34,7 +34,7 @@ kernel void makeHDR(const metal::array<texture2d<half, access::read>, MAX_IMAGE_
     }
     
     // calculate moving average to reduce noise
-    //movingAverage(linearData, exposureTimes, NumberOfinputImages);
+    movingAverage(linearData, exposureTimes, NumberOfinputImages);
     
     // calculate HDR Value
     const half3 enhancedPixel = HDRValue(linearDataArray, indices, exposureTimes, weights);
