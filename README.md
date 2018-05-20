@@ -10,7 +10,7 @@ After Compilation, add the MetalKitPlus framework to the project or install it t
 ### Getting the response curve of a camera
 This algorithm assumes that your photos are processed (not RAW). That means that the pixel values are not linear. You need to estimate a camera response curve before you can render a HDR image.
 
-First, instanciate a struct to holf these parameters:
+First, instanciate a struct to hold these parameters:
 ```
 var camParams = CameraParameter(withTrainingWeight: 7, BSplineKnotCount: 16)
 ```
